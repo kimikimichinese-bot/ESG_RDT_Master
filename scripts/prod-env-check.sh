@@ -26,4 +26,3 @@ if (( missing != 0 )); then
 fi
 
 echo "\n[PASS] Production environment appears configured."
-EOF && chmod +x scripts/prod-env-check.sh
