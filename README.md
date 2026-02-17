@@ -578,6 +578,22 @@ UPSTASH_REDIS_REST_TOKEN="__SET_ME__"
 
 > Note: Cron schedule frequency depends on your Vercel plan. Keep this flexible.
 
+### Production merge runbook (kimikimichinese-bot)
+
+To keep branch protection and CI gates reproducible:
+
+1. Ensure this branch is up to date and all required checks are green.
+2. Confirm the PR status/check summary on GitHub (`lint-build-test`, `Neon/Postgres + env readiness`).
+3. Merge from PR using:
+   - `gh pr merge <PR_NUMBER> --merge --delete-branch`
+
+Fallback direct flow (if needed from local branch):
+
+1. `git fetch origin`
+2. `git checkout master`
+3. `git pull`
+4. Wait for all required checks on the PR to be green before merging.
+
 ---
 
 **End of document.**
