@@ -5,7 +5,7 @@ set -euo pipefail
 readonly PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
 readonly WORKFLOW_NAME="production-readiness"
 readonly RUN_MIGRATIONS="${RUN_MIGRATIONS:-false}"
-readonly TICKET3_EXPECTED_COMMIT="${TICKET3_EXPECTED_COMMIT:-$(git rev-parse --short HEAD)}"
+readonly TICKET3_EXPECTED_COMMIT="${TICKET3_EXPECTED_COMMIT:-$(git rev-parse --short=8 HEAD)}"
 
 pass() {
   echo "[PASS] $1"
@@ -21,7 +21,7 @@ if [[ "$RUN_MIGRATIONS" != "true" && "$RUN_MIGRATIONS" != "false" ]]; then
 fi
 
 if [[ -z "$TICKET3_EXPECTED_COMMIT" ]]; then
-  fail "TICKET3_EXPECTED_COMMIT is empty. Set it to expected 7-char commit/tag short form."
+  fail "TICKET3_EXPECTED_COMMIT is empty. Set it to expected short commit/tag form (default 8 chars)."
 fi
 
 echo "=== Ticket #3 production readiness check ==="
@@ -37,7 +37,7 @@ sleep 30
 LATEST_RUN="$(gh run list --workflow "$WORKFLOW_NAME" --branch master --limit 1 --json databaseId -q '.[0].databaseId')"
 echo "Latest readiness run: $LATEST_RUN"
 gh run list --workflow "$WORKFLOW_NAME" --branch master --limit 1
-gh run wait "$LATEST_RUN"
+gh run watch "$LATEST_RUN"
 gh run view "$LATEST_RUN" --json status,conclusion,url,name --jq '{status:.status,conclusion:.conclusion,url:.url,name:.name}'
 
 echo "--- Deploy and endpoint checks ---"
@@ -62,4 +62,3 @@ fi
 pass "/api/health contract and version matched"
 
 echo "Ticket #3 production readiness check completed."
-

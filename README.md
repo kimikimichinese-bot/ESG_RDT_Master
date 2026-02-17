@@ -673,7 +673,7 @@ echo "Health commit check passed."
 
 ```bash
 RUN_MIGRATIONS=false \
-TICKET3_EXPECTED_COMMIT="$(git rev-parse --short HEAD)" \
+TICKET3_EXPECTED_COMMIT="$(git rev-parse --short=8 HEAD)" \
 ./scripts/ticket-3-full-check.sh
 ```
 

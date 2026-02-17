@@ -23,6 +23,5 @@ Add a deterministic one-command production readiness verification flow for `feat
 Run from `master`:
 
 ```bash
-RUN_MIGRATIONS=false TICKET3_EXPECTED_COMMIT="$(git rev-parse --short v1.0.3)" ./scripts/ticket-3-full-check.sh
+RUN_MIGRATIONS=false TICKET3_EXPECTED_COMMIT="$(git rev-parse --short=8 v1.0.3)" ./scripts/ticket-3-full-check.sh
 ```
-
