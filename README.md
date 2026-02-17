@@ -744,6 +744,14 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-11-production-readiness-sop-hardening.sh
 ```
 
+### Ticket #12 production readiness evidence hardening
+
+```bash
+TICKET12_EXPECTED_COMMIT="v1.0.6^{}" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-12-readiness-evidence-hardening.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
