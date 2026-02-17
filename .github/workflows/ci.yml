@@ -22,6 +22,13 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
       - name: Verify Prisma schema
-        run: bun run db:check
+        run: |
+          if [ -n "${DATABASE_URL:-}" ]; then
+            bun run db:check
+          else
+            echo "Skipping db:check: DATABASE_URL not set in this CI context."
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Test
         run: bun run test --if-present
