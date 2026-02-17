@@ -581,4 +581,22 @@ UPSTASH_REDIS_REST_TOKEN="__SET_ME__"
 ---
 
 **End of document.**
+
+### Branch protection gates (Kimikimichinese-bot)
+
+For production-readiness gating on `ESG_RDT_Master` (`master`):
+
+- Required status checks (exact names):
+  - `Neon/Postgres + env readiness`
+  - `lint-build-test`
+- Branch rules:
+  - `master` is protected
+  - Strict mode enabled
+  - 1 required approving review
+  - Admin enforcement enabled
+
+Health monitoring endpoints available on Vercel:
+- `https://esg-rdt-master-pi.vercel.app/api/ready`
+- `https://esg-rdt-master-pi.vercel.app/api/health`
+
 # ESG_RDT_Master
