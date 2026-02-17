@@ -1,5 +1,40 @@
 # Changelog
 
+## [v1.0.3] - 2026-02-17
+
+### Added
+- Ticket #2 completed: added production diagnostics landing page on `/` with direct `/api/ready` and `/api/health` links and a minimal runbook checklist.
+- Added `docs/tickets/TICKET-2.md` with ticket scope, acceptance criteria, and rollout notes.
+
+### Changed
+- Finalized the visual production entrypoint for operators while preserving current API contracts.
+
+### Production status
+- Release tag: `v1.0.3`.
+- Release commit: `7e16ee8`.
+- Source PR: `#12` (merged).
+- Production readiness checks:
+  - `22114981926` (push) → success
+  - `22114983535` (workflow_dispatch) → success
+- Latest production deployment alias check:
+  - alias: `https://esg-rdt-master-pi.vercel.app`
+  - deployment: `https://esg-rdt-master-intvwrwi3-kimikimichineses-projects.vercel.app`
+- Verified on production alias:
+  - `GET /api/ready` => `{"status":"ready","checks":{"web":"ok"}}`
+  - `GET /api/health` => `{"status":"ok","db":"ok","version":"7e16ee8b"}`
+
+### Ticket evidence (copy-paste)
+
+```bash
+git show --stat --oneline 7e16ee8
+# expected:
+# Merge pull request #12 from kimikimichinese-bot/feature/ticket-2-production-diagnostics
+
+git show --stat --oneline 7ac4ac1
+# expected:
+# feat: add production diagnostics landing page
+```
+
 ## [v1.0.2] - 2026-02-17
 
 ### Added
