@@ -40,7 +40,13 @@ Found:    ${gh_account:-<not logged in>}
 Fix: gh auth logout -h github.com && gh auth login -h github.com"
 fi
 
-vercel_account="$(vercel whoami 2>/dev/null | awk '/^[A-Za-z0-9-]+$/ {acct=$0} END{print acct}')"
+vercel_whoami="$(vercel whoami 2>/dev/null || true)"
+if [[ -z "$vercel_whoami" ]]; then
+  fail "Vercel auth required
+Fix: vercel login --github --oob"
+fi
+
+vercel_account="$(printf '%s\n' "$vercel_whoami" | awk '/^[A-Za-z0-9-]+$/ {acct=$0} END{print acct}')"
 if [[ "$vercel_account" != "$EXPECTED_VERCEL_ACCOUNT" ]]; then
   fail "Vercel account mismatch
 Expected: $EXPECTED_VERCEL_ACCOUNT
