@@ -1,3 +1,7 @@
 {
-  "framework": "nextjs"
+  "version": 2,
+  "framework": "nextjs",
+  "installCommand": "bun install",
+  "buildCommand": "bun run workspace:build",
+  "outputDirectory": "apps/web/.next"
 }
