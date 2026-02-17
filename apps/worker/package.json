@@ -1,0 +1,14 @@
+{
+  "name": "@esg-rdt/worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "echo \"Vercel Cron or scheduler worker placeholder.\"",
+    "start": "bun run src/index.ts",
+    "test": "echo \"No worker tests yet.\""
+  },
+  "dependencies": {
+    "@esg-rdt/shared": "*"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@esg-rdt/db",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "migrate": "echo \"Neon-backed Prisma migration placeholder.\"",
+    "seed": "echo \"Seed placeholder for demo tenant.\"",
+    "generate": "echo \"Generate Prisma client placeholder.\""
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0"
+  }
+}

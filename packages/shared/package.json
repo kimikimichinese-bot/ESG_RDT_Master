@@ -1,0 +1,9 @@
+{
+  "name": "@esg-rdt/shared",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"Shared schemas placeholder.\"",
+    "test": "echo \"No shared tests yet.\""
+  }
+}

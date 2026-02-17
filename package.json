@@ -2,11 +2,19 @@
   "name": "esg-rdt-master",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "bun run --filter @esg-rdt/web typecheck",
+    "test": "bun run --filter @esg-rdt/web test --if-present",
+    "workspace:build": "bun run --filter @esg-rdt/web build",
+    "workspace:lint": "bun run --filter @esg-rdt/web lint"
   },
   "dependencies": {
     "next": "14.2.3",

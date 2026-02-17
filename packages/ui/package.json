@@ -1,0 +1,12 @@
+{
+  "name": "@esg-rdt/ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"UI component library placeholder.\"",
+    "test": "echo \"No UI tests yet.\""
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

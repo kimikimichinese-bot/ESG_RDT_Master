@@ -1,0 +1,15 @@
+{
+  "name": "@esg-rdt/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "echo \"API placeholder build step.\"",
+    "start": "bun run src/index.ts",
+    "lint": "echo \"No API lint rules yet.\"",
+    "test": "echo \"No API tests yet.\""
+  },
+  "dependencies": {
+    "@esg-rdt/shared": "*"
+  }
+}
