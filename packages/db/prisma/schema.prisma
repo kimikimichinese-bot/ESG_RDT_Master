@@ -38,6 +38,10 @@ model Tenant {
   calculationRuns  CalculationRun[]
   auditLogs       AuditLog[]
   eventStore      EventStore[]
+  userRoleAssignments UserRoleAssignment[]
+  emissionFactorLibraries EmissionFactorLibrary[]
+  emissionFactors EmissionFactor[]
+  emissionsResults EmissionsResult[]
 }
 
 model User {
@@ -50,8 +54,10 @@ model User {
   updatedAt DateTime @updatedAt
 
   memberships Membership[]
-  calculations CalculationRun[]
-  auditLogs AuditLog[]
+  calculations CalculationRun[] @relation("CalculationRunActor")
+  auditLogs AuditLog[] @relation("AuditLogActor")
+  createdActivities ActivityData[] @relation("ActivityCreatedBy")
+  eventStore EventStore[] @relation("EventActor")
 
   @@unique([tenantId, email])
   @@index([tenantId, createdAt])
@@ -63,6 +69,7 @@ model UserRoleAssignment {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name     UserRole
   createdAt DateTime @default(now())
+  memberships Membership[] @relation("UserRoleAssignmentMemberships")
 }
 
 model Membership {
@@ -72,7 +79,7 @@ model Membership {
   userId   String
   user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
   roleId   String
-  role     UserRoleAssignment @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role     UserRoleAssignment @relation("UserRoleAssignmentMemberships", fields: [roleId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@unique([tenantId, userId, roleId])
@@ -141,7 +148,7 @@ model ActivityData {
   unit               String
   occurredAt         DateTime
   createdByUserId    String?
-  createdBy          User? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdBy          User? @relation("ActivityCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -214,7 +221,7 @@ model CalculationRun {
   scopeType        String
   factorSetVersion String
   actorId          String?
-  actor            User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor            User? @relation("CalculationRunActor", fields: [actorId], references: [id], onDelete: SetNull)
   hash             String
   notes            String?
 
@@ -241,7 +248,7 @@ model AuditLog {
   tenantId   String
   tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   actorId    String?
-  actor      User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor      User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
   action     String
   entityType String
   entityId   String
@@ -260,7 +267,7 @@ model EventStore {
   schemaVersion Int
   occurredAt    DateTime @default(now())
   actorId       String?
-  actor         User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actor         User? @relation("EventActor", fields: [actorId], references: [id], onDelete: SetNull)
   payload       Json
   hash          String
   prevHash      String?
