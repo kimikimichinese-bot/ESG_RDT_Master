@@ -728,6 +728,14 @@ Default expected commit is `v1.0.6^{}`.
 To validate a different deploy commit, set `TICKET9_EXPECTED_COMMIT` explicitly:
 `TICKET9_EXPECTED_COMMIT="abcdef12" ./scripts/ticket-9-production-readiness-automation.sh`
 
+### Ticket #10 production readiness docs hardening
+
+```bash
+TICKET10_EXPECTED_COMMIT="v1.0.6^{}" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-10-readiness-docs-hardening.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
