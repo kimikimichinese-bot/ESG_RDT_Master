@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "migrate": "echo \"Neon-backed Prisma migration placeholder.\"",
-    "seed": "echo \"Seed placeholder for demo tenant.\"",
-    "generate": "echo \"Generate Prisma client placeholder.\""
+    "check": "prisma validate",
+    "generate": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status",
+    "status": "prisma migrate status",
+    "push": "prisma db push --skip-generate",
+    "seed": "echo \"Seed placeholder for demo tenant.\""
   },
   "dependencies": {
     "@prisma/client": "^5.20.0"

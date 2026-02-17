@@ -7,7 +7,263 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  SuperAdmin
+  TenantAdmin
+  Manager
+  Personnel
+  Auditor
+}
+
+enum EvidenceState {
+  Draft
+  Submitted
+  Approved
+  Locked
+}
+
 model Tenant {
-  id   String  @id @default(cuid())
-  name String
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]
+  memberships     Membership[]
+  organizational  OrganizationalUnit[]
+  sites           Site[]
+  metricDefinitions MetricDefinition[]
+  activities      ActivityData[]
+  evidences       Evidence[]
+  calculationRuns  CalculationRun[]
+  auditLogs       AuditLog[]
+  eventStore      EventStore[]
+}
+
+model User {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email    String
+  passwordHash String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  calculations CalculationRun[]
+  auditLogs AuditLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId, createdAt])
+}
+
+model UserRoleAssignment {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name     UserRole
+  createdAt DateTime @default(now())
+}
+
+model Membership {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId   String
+  role     UserRoleAssignment @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, userId, roleId])
+  @@index([tenantId, userId])
+}
+
+model OrganizationalUnit {
+  id         String @id @default(cuid())
+  tenantId   String
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name       String
+  parentId   String?
+  parent     OrganizationalUnit? @relation("OrgUnitTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children   OrganizationalUnit[] @relation("OrgUnitTree")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sites      Site[]
+
+  @@index([tenantId, parentId])
+}
+
+model Site {
+  id          String @id @default(cuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orgUnitId   String?
+  orgUnit     OrganizationalUnit? @relation(fields: [orgUnitId], references: [id], onDelete: SetNull)
+  name        String
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  activities  ActivityData[]
+  evidences   Evidence[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, orgUnitId])
+}
+
+model MetricDefinition {
+  id          String @id @default(cuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  code        String
+  unit        String
+  createdAt   DateTime @default(now())
+
+  activities  ActivityData[]
+  factors     EmissionFactor[]
+  resultRows  EmissionsResult[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, code])
+}
+
+model ActivityData {
+  id                 String @id @default(cuid())
+  tenantId           String
+  tenant             Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId             String
+  site               Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  metricDefinitionId String
+  metricDefinition   MetricDefinition @relation(fields: [metricDefinitionId], references: [id], onDelete: Restrict)
+  amount             Float
+  unit               String
+  occurredAt         DateTime
+  createdByUserId    String?
+  createdBy          User? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  evidences          Evidence[]
+
+  @@index([tenantId, siteId])
+  @@index([tenantId, metricDefinitionId])
+}
+
+model Evidence {
+  id          String @id @default(cuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  siteId      String
+  site        Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  state       EvidenceState @default(Draft)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions    EvidenceVersion[]
+  activityData ActivityData[]
+}
+
+model EvidenceVersion {
+  id          String @id @default(cuid())
+  evidenceId  String
+  evidence    Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  blobUrl     String
+  size        Int
+  contentType String
+  sha256      String
+  createdAt   DateTime @default(now())
+}
+
+model EmissionFactorLibrary {
+  id          String @id @default(cuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  version     String
+  isDefault   Boolean @default(false)
+  createdAt   DateTime @default(now())
+
+  factors     EmissionFactor[]
+}
+
+model EmissionFactor {
+  id               String @id @default(cuid())
+  tenantId         String
+  tenant           Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  libraryId        String
+  library          EmissionFactorLibrary @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  metricDefinitionId String
+  metricDefinition MetricDefinition @relation(fields: [metricDefinitionId], references: [id], onDelete: Restrict)
+  value            Float
+  unit             String
+  region           String?
+  countryCode      String?
+
+  @@index([tenantId, metricDefinitionId])
+}
+
+model CalculationRun {
+  id               String @id @default(cuid())
+  tenantId         String
+  tenant           Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  startedAt        DateTime @default(now())
+  finishedAt       DateTime?
+  scopeType        String
+  factorSetVersion String
+  actorId          String?
+  actor            User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  hash             String
+  notes            String?
+
+  result           EmissionsResult[]
+}
+
+model EmissionsResult {
+  id               String @id @default(cuid())
+  tenantId         String
+  tenant           Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  calculationRunId String
+  calculationRun   CalculationRun @relation(fields: [calculationRunId], references: [id], onDelete: Cascade)
+  metricDefinitionId String
+  metricDefinition MetricDefinition @relation(fields: [metricDefinitionId], references: [id], onDelete: Restrict)
+  value            Float
+  unit             String
+  reportValue      Json
+
+  @@index([tenantId, calculationRunId])
+}
+
+model AuditLog {
+  id         String @id @default(cuid())
+  tenantId   String
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actorId    String?
+  actor      User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String
+  details    Json
+  occurredAt DateTime @default(now())
+  hash       String
+  prevHash   String?
+}
+
+model EventStore {
+  id            String @id @default(cuid())
+  tenantId      String
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stream        String
+  eventType     String
+  schemaVersion Int
+  occurredAt    DateTime @default(now())
+  actorId       String?
+  actor         User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  payload       Json
+  hash          String
+  prevHash      String?
+
+  @@index([tenantId, stream])
 }

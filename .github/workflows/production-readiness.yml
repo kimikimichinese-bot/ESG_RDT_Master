@@ -1,0 +1,49 @@
+name: production-readiness
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: "Run prisma migrate deploy (requires DATABASE_URL_UNPOOLED)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  env-and-db-readiness:
+    name: Neon/Postgres + env readiness
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXT_PUBLIC_WEB_URL: ${{ vars.NEXT_PUBLIC_WEB_URL || secrets.NEXT_PUBLIC_WEB_URL }}
+      NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || secrets.NEXT_PUBLIC_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Verify required production env vars
+        run: ./scripts/prod-env-check.sh
+      - name: Prisma schema and client readiness
+        run: |
+          bun run db:generate
+          bun run db:check
+      - name: Validate Neon branch connectivity (if DATABASE_URL_UNPOOLED is configured)
+        run: |
+          if [ -z "${DATABASE_URL_UNPOOLED:-}" ]; then
+            echo "[WARN] DATABASE_URL_UNPOOLED is not set; skipping Prisma status check."
+            exit 0
+          fi
+          bun run db:status
+      - name: Optional migration apply
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_migrations == true }}
+        run: bun run db:migrate:deploy

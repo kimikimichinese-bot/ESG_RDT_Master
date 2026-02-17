@@ -7,14 +7,19 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
+    "dev": "bun run --filter @esg-rdt/web dev",
+    "build": "bun run workspace:build",
+    "start": "bun run --filter @esg-rdt/web start",
+    "lint": "bun run workspace:lint",
     "typecheck": "bun run --filter @esg-rdt/web typecheck",
     "test": "bun run --filter @esg-rdt/web test --if-present",
     "workspace:build": "bun run --filter @esg-rdt/web build",
-    "workspace:lint": "bun run --filter @esg-rdt/web lint"
+    "workspace:lint": "bun run --filter @esg-rdt/web lint",
+    "db:generate": "bun run --filter @esg-rdt/db generate",
+    "db:check": "bun run --filter @esg-rdt/db check",
+    "db:migrate:deploy": "bun run --filter @esg-rdt/db migrate:deploy",
+    "db:status": "bun run --filter @esg-rdt/db status",
+    "db:push": "bun run --filter @esg-rdt/db push"
   },
   "dependencies": {
     "next": "14.2.3",
