@@ -637,4 +637,26 @@ Use this for each production-ready push on `master`:
    - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready`
    - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/health`
 
+### Uptime & alias rollout note (kimikimichinese-bot)
+
+- Primary production alias: `esg-rdt-master-pi.vercel.app`
+- Latest known production deployment: `https://esg-rdt-master-rf1xnskiz-kimikimichineses-projects.vercel.app`
+- Alias update pattern used during rollout: push → deploy → alias points to latest production-ready deployment on Vercel.
+- Quick rollout checks:
+  - `vercel ls esg-rdt-master`
+  - `vercel alias ls | grep esg-rdt-master-pi.vercel.app`
+
+### One-command full production check (copy-paste)
+
+```bash
+./scripts/context-check.sh && \
+gh workflow run production-readiness.yml -f run_migrations=true --ref master && \
+sleep 30 && \
+gh run list --workflow production-readiness --branch master --limit 1 && \
+./scripts/context-check.sh && \
+vercel --prod --yes && \
+curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready && \
+curl -sfS https://esg-rdt-master-pi.vercel.app/api/health
+```
+
 # ESG_RDT_Master
