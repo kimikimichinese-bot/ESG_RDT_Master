@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       run_migrations:
@@ -50,4 +53,9 @@ jobs:
           fi
       - name: Optional migration apply
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_migrations == true }}
-        run: bun run db:migrate:deploy
+        run: |
+          if [ -z "${DATABASE_URL_UNPOOLED:-}" ]; then
+            echo "[FAIL] DATABASE_URL_UNPOOLED is required when run_migrations=true."
+            exit 1
+          fi
+          DATABASE_URL="$DATABASE_URL_UNPOOLED" bun run db:migrate:deploy
