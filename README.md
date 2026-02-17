@@ -806,6 +806,15 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-18-readme-audit.sh
 ```
 
+### Ticket #19 production readiness docs continuity
+
+```bash
+TICKET19_RELEASE_TAG="v1.0.6" \
+TICKET19_EXPECTED_COMMIT="v1.0.6^{}" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-19-readme-continuity.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
