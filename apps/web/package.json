@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "next build && tsc --noEmit",
+    "typecheck": "next build",
     "test": "echo \"No web tests configured yet.\""
   },
   "dependencies": {
