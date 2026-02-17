@@ -1,5 +1,37 @@
 # Changelog
 
+## [v1.0.4] - 2026-02-17
+
+### Added
+- Added deterministic Ticket #3 pre-merge readiness wrapper command (`./scripts/ticket-3-closeout.sh`).
+- Kept Ticket #3 documentation and check scripts already introduced in PR #14.
+
+### Changed
+- Hardened closeout flow around production checks, including explicit version pinning and fail-fast behavior.
+- Kept command outputs reproducible for local/operator runbook execution.
+
+### Production status
+- Release tag: `v1.0.4`.
+- Release commit: `659d25b`.
+- Source PR: `#14` (Ticket #3 readiness docs + runbook), plus `scripts/ticket-3-closeout.sh` direct on `master`.
+- Production readiness check:
+  - `22115427224` (`production-readiness`) → success
+- Verified on production alias (`esg-rdt-master-pi.vercel.app`):
+  - `GET /api/ready`
+  - `GET /api/health` with `version=d9b3e85c` and `db=ok`.
+
+### Ticket evidence (copy-paste)
+
+```bash
+git show --stat --oneline 659d25b
+# expected:
+# chore: add ticket-3 closeout wrapper script
+
+git show --stat --oneline d9b3e85
+# expected:
+# Merge pull request #14 from kimikimichinese-bot/feature/ticket-3-infra-readiness
+```
+
 ## [v1.0.3] - 2026-02-17
 
 ### Added
