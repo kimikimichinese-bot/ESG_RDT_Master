@@ -677,6 +677,14 @@ TICKET3_EXPECTED_COMMIT="$(git rev-parse --short=8 HEAD)" \
 ./scripts/ticket-3-full-check.sh
 ```
 
+### Ticket #4 release audit signature
+
+```bash
+TICKET4_TAG="v1.0.4" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-4-release-signature.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
