@@ -788,6 +788,15 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-16-release-log-evidence-format.sh
 ```
 
+### Ticket #17 production readiness observability log checks
+
+```bash
+TICKET17_RELEASE_TAG="v1.0.6" \
+TICKET17_EXPECTED_COMMIT="v1.0.6^{}" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-17-readiness-observability-log-checks.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
