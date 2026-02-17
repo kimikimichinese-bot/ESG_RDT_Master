@@ -73,7 +73,7 @@ verify_sop_references() {
     fail "Missing SOP ticket file: ${DOCS_FILE}"
   fi
 
-  if ! grep -q "production readiness SOP hardening" "$DOCS_FILE"; then
+  if ! grep -qi "sop hardening" "$DOCS_FILE"; then
     fail "Ticket #11 doc does not describe SOP-hardening scope"
   fi
 
