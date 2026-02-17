@@ -615,4 +615,26 @@ Health monitoring endpoints available on Vercel:
 - `https://esg-rdt-master-pi.vercel.app/api/ready`
 - `https://esg-rdt-master-pi.vercel.app/api/health`
 
+### Final Go-Live Checklist (Production)
+
+Use this for each production-ready push on `master`:
+
+1. Verify hard context isolation:
+   - `./scripts/context-check.sh`
+   - `gh auth status` shows `kimikimichinese-bot`
+   - `vercel whoami` shows `kimikimichinese-bot`
+2. Confirm branch state:
+   - On `master` and tracking `origin/master`
+   - No local divergence (`git status`)
+3. Run the required production readiness workflow:
+   - `gh workflow run production-readiness.yml -f run_migrations=true --ref master`
+4. Confirm required checks on `master` are green:
+   - `Neon/Postgres + env readiness`
+   - `lint-build-test`
+5. Merge only when checks are green, then verify deployment:
+   - `./scripts/context-check.sh`
+   - `vercel ls esg-rdt-master`
+   - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready`
+   - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/health`
+
 # ESG_RDT_Master
