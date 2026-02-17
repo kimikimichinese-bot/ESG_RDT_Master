@@ -1,22 +1,31 @@
-import { PrismaClient } from "@prisma/client";
+import { Client } from "pg";
 
-const globalForPrisma = globalThis;
-
-const getPrismaClient = () => {
+const getDatabaseUrl = () => {
   const databaseUrl = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not configured");
   }
-  if (!globalForPrisma.__esgRdtMasterPrisma) {
-    globalForPrisma.__esgRdtMasterPrisma = new PrismaClient({
-      datasources: {
-        db: {
-          url: databaseUrl,
-        },
-      },
-    });
+  return databaseUrl;
+};
+
+const buildDbClient = () => {
+  const databaseUrl = getDatabaseUrl();
+  return new Client({
+    connectionString: databaseUrl,
+    ssl: /sslmode=require/i.test(databaseUrl)
+      ? { rejectUnauthorized: false }
+      : false,
+  });
+};
+
+const checkDatabase = async () => {
+  const client = buildDbClient();
+  try {
+    await client.connect();
+    await client.query("SELECT 1");
+  } finally {
+    await client.end();
   }
-  return globalForPrisma.__esgRdtMasterPrisma;
 };
 
 const getBuildVersion = () =>
@@ -34,8 +43,7 @@ export async function GET() {
   };
 
   try {
-    const prisma = getPrismaClient();
-    await prisma.$queryRaw`SELECT 1`;
+    await checkDatabase();
     return Response.json({
       ...payload,
       db: "ok",
