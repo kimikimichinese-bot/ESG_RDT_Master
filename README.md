@@ -696,7 +696,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ### Ticket #6 production handoff command
 
 ```bash
-TICKET6_EXPECTED="$(git rev-parse --short=8 origin/master)" \
+TICKET6_EXPECTED="v1.0.5^{}" \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-6-production-handoff.sh
 ```

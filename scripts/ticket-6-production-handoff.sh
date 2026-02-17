@@ -4,7 +4,7 @@ set -euo pipefail
 
 readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
 readonly WORKFLOW_NAME="${PROD_WORKFLOW:-production-readiness}"
-readonly EXPECTED_COMMIT="${TICKET6_EXPECTED:-$(git rev-parse --short=8 origin/master)}"
+readonly EXPECTED_COMMIT_INPUT="${TICKET6_EXPECTED:-$(git rev-parse --short=8 origin/master)}"
 readonly OUTFILE="${TICKET6_OUTFILE:-/tmp/ticket-6-handoff.md}"
 
 pass() {
@@ -24,6 +24,17 @@ require_cmd gh
 require_cmd curl
 require_cmd git
 require_cmd jq
+
+resolve_expected() {
+  local value="$1"
+  if [[ "$value" == v* ]]; then
+    git rev-parse --short=8 "${value}^{}" 2>/dev/null || git rev-parse --short=8 "$value"
+  else
+    printf '%s\n' "$value"
+  fi
+}
+
+readonly EXPECTED_COMMIT="$(resolve_expected "$EXPECTED_COMMIT_INPUT")"
 
 LAST_RUN="$(gh run list --workflow "$WORKFLOW_NAME" --branch master --limit 1 --json databaseId -q '.[0].databaseId')"
 if [[ -z "$LAST_RUN" || "$LAST_RUN" == "null" ]]; then
