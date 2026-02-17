@@ -657,6 +657,27 @@ gh run list --workflow production-readiness --branch master --limit 1 && \
 vercel --prod --yes && \
 curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready && \
 curl -sfS https://esg-rdt-master-pi.vercel.app/api/health
+
+### Production freeze policy (strict PR-only)
+
+From this point onward, **do not push directly to `master`**.
+
+Use this rule:
+
+1. Work on a feature branch.
+2. Open PR to `master`.
+3. Require required checks:
+   - `Neon/Postgres + env readiness`
+   - `lint-build-test`
+4. Require review + merge via PR UI/CLI:
+   - `gh pr merge <PR_NUMBER> --merge --delete-branch`
+5. Run one-command full production check only on merged state.
+
+`master` is the production control plane for `kimikimichinese-bot` and must stay protected.
+
+Keep `dituccios` and every other project fully in separate branches/credentials and never merge here.
+
+# ESG_RDT_Master
 ```
 
 # ESG_RDT_Master
