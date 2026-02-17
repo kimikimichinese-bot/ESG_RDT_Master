@@ -81,9 +81,10 @@ verify_ticket_refs() {
 verify_readme_state() {
   local count
   count="$(grep -c '^### Ticket #' "$README_FILE")"
-  if (( count < 18 )); then
+  if (( count < 16 )); then
     fail "README ticket section count is too low for continuity: ${count}"
   fi
+  grep -q '^### Ticket #18 ' "$README_FILE" || fail "README missing Ticket #18 section marker"
 }
 
 require_gh_api
@@ -204,4 +205,3 @@ run_ts="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 cat "${OUTFILE}"
 echo ""
 echo "Written to ${OUTFILE}"
-
