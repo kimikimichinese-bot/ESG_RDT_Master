@@ -693,6 +693,14 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-5-audit-bundle.sh
 ```
 
+### Ticket #6 production handoff command
+
+```bash
+TICKET6_EXPECTED="$(git rev-parse --short=8 origin/master)" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-6-production-handoff.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
