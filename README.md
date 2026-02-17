@@ -724,6 +724,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-9-production-readiness-automation.sh
 ```
 
+Default expected commit is `v1.0.6^{}`.
 To validate a different deploy commit, set `TICKET9_EXPECTED_COMMIT` explicitly:
 `TICKET9_EXPECTED_COMMIT="abcdef12" ./scripts/ticket-9-production-readiness-automation.sh`
 

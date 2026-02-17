@@ -27,4 +27,4 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```
 
 To validate a newer rollout commit, set `TICKET9_EXPECTED_COMMIT` explicitly.
-Default expected commit remains `v1.0.5^{}` for stable production evidence snapshots.
+Default expected commit is set to `v1.0.6^{}` for stable production evidence snapshots.
