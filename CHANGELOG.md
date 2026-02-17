@@ -5,15 +5,35 @@
 ### Added
 - Enforced PR-only production freeze policy into production runbook (`README.md`).
 - Documented final full production execution flow tied to latest deployment verification.
+- Added one-command production verification block in `README.md` with version-pin by release tag (`v1.0.2`).
 
 ### Changed
 - Re-released production green state after latest merge-freeze pipeline and deployment.
+- Replaced health DB probe in `/api/health` with direct PostgreSQL `pg` runtime check for Vercel stability.
 
 ### Production status
 - Release tag: `v1.0.2`.
-- Production readiness run: `22114009054` (success).
-- Latest production deployment alias: `https://esg-rdt-master-pi.vercel.app` (currently pointed to `esg-rdt-master-efhh2pmg8-kimikimichineses-projects.vercel.app`).
+- Release commit: `c37ddc6` (`v1.0.2` tag points here, annotated).
+- Production-ready deploy verification run: `22114771265` (`production-readiness` success, job `Neon/Postgres + env readiness` success).
+- Latest known production alias/deploy:
+  - alias: `https://esg-rdt-master-pi.vercel.app`
+  - deployment: `https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app`
 - Verified `/api/ready` and `/api/health` on production alias.
+
+### Release evidence (appendix)
+```bash
+git show --stat v1.0.2
+# Expected output: health endpoint runtime check migration from Prisma-in-route to `pg`, tag alignment to c37ddc6
+
+gh run view 22114771265 --json conclusion,status,headSha,startedAt,updatedAt,url,name,jobs
+# Expected output:
+# {
+#   "conclusion": "success",
+#   "status": "completed",
+#   "headSha": "69cc102038b4e8d163a69ec4c5eb7f71b1f327cc",
+#   "jobs": [{"name":"Neon/Postgres + env readiness","status":"completed","conclusion":"success"}]
+# }
+```
 
 ## [v1.0.1] - 2026-02-17
 
