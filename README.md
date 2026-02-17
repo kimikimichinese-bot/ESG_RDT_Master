@@ -709,6 +709,14 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-7-release-evidence-pack.sh
 ```
 
+### Ticket #8 production drift check
+
+```bash
+TICKET8_EXPECTED_COMMIT="v1.0.5^{}" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-8-production-drift.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
