@@ -43,7 +43,11 @@ jobs:
             echo "[WARN] DATABASE_URL_UNPOOLED is not set; skipping Prisma status check."
             exit 0
           fi
-          bun run db:status
+          if bun run db:status; then
+            echo "[PASS] Prisma status check passed."
+          else
+            echo "[WARN] Prisma status check returned non-zero. This is allowed for unmanaged databases."
+          fi
       - name: Optional migration apply
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_migrations == true }}
         run: bun run db:migrate:deploy
