@@ -12,7 +12,7 @@
 
 ### Production status
 - Release tag: `v1.0.4`.
-- Release commit: `659d25b`.
+- Release commit: `03d6218`.
 - Source PR: `#14` (Ticket #3 readiness docs + runbook), plus `scripts/ticket-3-closeout.sh` direct on `master`.
 - Production readiness check:
   - `22115427224` (`production-readiness`) → success
