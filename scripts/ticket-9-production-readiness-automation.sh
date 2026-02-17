@@ -6,7 +6,8 @@ readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET9_EXPECTED_COMMIT:-$(git rev-parse --short=8 origin/master)}"
 readonly OUTFILE="${TICKET9_OUTFILE:-/tmp/ticket-9-readiness-automation.md}"
 readonly WORKFLOW_READINESS="${TICKET9_WORKFLOW_READINESS:-production-readiness}"
-readonly WORKFLOW_LINT="${TICKET9_WORKFLOW_LINT:-lint-build-test}"
+readonly WORKFLOW_LINT="${TICKET9_WORKFLOW_LINT:-ci}"
+readonly WORKFLOW_LINT_FALLBACK="${TICKET9_WORKFLOW_LINT_FALLBACK:-lint-build-test}"
 
 pass() {
   echo "[PASS] $1"
@@ -38,17 +39,39 @@ resolve_expected() {
 get_run_state() {
   local workflow_name="$1"
   local run_id
-  run_id="$(gh run list --workflow "$workflow_name" --branch master --limit 1 --json databaseId -q '.[0].databaseId')"
+  run_id="$(gh run list --workflow "$workflow_name" --branch master --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)"
   if [[ -z "$run_id" || "$run_id" == "null" ]]; then
-    echo "missing:${workflow_name}" && return 1
+    return 1
   fi
-  gh run view "$run_id" --json status,conclusion,url,name,headSha,headBranch,startedAt,updatedAt
+  gh run view "$run_id" --json status,conclusion,url,name,headSha,headBranch,startedAt,updatedAt 2>/dev/null || return 1
+}
+
+resolve_workflow() {
+  local requested="$1"
+  local found
+  found="$(gh workflow list --json name | jq -r --arg n "$requested" '.[] | select(.name == $n) | .name' | head -n 1)"
+  if [[ -n "$found" ]]; then
+    printf '%s' "$found"
+    return 0
+  fi
+  return 1
 }
 
 readonly EXPECTED_COMMIT="$(resolve_expected "$EXPECTED_COMMIT_INPUT")"
 
 readonly READINESS_JSON="$(get_run_state "$WORKFLOW_READINESS")" || fail "No workflow run found for ${WORKFLOW_READINESS} on master"
-readonly LINT_JSON="$(get_run_state "$WORKFLOW_LINT")" || fail "No workflow run found for ${WORKFLOW_LINT} on master"
+
+LINT_WORKFLOW_RESOLVED="${WORKFLOW_LINT}"
+if ! get_run_state "$LINT_WORKFLOW_RESOLVED" >/dev/null; then
+  FALLBACK_WORKFLOW="$(resolve_workflow "$WORKFLOW_LINT_FALLBACK" || true)"
+  if [[ -n "${FALLBACK_WORKFLOW}" ]]; then
+    LINT_WORKFLOW_RESOLVED="$FALLBACK_WORKFLOW"
+  else
+    fail "No workflow run found for ${WORKFLOW_LINT} on master (and no fallback workflow matched)."
+  fi
+fi
+
+readonly LINT_JSON="$(get_run_state "$LINT_WORKFLOW_RESOLVED")" || fail "No workflow run found for ${LINT_WORKFLOW_RESOLVED} on master"
 
 READINESS_STATUS="$(jq -r '.status // empty' <<<"$READINESS_JSON")"
 READINESS_CONCLUSION="$(jq -r '.conclusion // empty' <<<"$READINESS_JSON")"
@@ -60,9 +83,9 @@ pass "workflow ${WORKFLOW_READINESS} success"
 LINT_STATUS="$(jq -r '.status // empty' <<<"$LINT_JSON")"
 LINT_CONCLUSION="$(jq -r '.conclusion // empty' <<<"$LINT_JSON")"
 if [[ "$LINT_STATUS" != "completed" || "$LINT_CONCLUSION" != "success" ]]; then
-  fail "workflow ${WORKFLOW_LINT} not successful: status=${LINT_STATUS}, conclusion=${LINT_CONCLUSION}"
+  fail "workflow ${LINT_WORKFLOW_RESOLVED} not successful: status=${LINT_STATUS}, conclusion=${LINT_CONCLUSION}"
 fi
-pass "workflow ${WORKFLOW_LINT} success"
+pass "workflow ${LINT_WORKFLOW_RESOLVED} success"
 
 READY_RESPONSE="$(curl -sfS "${PROD_ALIAS}/api/ready")"
 READY_STATUS="$(jq -r '.status // empty' <<<"$READY_RESPONSE")"
@@ -93,7 +116,7 @@ WIP="$(git status --short 2>/dev/null | awk 'END{print NR}')"
   echo "# Ticket #9 production readiness automation"
   echo ""
   echo "- readiness workflow: ${WORKFLOW_READINESS}"
-  echo "- lint workflow: ${WORKFLOW_LINT}"
+  echo "- lint workflow: ${LINT_WORKFLOW_RESOLVED}"
   echo "- expected commit: ${EXPECTED_COMMIT}"
   echo "- observed health version: ${HEALTH_VERSION}"
   echo "- origin/master: ${ORIGIN_MASTER}"
