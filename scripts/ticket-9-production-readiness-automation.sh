@@ -27,6 +27,12 @@ require_cmd curl
 require_cmd git
 require_cmd jq
 
+require_gh_api() {
+  if ! gh api user --jq .login >/tmp/ticket-9-gh-user.json 2>&1; then
+    fail "GitHub API unavailable or authentication issue. Re-run when online and authenticated (gh auth status)."
+  fi
+}
+
 resolve_expected() {
   local value="$1"
   if [[ "$value" == v* ]]; then
@@ -39,9 +45,12 @@ resolve_expected() {
 get_run_state() {
   local workflow_name="$1"
   local run_id
-  run_id="$(gh run list --workflow "$workflow_name" --branch master --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)"
+  run_id="$(gh run list --workflow "$workflow_name" --branch master --limit 1 --json databaseId -q '.[0].databaseId' 2>&1 || true)"
   if [[ -z "$run_id" || "$run_id" == "null" ]]; then
     return 1
+  fi
+  if [[ "$run_id" == *"error connecting to api.github.com"* || "$run_id" == *"error"* ]]; then
+    fail "$run_id"
   fi
   gh run view "$run_id" --json status,conclusion,url,name,headSha,headBranch,startedAt,updatedAt 2>/dev/null || return 1
 }
@@ -57,6 +66,7 @@ resolve_workflow() {
   return 1
 }
 
+require_gh_api
 readonly EXPECTED_COMMIT="$(resolve_expected "$EXPECTED_COMMIT_INPUT")"
 
 readonly READINESS_JSON="$(get_run_state "$WORKFLOW_READINESS")" || fail "No workflow run found for ${WORKFLOW_READINESS} on master"
