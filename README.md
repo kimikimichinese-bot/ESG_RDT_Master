@@ -669,6 +669,14 @@ grep -q "\"version\":\"${PROD_EXPECTED_COMMIT}\"" /tmp/health.json && \
 echo "Health commit check passed."
 ```
 
+### Ticket #3 one-command pre-merge check
+
+```bash
+RUN_MIGRATIONS=false \
+TICKET3_EXPECTED_COMMIT="$(git rev-parse --short HEAD)" \
+./scripts/ticket-3-full-check.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
