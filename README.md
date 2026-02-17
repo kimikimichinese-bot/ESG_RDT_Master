@@ -651,7 +651,7 @@ Use this for each production-ready push on `master`:
 ```bash
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
 PROD_DEPLOYMENT="https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app"
-PROD_EXPECTED_COMMIT="$(git rev-parse --short HEAD)"
+PROD_EXPECTED_COMMIT="$(git rev-parse --short v1.0.2)"
 
 echo "Production alias: ${PROD_ALIAS}"
 echo "Latest production deployment: ${PROD_DEPLOYMENT}"
