@@ -685,6 +685,14 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-4-release-signature.sh
 ```
 
+### Ticket #5 audit evidence bundle
+
+```bash
+TICKET5_TAG="v1.0.4" \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-5-audit-bundle.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
