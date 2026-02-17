@@ -1,5 +1,37 @@
 # Changelog
 
+## [v1.0.5] - 2026-02-17
+
+### Added
+- Added Ticket #5 post-release evidence bundle and Ticket #6 production handoff command.
+- Added `./scripts/ticket-5-audit-bundle.sh` and `./scripts/ticket-6-production-handoff.sh` for deterministic proof packets.
+
+### Changed
+- Production handoff flow now includes explicit deploy/endpoint/version lock validation after each merge.
+- `/api/health` and `/api/ready` remain unchanged contracts with strict production verification in runbook.
+
+### Production status
+- Release tag: `v1.0.5`.
+- Release commit: `183ccfe`.
+- Source PR: `#19` (Ticket #6 production handoff command).
+- Production readiness run: `22116524288` (`production-readiness`) → success.
+- Verified on production alias (`esg-rdt-master-pi.vercel.app`):
+  - `GET /api/ready` -> `status=ready`, `checks.web=ok`
+  - `GET /api/health` -> `status=ok`, `db=ok`, `version=183ccfe3`
+
+### Ticket evidence (copy-paste)
+
+```bash
+git show --stat --oneline 6018a1f
+# expected:
+# chore: add Ticket #6 production handoff command
+cat /tmp/ticket-6-handoff.md
+# expected:
+# workflow: production-readiness/22116524288
+# expected commit: 183ccfe3
+# version: 183ccfe3
+```
+
 ## [v1.0.4] - 2026-02-17
 
 ### Added
