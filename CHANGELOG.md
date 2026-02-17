@@ -1,5 +1,20 @@
 # Changelog
 
+## [v1.0.2] - 2026-02-17
+
+### Added
+- Enforced PR-only production freeze policy into production runbook (`README.md`).
+- Documented final full production execution flow tied to latest deployment verification.
+
+### Changed
+- Re-released production green state after latest merge-freeze pipeline and deployment.
+
+### Production status
+- Release tag: `v1.0.2`.
+- Production readiness run: `22114009054` (success).
+- Latest production deployment alias: `https://esg-rdt-master-pi.vercel.app` (currently pointed to `esg-rdt-master-efhh2pmg8-kimikimichineses-projects.vercel.app`).
+- Verified `/api/ready` and `/api/health` on production alias.
+
 ## [v1.0.1] - 2026-02-17
 
 ### Added
