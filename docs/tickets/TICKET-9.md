@@ -22,7 +22,9 @@ Add a single deterministic command for pre-merge and post-merge production ready
 ## Execution Command
 
 ```bash
-TICKET9_EXPECTED_COMMIT="v1.0.5^{}" \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-9-production-readiness-automation.sh
 ```
+
+To validate a newer rollout commit, set `TICKET9_EXPECTED_COMMIT` explicitly.
+Default expected commit is set to `v1.0.6^{}` for stable production evidence snapshots.

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
-readonly EXPECTED_COMMIT_INPUT="${TICKET9_EXPECTED_COMMIT:-$(git rev-parse --short=8 origin/master)}"
+readonly EXPECTED_COMMIT_INPUT="${TICKET9_EXPECTED_COMMIT:-v1.0.6^{}}"
 readonly OUTFILE="${TICKET9_OUTFILE:-/tmp/ticket-9-readiness-automation.md}"
 readonly WORKFLOW_READINESS="${TICKET9_WORKFLOW_READINESS:-production-readiness}"
 readonly WORKFLOW_LINT="${TICKET9_WORKFLOW_LINT:-ci}"
