@@ -91,7 +91,7 @@ verify_readme_continuity() {
     fail "README continuity order invalid: Ticket #19 must come after Ticket #18"
   fi
 
-  max_ticket="$(grep '^### Ticket #' "$README_FILE" | sed -E 's/### Ticket #([0-9]+).*/\\1/' | sort -n | tail -n 1)"
+  max_ticket="$(perl -ne 'if (/^### Ticket #([0-9]+)/){ print "$1\n" }' "$README_FILE" | sort -n | tail -n 1)"
   if [[ -z "$max_ticket" ]]; then
     fail "Unable to parse ticket numbering from README"
   fi
@@ -218,4 +218,3 @@ run_ts="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 cat "${OUTFILE}"
 echo ""
 echo "Written to ${OUTFILE}"
-
