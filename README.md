@@ -720,10 +720,12 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ### Ticket #9 production readiness automation
 
 ```bash
-TICKET9_EXPECTED_COMMIT="v1.0.5^{}" \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-9-production-readiness-automation.sh
 ```
+
+To validate a different deploy commit, set `TICKET9_EXPECTED_COMMIT` explicitly:
+`TICKET9_EXPECTED_COMMIT="abcdef12" ./scripts/ticket-9-production-readiness-automation.sh`
 
 ### Production freeze policy (strict PR-only)
 
