@@ -1132,3 +1132,15 @@ TICKET48_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-48-production-readiness-log-depth-continuity-check.sh
 ```
+
+### Ticket #49 production readiness log-depth continuity hardening
+
+- Scope: deterministic log-depth continuity hardening for production readiness workflow and docs
+
+```bash
+TICKET49_RELEASE_TAG="v1.0.6" \
+TICKET49_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET49_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-49-production-readiness-log-depth-continuity-check.sh
+```
