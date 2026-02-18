@@ -122,7 +122,7 @@ verify_ticket_docs_refs() {
     fail "README continuity order invalid: Ticket #22 must come after Ticket #21"
   fi
 
-  max_ticket="$(awk '/^### Ticket #[0-9]+ / {match($0, /^### Ticket #([0-9]+)/, m); if (m[1] != "") print m[1]}' "$README_FILE" | sort -n | tail -n 1)"
+  max_ticket="$(awk '/^### Ticket #[0-9]/ {sub(/^### Ticket #/, "", $0); sub(/ .*/, "", $0); if ($0 ~ /^[0-9]+$/) print $0}' "$README_FILE" | sort -n | tail -n 1)"
   if [[ -z "$max_ticket" ]]; then
     fail "Unable to parse ticket numbering from README"
   fi
