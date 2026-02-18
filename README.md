@@ -988,3 +988,13 @@ TICKET34_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-34-production-readiness-evidence-continuity.sh
 ```
+
+### Ticket #35 production readiness docs traceability hardening
+
+```bash
+TICKET35_RELEASE_TAG="v1.0.6" \
+TICKET35_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET35_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-35-production-readiness-docs-traceability.sh
+```
