@@ -26,7 +26,7 @@ require_cmd() {
 get_pr_state() {
   local pr="$1"
   local state
-  state="$(gh pr list --state all --json number,state --jq "[.[] | select(.number == $pr) | .state][0]" 2>/dev/null || true)"
+  state="$(gh pr list --state all --json number,state --jq ".[] | select(.number == $pr) | .state" | head -n 1 || true)"
   if [[ -z "$state" || "$state" == "null" ]]; then
     return 1
   fi
