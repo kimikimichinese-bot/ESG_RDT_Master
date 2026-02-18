@@ -1,4 +1,4 @@
-### Ticket #142 production readiness evidence continuity wrapup
+### Ticket #141 production readiness evidence continuity wrapup
 
 ## Goal
 Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #109 to Ticket #142.
