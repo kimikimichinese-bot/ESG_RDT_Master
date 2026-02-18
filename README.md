@@ -6572,3 +6572,16 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-470-production-readiness-evidence-continuity-wrapup.sh
 ```
 
+
+### Ticket #471 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #470 to Ticket #471.
+
+```bash
+TICKET471_RELEASE_TAG="v1.0.6" \
+TICKET471_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET471_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-471-production-readiness-evidence-continuity-wrapup.sh
+```
+
