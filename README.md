@@ -1108,3 +1108,8 @@ TICKET46_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-46-production-readiness-readme-lineage-check-v2.sh
 ```
+
+## Ticket #47 - Production Readiness Log-depth Continuity
+- Scope: deterministic log-depth continuity hardening for production readiness workflow and docs
+- Run check:
+  - ``TICKET47_RELEASE_TAG="v1.0.6" TICKET47_EXPECTED_COMMIT="v1.0.6^{}" TICKET47_LOG_DEPTH=4 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" ./scripts/ticket-47-production-readiness-log-depth-continuity-check.sh``
