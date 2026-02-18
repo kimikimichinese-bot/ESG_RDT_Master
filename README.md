@@ -898,3 +898,13 @@ TICKET25_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-25-production-readiness-evidence-continuity.sh
 ```
+
+### Ticket #26 production readiness ops drift check
+
+```bash
+TICKET26_RELEASE_TAG="v1.0.6" \
+TICKET26_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET26_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-26-production-readiness-ops-drift-check.sh
+```
