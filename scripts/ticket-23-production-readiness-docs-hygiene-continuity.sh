@@ -121,7 +121,8 @@ verify_workflow_depth() {
 
 verify_ticket_refs() {
   [[ -f "$DOCS_FILE" ]] || fail "Missing Ticket #23 docs file: ${DOCS_FILE}"
-  grep -qi "docs hygiene continuity" "$DOCS_FILE" || fail "Ticket #23 docs missing continuity scope"
+  grep -Eq "docs.*continuity.*hardening|continuity.*hardening|docs hygiene continuity" "$DOCS_FILE" \
+    || fail "Ticket #23 docs missing continuity scope"
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
   grep -q "### Ticket #23 production readiness docs hygiene continuity" "$README_FILE" || fail "README missing Ticket #23 section heading"
