@@ -23,6 +23,16 @@ require_cmd() {
   command -v "$cmd" >/dev/null 2>&1 || fail "Required command not found: $cmd"
 }
 
+get_pr_state() {
+  local pr="$1"
+  local state
+  state="$(gh pr list --state all --json number,state --jq "[.[] | select(.number == $pr) | .state][0]" 2>/dev/null || true)"
+  if [[ -z "$state" || "$state" == "null" ]]; then
+    return 1
+  fi
+  printf '%s\n' "$state"
+}
+
 run_check_script() {
   local script="$1"
   local deploy_flag="$2"
@@ -130,8 +140,7 @@ cmd_process() {
   cd "$ROOT_DIR"
 
   log "Processing PR #${pr}"
-  if gh pr view "$pr" --json state --jq .state >/dev/null 2>&1; then
-    state="$(gh pr view "$pr" --json state --jq .state)"
+  if state="$(get_pr_state "$pr")"; then
     if [[ "$state" == "OPEN" ]]; then
       log "Merging PR #${pr}"
       gh pr merge "$pr" --merge --delete-branch
