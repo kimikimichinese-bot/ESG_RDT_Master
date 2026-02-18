@@ -173,7 +173,7 @@ cmd_process() {
       log "PR #${pr} is ${state}, skipping merge step"
     fi
   else
-    fail "PR #${pr} not found"
+    log "WARN: Could not determine PR #${pr} state (network/cache issue). Running check-only."
   fi
 
   git checkout master
