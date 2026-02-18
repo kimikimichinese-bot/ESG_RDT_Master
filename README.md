@@ -2565,8 +2565,10 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 - Scope: deterministic one-command wrapup continuity validation from Ticket #172 to Ticket #173.
 
-[PASS] production-readiness last 4 runs successful
-[PASS] ci last 4 runs successful
-[PASS] /api/ready contract validated
-[PASS] /api/health contract and version validated
-[FAIL] README missing Ticket #173 heading
+```bash
+TICKET173_RELEASE_TAG="v1.0.6" \
+TICKET173_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET173_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-173-production-readiness-evidence-continuity-wrapup.sh
+```
