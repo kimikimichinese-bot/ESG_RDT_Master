@@ -2361,7 +2361,6 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 [PASS] ci last 4 runs successful
 [PASS] /api/ready contract validated
 [PASS] /api/health contract and version validated
-[FAIL] README missing Ticket #150 heading
 
 ### Ticket #151 production readiness evidence continuity wrapup
 
@@ -2387,9 +2386,21 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-152-production-readiness-evidence-continuity-wrapup.sh
 ```
 
+
 ### Ticket #153 production readiness evidence continuity wrapup
 
 - Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+
+```bash
+TICKET153_RELEASE_TAG="v1.0.6" \
+TICKET153_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET153_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-153-production-readiness-evidence-continuity-wrapup.sh
+```
+### Ticket #154 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #153 to Ticket #154.
 
 ```bash
 TICKET154_RELEASE_TAG="v1.0.6" \
@@ -2398,22 +2409,9 @@ TICKET154_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-154-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #155 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
-
-```bash
-TICKET154_RELEASE_TAG="v1.0.6" \
-TICKET154_EXPECTED_COMMIT="v1.0.6^{}" \
-TICKET154_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
-./scripts/ticket-154-production-readiness-evidence-continuity-wrapup.sh
-```
-
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #154 to Ticket #155.
 
 ```bash
 TICKET155_RELEASE_TAG="v1.0.6" \
@@ -2422,10 +2420,9 @@ TICKET155_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-155-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #156 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #155 to Ticket #156.
 
 ```bash
 TICKET156_RELEASE_TAG="v1.0.6" \
@@ -2434,10 +2431,9 @@ TICKET156_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-156-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #157 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #156 to Ticket #157.
 
 ```bash
 TICKET157_RELEASE_TAG="v1.0.6" \
@@ -2446,10 +2442,9 @@ TICKET157_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-157-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #158 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #157 to Ticket #158.
 
 ```bash
 TICKET158_RELEASE_TAG="v1.0.6" \
@@ -2458,10 +2453,9 @@ TICKET158_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-158-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #159 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #158 to Ticket #159.
 
 ```bash
 TICKET159_RELEASE_TAG="v1.0.6" \
@@ -2470,10 +2464,9 @@ TICKET159_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-159-production-readiness-evidence-continuity-wrapup.sh
 ```
+### Ticket #160 production readiness evidence continuity wrapup
 
-### Ticket #153 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #152 to Ticket #153.
+- Scope: deterministic one-command wrapup continuity validation from Ticket #159 to Ticket #160.
 
 ```bash
 TICKET170_RELEASE_TAG="v1.0.6" \
