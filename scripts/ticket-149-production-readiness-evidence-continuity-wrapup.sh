@@ -8,7 +8,7 @@ readonly WORKFLOW_LINT_FALLBACK="${TICKET149_WORKFLOW_LINT_FALLBACK:-lint-build-
 readonly RELEASE_TAG_INPUT="${TICKET149_RELEASE_TAG:-v1.0.6}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET149_EXPECTED_COMMIT:-${RELEASE_TAG_INPUT}}"
 readonly LOG_DEPTH="${TICKET149_LOG_DEPTH:-4}"
-readonly DOCS_FILE="${TICKET149_DOCS_FILE:-docs/tickets/TICKET-148.md}"
+readonly DOCS_FILE="${TICKET149_DOCS_FILE:-docs/tickets/TICKET-149.md}"
 readonly README_FILE="${TICKET149_README_FILE:-README.md}"
 readonly OUTFILE="${TICKET149_OUTFILE:-/tmp/ticket-149-production-readiness-evidence-continuity-wrapup.md}"
 
