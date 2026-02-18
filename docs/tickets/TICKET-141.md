@@ -1,7 +1,7 @@
-### Ticket #140 production readiness evidence continuity wrapup
+### Ticket #141 production readiness evidence continuity wrapup
 
 ## Goal
-Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #109 to Ticket #140.
+Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #109 to Ticket #141.
 
 ## Scope
 - Add `./scripts/ticket-139-production-readiness-evidence-continuity-wrapup.sh`.
@@ -9,7 +9,7 @@ Add one-command evidence wrap-up check focused on deterministic continuity valid
   - `production-readiness`
   - `ci` (or `lint-build-test` fallback).
 - Verify `/api/ready` and `/api/health` contracts.
-- Verify README continuity from Ticket #109 to Ticket #140.
+- Verify README continuity from Ticket #109 to Ticket #141.
 - Emit deterministic evidence to `/tmp`.
 
 ## Acceptance Criteria
@@ -20,9 +20,9 @@ Add one-command evidence wrap-up check focused on deterministic continuity valid
 
 ## Execution
 ```bash
-TICKET140_RELEASE_TAG="v1.0.6" \
-TICKET140_EXPECTED_COMMIT="v1.0.6^{}" \
-TICKET140_LOG_DEPTH=4 \
+TICKET141_RELEASE_TAG="v1.0.6" \
+TICKET141_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET141_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
-./scripts/ticket-140-production-readiness-evidence-continuity-wrapup.sh
+./scripts/ticket-141-production-readiness-evidence-continuity-wrapup.sh
 ```
