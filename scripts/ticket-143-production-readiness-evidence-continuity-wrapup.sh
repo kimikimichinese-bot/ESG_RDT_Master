@@ -81,8 +81,8 @@ verify_workflow_depth() {
 }
 
 verify_readme_and_docs() {
-  [[ -f "$DOCS_FILE" ]] || fail "Missing Ticket #141 docs file: ${DOCS_FILE}"
-  grep -q "### Ticket #141" "$DOCS_FILE" || fail "Ticket #141 docs heading missing"
+  [[ -f "$DOCS_FILE" ]] || fail "Missing Ticket #143 docs file: ${DOCS_FILE}"
+  grep -q "### Ticket #143" "$DOCS_FILE" || fail "Ticket #143 docs heading missing"
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
   grep -q "### Ticket #143" "$README_FILE" || fail "README missing Ticket #143 heading"
@@ -141,14 +141,14 @@ health_version="$(jq -r '.version // empty' <<<"$health_response")"
 pass "/api/health contract and version validated"
 
 verify_readme_and_docs
-pass "Ticket #141 docs/README continuity validated"
+pass "Ticket #143 docs/README continuity validated"
 
 origin_master="$(git rev-parse --short=8 origin/master)"
 local_head="$(git rev-parse --short=8 HEAD)"
 tracking="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null || true)"
 
 {
-  echo "# Ticket #141 production readiness evidence wrapup"
+  echo "# Ticket #143 production readiness evidence wrapup"
   echo ""
   echo "- release tag: ${RELEASE_TAG}"
   echo "- release tag commit: ${RELEASE_TAG_COMMIT}"
