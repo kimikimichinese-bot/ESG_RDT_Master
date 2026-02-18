@@ -8,7 +8,7 @@ readonly WORKFLOW_LINT_FALLBACK="${TICKET83_WORKFLOW_LINT_FALLBACK:-lint-build-t
 readonly RELEASE_TAG_INPUT="${TICKET83_RELEASE_TAG:-v1.0.6}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET83_EXPECTED_COMMIT:-${RELEASE_TAG_INPUT}}"
 readonly LOG_DEPTH="${TICKET83_LOG_DEPTH:-4}"
-readonly DOCS_FILE="${TICKET83_DOCS_FILE:-docs/tickets/TICKET-82.md}"
+readonly DOCS_FILE="${TICKET83_DOCS_FILE:-docs/tickets/TICKET-83.md}"
 readonly README_FILE="${TICKET83_README_FILE:-README.md}"
 readonly OUTFILE="${TICKET83_OUTFILE:-/tmp/ticket-83-production-readiness-evidence-continuity-wrapup.md}"
 
@@ -89,12 +89,12 @@ verify_readme_and_docs() {
   grep -q "ticket-83-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #83 script command"
   grep -q "### Ticket #83" "$README_FILE" || fail "README continuity missing ### Ticket #83"
 
-  local line_83 line_83
-  line_83="$(grep -n '^### Ticket #82 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  local line_82 line_83
+  line_82="$(grep -n '^### Ticket #82 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   line_83="$(grep -n '^### Ticket #83 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_83" ]] || fail "README missing Ticket #82 anchor"
+  [[ -n "$line_82" ]] || fail "README missing Ticket #82 anchor"
   [[ -n "$line_83" ]] || fail "README missing Ticket #83 anchor"
-  (( line_83 > line_83 )) || fail "README continuity order invalid: Ticket #83 must follow Ticket #82"
+  (( line_83 > line_82 )) || fail "README continuity order invalid: Ticket #83 must follow Ticket #82"
 }
 
 require_gh_api
