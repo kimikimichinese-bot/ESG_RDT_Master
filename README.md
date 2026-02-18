@@ -968,3 +968,13 @@ TICKET32_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-32-production-readiness-evidence-lockdown.sh
 ```
+
+### Ticket #33 production readiness evidence lifecycle hardening
+
+```bash
+TICKET33_RELEASE_TAG="v1.0.6" \
+TICKET33_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET33_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-33-production-readiness-evidence-lifecycle.sh
+```
