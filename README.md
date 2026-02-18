@@ -1028,3 +1028,13 @@ TICKET38_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-38-production-readiness-handoff-continuity.sh
 ```
+
+### Ticket #39 production readiness evidence drift continuity
+
+```bash
+TICKET39_RELEASE_TAG="v1.0.6" \
+TICKET39_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET39_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-39-production-readiness-evidence-drift-continuity.sh
+```
