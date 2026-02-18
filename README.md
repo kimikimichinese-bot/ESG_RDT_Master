@@ -908,3 +908,13 @@ TICKET26_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-26-production-readiness-ops-drift-check.sh
 ```
+
+### Ticket #27 production readiness docs hardening
+
+```bash
+TICKET27_RELEASE_TAG="v1.0.6" \
+TICKET27_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET27_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-27-production-readiness-docs-hardening.sh
+```
