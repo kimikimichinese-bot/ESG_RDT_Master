@@ -1168,3 +1168,15 @@ TICKET51_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-51-production-readiness-completion.sh
 ```
+
+### Ticket #52 production readiness continuity wrap-up
+
+- Scope: deterministic one-command wrap-up validation for production readiness continuity finalization.
+
+```bash
+TICKET52_RELEASE_TAG="v1.0.6" \
+TICKET52_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET52_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-52-production-readiness-continuity-wrapup.sh
+```
