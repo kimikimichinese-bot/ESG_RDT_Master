@@ -845,6 +845,16 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-22-production-readiness-docs-hygiene.sh
 ```
 
+### Ticket #23 production readiness docs hygiene continuity
+
+```bash
+TICKET23_RELEASE_TAG="v1.0.6" \
+TICKET23_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET23_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-23-production-readiness-docs-hygiene-continuity.sh
+```
+
 ### Production freeze policy (strict PR-only)
 
 From this point onward, **do not push directly to `master`**.
