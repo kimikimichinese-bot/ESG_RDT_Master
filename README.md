@@ -1192,3 +1192,15 @@ TICKET53_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-53-production-readiness-evidence-wrap-check.sh
 ```
+
+### Ticket #54 production readiness evidence continuity
+
+- Scope: deterministic one-command evidence continuity validation from Ticket #53 to Ticket #54.
+
+```bash
+TICKET54_RELEASE_TAG="v1.0.6" \
+TICKET54_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET54_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-54-production-readiness-evidence-continuity.sh
+```
