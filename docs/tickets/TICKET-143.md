@@ -4,7 +4,7 @@
 Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #109 to Ticket #143.
 
 ## Scope
-- Add `./scripts/ticket-141-production-readiness-evidence-continuity-wrapup.sh`.
+- Add `./scripts/ticket-143-production-readiness-evidence-continuity-wrapup.sh`.
 - Verify required workflows on `master`:
   - `production-readiness`
   - `ci` (or `lint-build-test` fallback).
