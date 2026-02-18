@@ -5597,3 +5597,16 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-395-production-readiness-evidence-continuity-wrapup.sh
 ```
 
+
+### Ticket #396 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #395 to Ticket #396.
+
+```bash
+TICKET396_RELEASE_TAG="v1.0.6" \
+TICKET396_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET396_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-396-production-readiness-evidence-continuity-wrapup.sh
+```
+
