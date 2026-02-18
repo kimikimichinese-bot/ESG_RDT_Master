@@ -90,11 +90,11 @@ verify_readme_and_docs() {
   grep -q "### Ticket #194" "$README_FILE" || fail "README continuity missing Ticket #194"
 
   local line_prev line_current
-  line_prev="$(grep -n '^### Ticket #190 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  line_prev="$(grep -n '^### Ticket #193 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   line_current="$(grep -n '^### Ticket #194 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_prev" ]] || fail "README missing Ticket #190 anchor"
+  [[ -n "$line_prev" ]] || fail "README missing Ticket #193 anchor"
   [[ -n "$line_current" ]] || fail "README missing Ticket #193 anchor"
-  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #194 must follow Ticket #190"
+  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #194 must follow Ticket #193"
 }
 
 require_gh_api
