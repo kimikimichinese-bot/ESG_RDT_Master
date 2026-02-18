@@ -67,9 +67,15 @@ verify_workflow_depth() {
     fi
   done < <(echo "$runs_json" | jq -r '.[] | "\(.status) \(.conclusion)"')
 
-  ((i < LOG_DEPTH)) && fail "${kind} run depth too low for requested LOG_DEPTH=${LOG_DEPTH}, found=${i}"
-  ((bad == 1)) && fail "At least one ${kind} workflow run in last ${LOG_DEPTH} is not successful"
-  ((missing == 1)) && fail "At least one ${kind} workflow run has missing status/conclusion"
+  if (( i < LOG_DEPTH )); then
+    fail "${kind} run depth too low for requested LOG_DEPTH=${LOG_DEPTH}, found=${i}"
+  fi
+  if (( bad == 1 )); then
+    fail "At least one ${kind} workflow run in last ${LOG_DEPTH} is not successful"
+  fi
+  if (( missing == 1 )); then
+    fail "At least one ${kind} workflow run has missing status/conclusion"
+  fi
 }
 
 verify_readme_and_docs() {
