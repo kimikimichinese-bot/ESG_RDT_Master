@@ -1058,3 +1058,13 @@ TICKET41_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-41-production-readiness-continuity-hardening.sh
 ```
+
+### Ticket #42 production readiness README lineage validation
+
+```bash
+TICKET42_RELEASE_TAG="v1.0.6" \
+TICKET42_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET42_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-42-production-readiness-readme-lineage.sh
+```
