@@ -1505,18 +1505,6 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-79-production-readiness-evidence-continuity-wrapup.sh
 ```
 
-### Ticket #80 production readiness evidence continuity wrapup
-
-- Scope: deterministic one-command wrapup continuity validation from Ticket #79 to Ticket #80.
-
-```bash
-TICKET80_RELEASE_TAG="v1.0.6" \
-TICKET80_EXPECTED_COMMIT="v1.0.6^{}" \
-TICKET80_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
-./scripts/ticket-80-production-readiness-evidence-continuity-wrapup.sh
-```
-
 ### Ticket #81 production readiness evidence continuity wrapup
 
 - Scope: deterministic one-command wrapup continuity validation from Ticket #80 to Ticket #81.
@@ -1527,4 +1515,16 @@ TICKET81_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET81_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-81-production-readiness-evidence-continuity-wrapup.sh
+```
+
+### Ticket #82 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #81 to Ticket #82.
+
+```bash
+TICKET82_RELEASE_TAG="v1.0.6" \
+TICKET82_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET82_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-82-production-readiness-evidence-continuity-wrapup.sh
 ```
