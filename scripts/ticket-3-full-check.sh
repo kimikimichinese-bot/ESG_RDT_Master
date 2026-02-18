@@ -5,6 +5,7 @@ set -euo pipefail
 readonly PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
 readonly WORKFLOW_NAME="production-readiness"
 readonly RUN_MIGRATIONS="${RUN_MIGRATIONS:-false}"
+readonly RUN_PROD_DEPLOY="${RUN_PROD_DEPLOY:-false}"
 readonly TICKET3_EXPECTED_COMMIT="${TICKET3_EXPECTED_COMMIT:-$(git rev-parse --short=8 HEAD)}"
 
 pass() {
@@ -18,6 +19,9 @@ fail() {
 
 if [[ "$RUN_MIGRATIONS" != "true" && "$RUN_MIGRATIONS" != "false" ]]; then
   fail "RUN_MIGRATIONS must be true|false"
+fi
+if [[ "$RUN_PROD_DEPLOY" != "true" && "$RUN_PROD_DEPLOY" != "false" ]]; then
+  fail "RUN_PROD_DEPLOY must be true|false"
 fi
 
 if [[ -z "$TICKET3_EXPECTED_COMMIT" ]]; then
@@ -42,7 +46,11 @@ gh run view "$LATEST_RUN" --json status,conclusion,url,name --jq '{status:.statu
 
 echo "--- Deploy and endpoint checks ---"
 ./scripts/context-check.sh
-vercel --prod --yes
+if [[ "$RUN_PROD_DEPLOY" == "true" ]]; then
+  vercel --prod --yes
+else
+  pass "RUN_PROD_DEPLOY is false, skipping vercel --prod (quota-safe mode)"
+fi
 
 READY_RESPONSE="$(curl -sfS "${PROD_ALIAS}/api/ready")"
 echo "$READY_RESPONSE"
