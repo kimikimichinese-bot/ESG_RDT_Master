@@ -681,6 +681,26 @@ If you hit Vercel API deployment limits on PR pushes (`api-deployments-free-per-
   `vercel git connect https://github.com/kimikimichinese-bot/ESG_RDT_Master.git`
   `RUN_PROD_DEPLOY=true ./scripts/ticket-3-full-check.sh`
 
+### Automated quota-safe batch helper
+
+Use this for long ticket waves with live log and no preview deploy spam:
+
+```bash
+# 1) Create a queue file (queue.txt), one line per ticket:
+# <pr-number> <script-path> [deploy-flag]
+cat > /tmp/ticket-batch-queue.txt <<'EOF'
+123 ./scripts/ticket-53-production-readiness-evidence-wrap-check.sh false
+124 ./scripts/ticket-54-production-readiness-evidence-continuity.sh false
+EOF
+
+# 2) Run full batch (disconnect preview + process all + reconnect)
+./scripts/run-batch-tickets.sh --queue /tmp/ticket-batch-queue.txt --repo kimikimichinese-bot/ESG_RDT_Master --deploy-final false
+
+# 3) If this batch must go to production immediately, run final deploy separately:
+vercel git connect https://github.com/kimikimichinese-bot/ESG_RDT_Master.git
+vercel --prod --yes
+```
+
 ### Ticket #3 one-command pre-merge check
 
 ```bash
