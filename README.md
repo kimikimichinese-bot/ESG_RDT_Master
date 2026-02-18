@@ -701,6 +701,25 @@ vercel git connect https://github.com/kimikimichinese-bot/ESG_RDT_Master.git
 vercel --prod --yes
 ```
 
+### Batch automation (consolidated tickets)
+
+- Production branch for this repo is `master` (required for this workflow).
+- For repetitive ticket windows, use the range runner:
+
+```bash
+./scripts/run-ticket-wave.sh \
+  --from 55 \
+  --to 198 \
+  --check-script-template "ticket-%d-production-readiness-evidence-continuity-wrapup.sh" \
+  --create-missing-prs true \
+  --default-deploy-flag false \
+  --deploy-final false \
+  --repo kimikimichinese-bot/ESG_RDT_Master
+```
+
+- Compact ticket catalog and ranges:
+  - `docs/TICKET-COMPACT-INDEX.md`
+
 ### Ticket #3 one-command pre-merge check
 
 ```bash
