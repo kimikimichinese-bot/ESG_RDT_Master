@@ -4,7 +4,7 @@
 Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #109 to Ticket #145.
 
 ## Scope
-- Add `./scripts/ticket-144-production-readiness-evidence-continuity-wrapup.sh`.
+- Add `./scripts/ticket-145-production-readiness-evidence-continuity-wrapup.sh`.
 - Verify required workflows on `master`:
   - `production-readiness`
   - `ci` (or `lint-build-test` fallback).
@@ -20,9 +20,9 @@ Add one-command evidence wrap-up check focused on deterministic continuity valid
 
 ## Execution
 ```bash
-TICKET144_RELEASE_TAG="v1.0.6" \
-TICKET144_EXPECTED_COMMIT="v1.0.6^{}" \
-TICKET144_LOG_DEPTH=4 \
+TICKET145_RELEASE_TAG="v1.0.6" \
+TICKET145_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET145_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
-./scripts/ticket-144-production-readiness-evidence-continuity-wrapup.sh
+./scripts/ticket-145-production-readiness-evidence-continuity-wrapup.sh
 ```
