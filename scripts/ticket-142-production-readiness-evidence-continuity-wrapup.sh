@@ -85,16 +85,16 @@ verify_readme_and_docs() {
   grep -q "### Ticket #141" "$DOCS_FILE" || fail "Ticket #141 docs heading missing"
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
-  grep -q "### Ticket #141" "$README_FILE" || fail "README missing Ticket #141 heading"
-  grep -q "ticket-142-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #141 script command"
+  grep -q "### Ticket #142" "$README_FILE" || fail "README missing Ticket #142 heading"
+  grep -q "ticket-142-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #142 script command"
   grep -q "### Ticket #109" "$README_FILE" || fail "README continuity missing ### Ticket #109"
 
   local line_prev line_current
   line_prev="$(grep -n '^### Ticket #109 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  line_current="$(grep -n '^### Ticket #141 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  line_current="$(grep -n '^### Ticket #142 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   [[ -n "$line_prev" ]] || fail "README missing Ticket #109 anchor"
-  [[ -n "$line_current" ]] || fail "README missing Ticket #141 anchor"
-  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #141 must follow Ticket #109"
+  [[ -n "$line_current" ]] || fail "README missing Ticket #142 anchor"
+  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #142 must follow Ticket #109"
 }
 
 require_gh_api
