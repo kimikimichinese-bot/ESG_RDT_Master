@@ -928,3 +928,13 @@ TICKET28_LOG_DEPTH=3 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-28-production-readiness-sop-check.sh
 ```
+
+### Ticket #29 production readiness ops sanity hardening
+
+```bash
+TICKET29_RELEASE_TAG="v1.0.6" \
+TICKET29_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET29_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-29-production-readiness-ops-sanity.sh
+```
