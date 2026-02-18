@@ -888,3 +888,13 @@ Keep `dituccios` and every other project fully in separate branches/credentials 
 ```
 
 # ESG_RDT_Master
+
+### Ticket #25 production readiness evidence continuity
+
+```bash
+TICKET25_RELEASE_TAG="v1.0.6" \
+TICKET25_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET25_LOG_DEPTH=3 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-25-production-readiness-evidence-continuity.sh
+```
