@@ -86,7 +86,7 @@ verify_readme_and_docs() {
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
   grep -q "### Ticket #139" "$README_FILE" || fail "README missing Ticket #139 heading"
-  grep -q "TICKET-139-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #139 script command"
+  grep -q "ticket-139-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #139 script command"
   grep -q "### Ticket #109" "$README_FILE" || fail "README continuity missing ### Ticket #109"
 
   local line_prev line_current
