@@ -37,8 +37,9 @@ require_gh_api() {
 
 get_runs_json() {
   local workflow="$1" depth="$2"
+  local fetch_depth=$((depth + 3))
   local json
-  json="$(gh run list --workflow "$workflow" --branch master --limit "$depth" --json databaseId,status,conclusion,headSha,headBranch,name,startedAt,updatedAt,url 2>&1 || true)"
+  json="$(gh run list --workflow "$workflow" --branch master --limit "$fetch_depth" --json databaseId,status,conclusion,headSha,headBranch,name,startedAt,updatedAt,url 2>&1 || true)"
   [[ -n "$json" ]] || return 1
   [[ "$json" == "null" || "$json" == "[]" ]] && return 1
   if ! jq -e 'type == "array"' <<<"$json" >/dev/null 2>&1; then
@@ -63,10 +64,10 @@ verify_workflow_depth() {
     ((i+=1))
     if [[ "$status" == "null" || "$conclusion" == "null" ]]; then
       missing=1
-    elif [[ "$status" != "completed" || "$conclusion" != "success" ]]; then
+    elif [[ "$conclusion" != "success" ]]; then
       bad=1
     fi
-  done < <(echo "$runs_json" | jq -r '.[] | "\(.status) \(.conclusion)"')
+  done < <(echo "$runs_json" | jq -r '.[] | select(.status=="completed") | "\(.status) \(.conclusion)"')
 
   if (( i < LOG_DEPTH )); then
     fail "${kind} run depth too low for requested LOG_DEPTH=${LOG_DEPTH}, found=${i}"
