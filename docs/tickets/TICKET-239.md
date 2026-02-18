@@ -1,15 +1,15 @@
 ### Ticket #239 production readiness evidence continuity wrapup
 
 ## Goal
-Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #236 to Ticket #239.
+Add one-command evidence wrap-up check focused on deterministic continuity validation from Ticket #237 to Ticket #239.
 
 ## Scope
-- Add one-command evidence wrap-up check for this ticket.
+- Add `./scripts/ticket-239-production-readiness-evidence-continuity-wrapup.sh`.
 - Verify required workflows on `master`:
   - `production-readiness`
   - `ci` (or `lint-build-test` fallback).
 - Verify `/api/ready` and `/api/health` contracts.
-- Verify README continuity from Ticket #236 to Ticket #239.
+- Verify README continuity from Ticket #237 to Ticket #239.
 - Emit deterministic evidence to `/tmp`.
 
 ## Acceptance Criteria

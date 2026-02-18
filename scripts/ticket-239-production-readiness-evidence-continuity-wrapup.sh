@@ -21,8 +21,7 @@ resolve_expected() {
   if [[ "$value" == v* ]]; then
     git rev-parse --short=8 "${value}^{commit}" 2>/dev/null || git rev-parse --short=8 "$value"
   else
-    printf '%s
-' "$value"
+    printf '%s\n' "$value"
   fi
 }
 
@@ -46,8 +45,7 @@ get_runs_json() {
   if ! jq -e 'type == "array"' <<<"$json" >/dev/null 2>&1; then
     fail "Could not parse workflow runs for ${workflow}"
   fi
-  printf '%s
-' "$json"
+  printf '%s\n' "$json"
 }
 
 get_latest_run_json() {
@@ -83,19 +81,20 @@ verify_workflow_depth() {
 }
 
 verify_readme_and_docs() {
-  [[ -f "$DOCS_FILE" ]] || fail "Missing Ticket #$228 docs file: ${DOCS_FILE}"
+  [[ -f "$DOCS_FILE" ]] || fail "Missing Ticket #239 docs file: ${DOCS_FILE}"
   grep -q "### Ticket #239" "$DOCS_FILE" || fail "Ticket #239 docs heading missing"
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
   grep -q "### Ticket #239" "$README_FILE" || fail "README missing Ticket #239 heading"
   grep -q "ticket-239-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #239 script command"
+  grep -q "### Ticket #239" "$README_FILE" || fail "README continuity missing Ticket #239"
 
   local line_prev line_current
-  line_prev="$(grep -n '^### Ticket #226 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  line_prev="$(grep -n '^### Ticket #237 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   line_current="$(grep -n '^### Ticket #239 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_prev" ]] || fail "README missing Ticket #226 anchor"
+  [[ -n "$line_prev" ]] || fail "README missing Ticket #237 anchor"
   [[ -n "$line_current" ]] || fail "README missing Ticket #239 anchor"
-  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #239 must follow Ticket #226"
+  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #239 must follow Ticket #237"
 }
 
 require_gh_api
@@ -142,7 +141,7 @@ health_version="$(jq -r '.version // empty' <<<"$health_response")"
 pass "/api/health contract and version validated"
 
 verify_readme_and_docs
-pass "Ticket #$228 docs/README continuity validated"
+pass "Ticket #239 docs/README continuity validated"
 
 origin_master="$(git rev-parse --short=8 origin/master)"
 local_head="$(git rev-parse --short=8 HEAD)"
@@ -165,7 +164,7 @@ tracking="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/n
   echo ""
   echo "## workflow runs (last ${LOG_DEPTH})"
   echo '```json'
-  echo "{"readiness_runs": ${READINESS_RUNS}, "lint_runs": ${LINT_RUNS}}"
+  echo "{\"readiness_runs\": ${READINESS_RUNS}, \"lint_runs\": ${LINT_RUNS}}"
   echo '```'
   echo "## /api/ready"
   echo '```json'
@@ -176,6 +175,6 @@ tracking="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/n
   echo "${health_response}"
   echo '```'
   echo ""
-} >"$OUTFILE"
+} >"${OUTFILE}"
 
 echo "Written to ${OUTFILE}"
