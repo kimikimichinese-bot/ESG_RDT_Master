@@ -8,9 +8,9 @@ readonly WORKFLOW_LINT_FALLBACK="${TICKET98_WORKFLOW_LINT_FALLBACK:-lint-build-t
 readonly RELEASE_TAG_INPUT="${TICKET98_RELEASE_TAG:-v1.0.6}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET98_EXPECTED_COMMIT:-${RELEASE_TAG_INPUT}}"
 readonly LOG_DEPTH="${TICKET98_LOG_DEPTH:-4}"
-readonly DOCS_FILE="${TICKET98_DOCS_FILE:-docs/tickets/TICKET-97.md}"
+readonly DOCS_FILE="${TICKET98_DOCS_FILE:-docs/tickets/TICKET-98.md}"
 readonly README_FILE="${TICKET98_README_FILE:-README.md}"
-readonly OUTFILE="${TICKET98_OUTFILE:-/tmp/ticket-96-production-readiness-evidence-continuity-wrapup.md}"
+readonly OUTFILE="${TICKET98_OUTFILE:-/tmp/ticket-98-production-readiness-evidence-continuity-wrapup.md}"
 
 pass() { echo "[PASS] $1"; }
 fail() { echo "[FAIL] $1"; exit 1; }
@@ -86,15 +86,15 @@ verify_readme_and_docs() {
 
   [[ -f "$README_FILE" ]] || fail "Missing README file: ${README_FILE}"
   grep -q "### Ticket #98" "$README_FILE" || fail "README missing Ticket #98 heading"
-  grep -q "ticket-97-ticket-98-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #98 script command"
+  grep -q "ticket-98-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #98 script command"
   grep -q "### Ticket #98" "$README_FILE" || fail "README continuity missing ### Ticket #98"
 
-  local line_97 line_97
-  line_97="$(grep -n '^### Ticket #88 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  line_97="$(grep -n '^### Ticket #98 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_97" ]] || fail "README missing Ticket #88 anchor"
-  [[ -n "$line_97" ]] || fail "README missing Ticket #98 anchor"
-  (( line_97 > line_97 )) || fail "README continuity order invalid: Ticket #98 must follow Ticket #88"
+  local line_prev line_current
+  line_prev="$(grep -n '^### Ticket #97 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  line_current="$(grep -n '^### Ticket #98 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  [[ -n "$line_prev" ]] || fail "README missing Ticket #97 anchor"
+  [[ -n "$line_current" ]] || fail "README missing Ticket #98 anchor"
+  (( line_current > line_prev )) || fail "README continuity order invalid: Ticket #98 must follow Ticket #97"
 }
 
 require_gh_api
