@@ -652,6 +652,7 @@ Use this for each production-ready push on `master`:
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
 PROD_DEPLOYMENT="https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app"
 PROD_EXPECTED_COMMIT="$(git rev-parse --short v1.0.2)"
+RUN_PROD_DEPLOY="${RUN_PROD_DEPLOY:-false}"
 
 echo "Production alias: ${PROD_ALIAS}"
 echo "Latest production deployment: ${PROD_DEPLOYMENT}"
@@ -662,12 +663,23 @@ gh workflow run production-readiness.yml -f run_migrations=true --ref master && 
 sleep 30 && \
 gh run list --workflow production-readiness --branch master --limit 1 && \
 ./scripts/context-check.sh && \
-vercel --prod --yes && \
+if [[ "${RUN_PROD_DEPLOY}" == "true" ]]; then vercel --prod --yes; else echo "RUN_PROD_DEPLOY=false, skip vercel --prod"; fi && \
 curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready && \
 curl -sfS "${PROD_ALIAS}/api/health" | tee /tmp/health.json && \
 grep -q "\"version\":\"${PROD_EXPECTED_COMMIT}\"" /tmp/health.json && \
 echo "Health commit check passed."
 ```
+
+### Quota-safe deployment mode (Vercel free-tier)
+
+If you hit Vercel API deployment limits on PR pushes (`api-deployments-free-per-day`), do this:
+
+- Pause Git-backed auto-deployments while doing many ticket iterations:
+  `vercel git disconnect`
+- Run your local checks/PR merges without `vercel --prod`.
+- Reconnect and deploy once when you are done:
+  `vercel git connect https://github.com/kimikimichinese-bot/ESG_RDT_Master.git`
+  `RUN_PROD_DEPLOY=true ./scripts/ticket-3-full-check.sh`
 
 ### Ticket #3 one-command pre-merge check
 
@@ -2660,4 +2672,17 @@ TICKET180_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET180_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-180-production-readiness-evidence-continuity-wrapup.sh
+```
+
+
+### Ticket #181 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #180 to Ticket #181.
+
+```bash
+TICKET181_RELEASE_TAG="v1.0.6" \
+TICKET181_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET181_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-181-production-readiness-evidence-continuity-wrapup.sh
 ```
