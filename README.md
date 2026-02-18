@@ -2560,3 +2560,13 @@ TICKET172_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-172-production-readiness-evidence-continuity-wrapup.sh
 ```
+
+### Ticket #173 production readiness evidence continuity wrapup
+
+- Scope: deterministic one-command wrapup continuity validation from Ticket #172 to Ticket #173.
+
+[PASS] production-readiness last 4 runs successful
+[PASS] ci last 4 runs successful
+[PASS] /api/ready contract validated
+[PASS] /api/health contract and version validated
+[FAIL] README missing Ticket #173 heading
