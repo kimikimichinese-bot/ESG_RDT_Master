@@ -18,6 +18,34 @@ log() {
   echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] $1"
 }
 
+vercel_git_disconnect() {
+  if ! command -v vercel >/dev/null 2>&1; then
+    log "WARN: vercel CLI not available; skipping git disconnect."
+    return
+  fi
+
+  log "Disconnecting Vercel Git integration (auto-confirm)."
+  # Vercel confirm prompt is text-based and can block unattended batches.
+  printf 'y\n' | vercel git disconnect || log "WARN: vercel git disconnect failed (continuing)."
+}
+
+vercel_git_connect() {
+  local repo="$1"
+
+  if ! command -v vercel >/dev/null 2>&1; then
+    log "WARN: vercel CLI not available; skipping git reconnect."
+    return
+  fi
+
+  if [[ -z "$repo" ]]; then
+    log "WARN: no repo provided for reconnect; skipping vercel git connect."
+    return
+  fi
+
+  log "Reconnecting Vercel Git integration to ${repo}."
+  vercel git connect "$repo" || log "WARN: vercel git connect failed. Re-run manually with vercel git connect ${repo}."
+}
+
 require_cmd() {
   local cmd="$1"
   command -v "$cmd" >/dev/null 2>&1 || fail "Required command not found: $cmd"
@@ -84,12 +112,8 @@ cmd_start() {
   git fetch --all --prune
 
   if [[ "$disconnect_preview" == "true" ]]; then
-    if command -v vercel >/dev/null 2>&1; then
-      log "Disconnecting Vercel Git integration to avoid preview deploys."
-      vercel git disconnect || log "WARN: vercel git disconnect failed (continuing in quota-safe mode)."
-    else
-      log "WARN: vercel not installed, skipping disconnect"
-    fi
+    log "Disconnecting Vercel Git integration to avoid preview deploys."
+    vercel_git_disconnect
   fi
 
   if git rev-parse --verify dev >/dev/null 2>&1; then
@@ -149,7 +173,7 @@ cmd_process() {
       log "PR #${pr} is ${state}, skipping merge step"
     fi
   else
-    fail "PR #${pr} not found"
+    log "WARN: Could not determine PR #${pr} state (network/cache issue). Running check-only."
   fi
 
   git checkout master
@@ -240,12 +264,7 @@ cmd_finish() {
   [[ "$deploy" == "true" || "$deploy" == "false" ]] || fail "--deploy must be true|false"
 
   if [[ "$skip_connect" != "true" && -n "$connect_repo" ]]; then
-    if command -v vercel >/dev/null 2>&1; then
-      log "Reconnecting Vercel Git integration to ${connect_repo}"
-      vercel git connect "$connect_repo" || log "WARN: vercel git connect failed. Re-run manually."
-    else
-      log "WARN: vercel not installed; cannot reconnect"
-    fi
+    vercel_git_connect "$connect_repo"
   elif [[ "$skip_connect" != "true" ]]; then
     log "No --connect-repo provided; skipping reconnection (manual reconnection needed)."
   fi

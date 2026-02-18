@@ -89,12 +89,12 @@ verify_readme_and_docs() {
   grep -q "ticket-97-production-readiness-evidence-continuity-wrapup.sh" "$README_FILE" || fail "README missing Ticket #97 script command"
   grep -q "### Ticket #97" "$README_FILE" || fail "README continuity missing ### Ticket #97"
 
-  local line_97 line_97
-  line_97="$(grep -n '^### Ticket #88 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  local line_88 line_97
+  line_88="$(grep -n '^### Ticket #88 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   line_97="$(grep -n '^### Ticket #97 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_97" ]] || fail "README missing Ticket #88 anchor"
+  [[ -n "$line_88" ]] || fail "README missing Ticket #88 anchor"
   [[ -n "$line_97" ]] || fail "README missing Ticket #97 anchor"
-  (( line_97 > line_97 )) || fail "README continuity order invalid: Ticket #97 must follow Ticket #88"
+  (( line_97 > line_88 )) || fail "README continuity order invalid: Ticket #97 must follow Ticket #88"
 }
 
 require_gh_api
