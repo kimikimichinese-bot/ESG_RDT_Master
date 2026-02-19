@@ -10069,8 +10069,6 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-739-production-readiness-evidence-continuity-wrapup.sh
 ```
 
-<<<<<<< Updated upstream
-=======
 
 ### Ticket #740 production readiness evidence continuity wrapup
 
@@ -10097,11 +10095,16 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-741-production-readiness-evidence-continuity-wrapup.sh
 ```
 
->>>>>>> Stashed changes
 
 ### Ticket #743 production readiness evidence continuity wrapup
 
 - Scope: deterministic one-command wrapup continuity validation from Ticket #742 to Ticket #743.
 
-
+```bash
+TICKET743_RELEASE_TAG="v1.0.6" \
+TICKET743_EXPECTED_COMMIT="v1.0.6^{}" \
+TICKET743_LOG_DEPTH=4 \
+PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+./scripts/ticket-743-production-readiness-evidence-continuity-wrapup.sh
+```
 

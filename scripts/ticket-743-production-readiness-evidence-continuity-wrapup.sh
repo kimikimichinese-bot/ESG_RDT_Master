@@ -8,7 +8,7 @@ readonly WORKFLOW_LINT_FALLBACK="${TICKET743_WORKFLOW_LINT_FALLBACK:-lint-build-
 readonly RELEASE_TAG_INPUT="${TICKET743_RELEASE_TAG:-v1.0.6}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET743_EXPECTED_COMMIT:-${RELEASE_TAG_INPUT}}"
 readonly LOG_DEPTH="${TICKET743_LOG_DEPTH:-4}"
-readonly DOCS_FILE="${TICKET743_DOCS_FILE:-docs/tickets/TICKET-200.md}"
+readonly DOCS_FILE="${TICKET743_DOCS_FILE:-docs/tickets/TICKET-743.md}"
 readonly README_FILE="${TICKET743_README_FILE:-README.md}"
 readonly OUTFILE="${TICKET743_OUTFILE:-/tmp/ticket-743-production-readiness-evidence-continuity-wrapup.md}"
 
