@@ -7,22 +7,34 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter @esg-rdt/web dev",
+    "dev": "bun run dev:web",
+    "dev:web": "bash ./scripts/dev-web.sh",
+    "dev:api": "bash ./scripts/dev-api.sh",
+    "dev:ports:clean": "bash ./scripts/kill-dev-ports.sh",
+    "dev:worker": "bash ./scripts/dev-worker.sh",
+    "dev:local": "bash ./scripts/dev-local.sh",
     "build": "bun run workspace:build",
     "start": "bun run --filter @esg-rdt/web start",
     "lint": "bun run workspace:lint",
     "typecheck": "bun run --filter @esg-rdt/web typecheck",
     "test": "bun run --filter @esg-rdt/web test --if-present",
+    "test:functional": "bash ./scripts/full-functional-check.sh",
     "workspace:build": "bun run --filter @esg-rdt/web build",
     "workspace:lint": "bun run --filter @esg-rdt/web lint",
     "db:generate": "bun run --filter @esg-rdt/db generate",
     "db:check": "bun run --filter @esg-rdt/db check",
+    "pre-vercel": "bash ./scripts/pre-vercel-check.sh",
+    "check:pre-vercel": "bash ./scripts/pre-vercel-check.sh",
+    "verify:matrix": "bash ./scripts/pre-vercel-check.sh",
+    "verify:matrix:env": "bash ./scripts/pre-vercel-check.sh --with-env .env.vercel.local",
+    "verify:matrix:offline": "FULL_FUNCTIONAL_OFFLINE=1 bash ./scripts/pre-vercel-check.sh",
+    "verify:matrix:env-offline": "FULL_FUNCTIONAL_OFFLINE=1 bash ./scripts/pre-vercel-check.sh --with-env .env.vercel.local",
     "db:migrate:deploy": "bun run --filter @esg-rdt/db migrate:deploy",
     "db:status": "bun run --filter @esg-rdt/db status",
     "db:push": "bun run --filter @esg-rdt/db push"
   },
   "dependencies": {
-    "next": "14.2.3",
+    "next": "^14.2.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }

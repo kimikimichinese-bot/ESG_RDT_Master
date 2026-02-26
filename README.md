@@ -204,6 +204,21 @@ Use Neon’s Vercel integration to:
   - `vercel env pull .env.local`
 - Local dev runs against the same Neon branch (Dev) or an explicit personal branch.
 
+### 4.5 Local launch checklist (this workspace)
+
+- Clear stale local ports (optional if you are already sure they are free):
+  - `bun run dev:ports:clean`
+- Start UI + API together:
+  - `bun run dev:local`
+- Or start services individually:
+  - API: `bun run dev:api`
+  - Web: `bun run dev:web`
+- Quick endpoint checks (expected 200):
+  - `curl -sfS http://localhost:3001/health`
+  - `curl -sfS http://localhost:3000/api/ready`
+  - `curl -sfS http://localhost:3000/api/v1/health`
+  - `curl -sfS http://localhost:3000/api/v1/status`
+
 ---
 
 ## 5. Data Model & Multi‑Tenancy
