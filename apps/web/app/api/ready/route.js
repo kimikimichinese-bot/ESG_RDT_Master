@@ -1,10 +1,10 @@
-export function GET() {
-  return Response.json({
-    status: "ready",
-    service: "esg-rdt-master-web",
-    timestamp: new Date().toISOString(),
-    checks: {
-      web: "ok",
-    },
-  });
+import { proxyDiagnosticGet } from "../_lib/diagnostics-proxy.js";
+
+export async function GET(request) {
+  return proxyDiagnosticGet(
+    request,
+    "/ready",
+    { web: "warn" },
+    "/ready",
+  );
 }
