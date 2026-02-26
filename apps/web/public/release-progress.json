@@ -1,0 +1,78 @@
+{
+  "service": "esg-rdt-master-web",
+  "releaseStatus": "degraded",
+  "productSignals": [
+    {
+      "label": "Web shell",
+      "status": "implemented",
+      "detail": "Diagnostic UI shell and endpoint cards are active.",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-01T00:00:00.000Z"
+    },
+    {
+      "label": "API contract",
+      "status": "basic",
+      "detail": "Core endpoints and shared check schema are wired with basic health checks.",
+      "addedAt": "2026-02-24T09:00:00.000Z",
+      "updatedAt": "2026-02-24T09:00:00.000Z"
+    },
+    {
+      "label": "Worker loop",
+      "status": "scaffolded",
+      "detail": "Worker cycle execution exists, with overlap protection and structured logs.",
+      "addedAt": "2026-02-24T09:05:00.000Z",
+      "updatedAt": "2026-02-24T09:05:00.000Z"
+    }
+  ],
+  "progress": [
+    {
+      "area": "UI + UX",
+      "done": 25,
+      "buildPriority": 3,
+      "buildLabel": "Refine dashboard UX polish",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-20T08:00:00.000Z"
+    },
+    {
+      "area": "API + health checks",
+      "done": 45,
+      "buildPriority": 1,
+      "buildLabel": "Stabilize API + health checks",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-22T08:00:00.000Z"
+    },
+    {
+      "area": "Data model",
+      "done": 55,
+      "buildPriority": 2,
+      "buildLabel": "Finish data model hardening",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-21T10:00:00.000Z"
+    },
+    {
+      "area": "Auth + RBAC",
+      "done": 12,
+      "buildPriority": 1,
+      "buildLabel": "Complete auth + RBAC delivery",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-22T07:00:00.000Z"
+    }
+  ],
+  "quickActions": [
+    {
+      "text": "Open /api/ready and /api/v1/health in parallel.",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-01T00:00:00.000Z"
+    },
+    {
+      "text": "Wire tenant auth middleware before moving to business routes.",
+      "addedAt": "2026-02-01T00:00:00.000Z",
+      "updatedAt": "2026-02-22T00:00:00.000Z"
+    },
+    {
+      "text": "Keep this file updated for release snapshots without code changes.",
+      "addedAt": "2026-01-15T00:00:00.000Z",
+      "updatedAt": "2026-01-15T00:00:00.000Z"
+    }
+  ]
+}
