@@ -3,6 +3,8 @@ import { randomUUID } from "node:crypto";
 const SERVICE_NAME = "esg-rdt-master-api";
 const DEFAULT_API_BASE = null;
 const DEFAULT_PROXY_TIMEOUT_MS = 4_000;
+const DEFAULT_MISCONFIG_STATUS = 200;
+const MISCONFIG_STATUS = Number.parseInt(process.env.DIAGNOSTICS_PROXY_MISCONFIG_STATUS ?? "", 10);
 
 const parseTimeoutMs = () => {
   const configuredTimeout = process.env.DIAGNOSTICS_PROXY_TIMEOUT_MS ?? "";
@@ -26,6 +28,14 @@ const parseApiBase = () => {
   }
 
   return configured.trim();
+};
+
+const parseMisconfigStatus = () => {
+  if (Number.isInteger(MISCONFIG_STATUS) && MISCONFIG_STATUS > 0) {
+    return MISCONFIG_STATUS;
+  }
+
+  return DEFAULT_MISCONFIG_STATUS;
 };
 
 const parseDiagnosticTenantId = () => {
@@ -154,7 +164,7 @@ export const proxyDiagnosticGet = async (request, targetPath, fallbackChecks, re
         new Error("Missing upstream API base URL for diagnostics proxy"),
         requestPathLabel,
       ),
-      { status: 503 },
+      { status: parseMisconfigStatus() },
     );
   }
 
