@@ -9,3 +9,6 @@ bun.lockb
 .env.production
 
 .env.vercel.local
+
+# test artifacts
+apps/web/test-results/
