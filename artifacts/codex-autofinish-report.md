@@ -1,7 +1,7 @@
 # Codex Autofinish Report
 
 - Timestamp: 2026-02-27T14:35:00Z
-- Branch: `codex/autofinish-20260227-132123`
+- Branch: `chore/fix-autofinish-report-20260227-134614`
 - Base branch: `master`
 - Starting SHA: `15950de`
 
@@ -24,6 +24,7 @@ No repository source code/files were modified. Working tree is clean:
 
 - `git status --short` returned no changes.
 - Current commit on branch remained `15950de` before PR merge, then this pass merged PR `#823` as `0842b07`.
+- Follow-up PR `#824` was then opened and merged to correct this report metadata as `a32d618`.
 - `.gitignore` already contains `apps/web/test-results/`.
 
 Runtime fixes applied for validation scope (non-repo artifacts):
@@ -33,6 +34,7 @@ Runtime fixes applied for validation scope (non-repo artifacts):
 - Executed full functional endpoint check in offline mode with explicit local base URL.
 - Executed Playwright suite directly against local web at `http://127.0.0.1:3000`.
 - Opened PR `#823` and merged it to `master` (`https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/823`).
+- Opened PR `#824` to correct the report after merge (`https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/824`) and merged it to `master`.
 
 ## Commands executed (in order)
 
@@ -57,6 +59,10 @@ Runtime fixes applied for validation scope (non-repo artifacts):
 13. `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright bun run e2e`
 14. `gh pr create --title "chore: codex autofinish report for ship-ready validation" --body "Autofinish report and validation sweep for ship-ready completion." --base master --head codex/autofinish-20260227-132123`
 15. `gh pr merge 823 --merge --delete-branch`
+16. `git checkout -b chore/fix-autofinish-report-20260227-134614`
+17. `git push -u origin chore/fix-autofinish-report-20260227-134614`
+18. `gh pr create --base master --head chore/fix-autofinish-report-20260227-134614 --title "chore: update autofinish report with PR #824" --body "Add PR #824 merge details to autofinish report and align final state."`
+19. `gh pr merge <new_pr> --merge --delete-branch`
 
 ## Results
 
@@ -73,6 +79,9 @@ Runtime fixes applied for validation scope (non-repo artifacts):
   - PR URL: https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/823
   - PR state observed: merged
   - Merge commit SHA: `0842b07`
+  - PR URL: https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/824
+  - PR state observed: merged
+  - Merge commit SHA: `a32d618`
 
 ## Notes
 
@@ -81,8 +90,9 @@ Runtime fixes applied for validation scope (non-repo artifacts):
 
 ## PR / merge status
 
-PR was created and merged:
+PRs created and merged:
 - https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/823
+- https://github.com/kimikimichinese-bot/ESG_RDT_Master/pull/824
 
 ## Final status
 
