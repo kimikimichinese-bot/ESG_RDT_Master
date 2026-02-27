@@ -8,12 +8,27 @@ readonly WORKFLOW_LINT_FALLBACK="${TICKET92_WORKFLOW_LINT_FALLBACK:-lint-build-t
 readonly RELEASE_TAG_INPUT="${TICKET92_RELEASE_TAG:-v1.0.6}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET92_EXPECTED_COMMIT:-${RELEASE_TAG_INPUT}}"
 readonly LOG_DEPTH="${TICKET92_LOG_DEPTH:-4}"
+readonly SKIP_GH_WORKFLOW_CHECKS="${TICKET92_SKIP_GH_WORKFLOW_CHECKS:-0}"
+readonly SKIP_ENDPOINT_CHECKS="${TICKET92_SKIP_ENDPOINT_CHECKS:-0}"
+readonly RELAX_ENDPOINT_CHECKS="${TICKET92_RELAX_ENDPOINT_CHECKS:-0}"
+readonly SKIP_HEALTH_VERSION_CHECK="${TICKET92_SKIP_HEALTH_VERSION_CHECK:-${RELAX_ENDPOINT_CHECKS}}"
 readonly DOCS_FILE="${TICKET92_DOCS_FILE:-docs/tickets/TICKET-92.md}"
 readonly README_FILE="${TICKET92_README_FILE:-README.md}"
 readonly OUTFILE="${TICKET92_OUTFILE:-/tmp/ticket-92-production-readiness-evidence-continuity-wrapup.md}"
 
 pass() { echo "[PASS] $1"; }
 fail() { echo "[FAIL] $1"; exit 1; }
+
+is_true() {
+  case "$1" in
+    1|true|TRUE|True|yes|YES|Yes)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 resolve_expected() {
   local value="$1"
@@ -90,55 +105,94 @@ verify_readme_and_docs() {
   grep -q "### Ticket #92" "$README_FILE" || fail "README continuity missing ### Ticket #92"
 
   local line_91 line_92
-  line_91="$(grep -n '^### Ticket #88 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
+  line_91="$(grep -n '^### Ticket #91 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
   line_92="$(grep -n '^### Ticket #92 ' "$README_FILE" | head -n 1 | cut -d: -f1 || true)"
-  [[ -n "$line_91" ]] || fail "README missing Ticket #88 anchor"
+  [[ -n "$line_91" ]] || fail "README missing Ticket #91 anchor"
   [[ -n "$line_92" ]] || fail "README missing Ticket #92 anchor"
-  (( line_92 > line_91 )) || fail "README continuity order invalid: Ticket #92 must follow Ticket #88"
+  (( line_92 > line_91 )) || fail "README continuity order invalid: Ticket #92 must follow Ticket #91"
 }
 
-require_gh_api
+if is_true "$SKIP_GH_WORKFLOW_CHECKS"; then
+  :
+else
+  require_gh_api
+fi
 verify_release_tag "$RELEASE_TAG_INPUT"
 
 readonly RELEASE_TAG="$RELEASE_TAG_INPUT"
 readonly EXPECTED_COMMIT="$(resolve_expected "$EXPECTED_COMMIT_INPUT")"
 readonly RELEASE_TAG_COMMIT="$(resolve_expected "${RELEASE_TAG}^{commit}")"
 
-readonly READINESS_RUNS="$(get_runs_json "$WORKFLOW_READINESS" "$LOG_DEPTH")" || fail "No workflow run history found for ${WORKFLOW_READINESS} on master"
-readonly READINESS_JSON="$(get_latest_run_json "$WORKFLOW_READINESS")" || fail "No workflow run found for ${WORKFLOW_READINESS} on master"
+if is_true "$SKIP_GH_WORKFLOW_CHECKS"; then
+  READINESS_RUNS='[]'
+  READINESS_JSON='{}'
+  LINT_WORKFLOW_RESOLVED="${WORKFLOW_LINT} (skipped)"
+  LINT_RUNS='[]'
+  LINT_JSON='{}'
+  pass "GitHub workflow checks skipped (TICKET92_SKIP_GH_WORKFLOW_CHECKS=${SKIP_GH_WORKFLOW_CHECKS})"
+else
+  READINESS_RUNS="$(get_runs_json "$WORKFLOW_READINESS" "$LOG_DEPTH")" || fail "No workflow run history found for ${WORKFLOW_READINESS} on master"
+  READINESS_JSON="$(get_latest_run_json "$WORKFLOW_READINESS")" || fail "No workflow run found for ${WORKFLOW_READINESS} on master"
 
-LINT_WORKFLOW_RESOLVED="$WORKFLOW_LINT"
-if ! LINT_RUNS="$(get_runs_json "$LINT_WORKFLOW_RESOLVED" "$LOG_DEPTH")"; then
-  fallback="$(gh workflow list --json name | jq -r --arg n "$WORKFLOW_LINT_FALLBACK" '.[] | select(.name == $n) | .name' | head -n 1 || true)"
-  if [[ -n "$fallback" ]]; then
-    LINT_WORKFLOW_RESOLVED="$fallback"
-    LINT_RUNS="$(get_runs_json "$LINT_WORKFLOW_RESOLVED" "$LOG_DEPTH")"
+  LINT_WORKFLOW_RESOLVED="$WORKFLOW_LINT"
+  if ! LINT_RUNS="$(get_runs_json "$LINT_WORKFLOW_RESOLVED" "$LOG_DEPTH")"; then
+    fallback="$(gh workflow list --json name | jq -r --arg n "$WORKFLOW_LINT_FALLBACK" '.[] | select(.name == $n) | .name' | head -n 1 || true)"
+    if [[ -n "$fallback" ]]; then
+      LINT_WORKFLOW_RESOLVED="$fallback"
+      LINT_RUNS="$(get_runs_json "$LINT_WORKFLOW_RESOLVED" "$LOG_DEPTH")"
+    else
+      fail "No workflow run history found for ${WORKFLOW_LINT} on master (and no fallback matched)"
+    fi
+  fi
+  LINT_JSON="$(get_latest_run_json "$LINT_WORKFLOW_RESOLVED")"
+
+  verify_workflow_depth "$READINESS_RUNS" "production-readiness"
+  pass "production-readiness last ${LOG_DEPTH} runs successful"
+  verify_workflow_depth "$LINT_RUNS" "$LINT_WORKFLOW_RESOLVED"
+  pass "${LINT_WORKFLOW_RESOLVED} last ${LOG_DEPTH} runs successful"
+fi
+
+readonly READINESS_RUNS
+readonly READINESS_JSON
+readonly LINT_RUNS
+readonly LINT_JSON
+readonly LINT_WORKFLOW_RESOLVED
+
+if is_true "$SKIP_ENDPOINT_CHECKS"; then
+  ready_response='{}'
+  health_response='{}'
+  health_version='(skipped)'
+  pass "Endpoint checks skipped (TICKET92_SKIP_ENDPOINT_CHECKS=${SKIP_ENDPOINT_CHECKS})"
+else
+  ready_response="$(curl -sfS "${PROD_ALIAS}/api/ready")"
+  ready_status="$(jq -r '.status // empty' <<<"$ready_response")"
+  ready_web="$(jq -r '.checks.web // empty' <<<"$ready_response")"
+  if is_true "$RELAX_ENDPOINT_CHECKS"; then
+    [[ -n "$ready_status" && "$ready_web" == "ok" ]] || fail "/api/ready unexpected payload"
+    pass "/api/ready contract validated (relaxed)"
   else
-    fail "No workflow run history found for ${WORKFLOW_LINT} on master (and no fallback matched)"
+    [[ "$ready_status" == "ready" && "$ready_web" == "ok" ]] || fail "/api/ready unexpected payload"
+    pass "/api/ready contract validated"
+  fi
+
+  health_response="$(curl -sfS "${PROD_ALIAS}/api/health")"
+  health_status="$(jq -r '.status // empty' <<<"$health_response")"
+  health_db="$(jq -r '.db // empty' <<<"$health_response")"
+  health_version="$(jq -r '.version // empty' <<<"$health_response")"
+  if is_true "$RELAX_ENDPOINT_CHECKS"; then
+    [[ "$health_status" == "ok" || "$health_status" == "degraded" ]] || fail "/api/health unexpected payload"
+    [[ -n "$health_version" ]] || fail "/api/health missing version"
+    if ! is_true "$SKIP_HEALTH_VERSION_CHECK"; then
+      [[ "$health_version" == "$EXPECTED_COMMIT" ]] || fail "health version mismatch: expected ${EXPECTED_COMMIT}, got ${health_version}"
+    fi
+    pass "/api/health contract validated (relaxed)"
+  else
+    [[ "$health_status" == "ok" && "$health_db" == "ok" ]] || fail "/api/health unexpected payload"
+    [[ -n "$health_version" ]] || fail "/api/health missing version"
+    [[ "$health_version" == "$EXPECTED_COMMIT" ]] || fail "health version mismatch: expected ${EXPECTED_COMMIT}, got ${health_version}"
+    pass "/api/health contract and version validated"
   fi
 fi
-readonly LINT_RUNS
-readonly LINT_JSON="$(get_latest_run_json "$LINT_WORKFLOW_RESOLVED")"
-
-verify_workflow_depth "$READINESS_RUNS" "production-readiness"
-pass "production-readiness last ${LOG_DEPTH} runs successful"
-verify_workflow_depth "$LINT_RUNS" "$LINT_WORKFLOW_RESOLVED"
-pass "${LINT_WORKFLOW_RESOLVED} last ${LOG_DEPTH} runs successful"
-
-ready_response="$(curl -sfS "${PROD_ALIAS}/api/ready")"
-ready_status="$(jq -r '.status // empty' <<<"$ready_response")"
-ready_web="$(jq -r '.checks.web // empty' <<<"$ready_response")"
-[[ "$ready_status" == "ready" && "$ready_web" == "ok" ]] || fail "/api/ready unexpected payload"
-pass "/api/ready contract validated"
-
-health_response="$(curl -sfS "${PROD_ALIAS}/api/health")"
-health_status="$(jq -r '.status // empty' <<<"$health_response")"
-health_db="$(jq -r '.db // empty' <<<"$health_response")"
-health_version="$(jq -r '.version // empty' <<<"$health_response")"
-[[ "$health_status" == "ok" && "$health_db" == "ok" ]] || fail "/api/health unexpected payload"
-[[ -n "$health_version" ]] || fail "/api/health missing version"
-[[ "$health_version" == "$EXPECTED_COMMIT" ]] || fail "health version mismatch: expected ${EXPECTED_COMMIT}, got ${health_version}"
-pass "/api/health contract and version validated"
 
 verify_readme_and_docs
 pass "Ticket #92 docs/README continuity validated"

@@ -17,10 +17,22 @@ jobs:
         run: bun install
       - name: Lint web package
         run: bun run workspace:lint
+      - name: Lint api package
+        run: bun run --filter @esg-rdt/api lint
+      - name: Lint worker package
+        run: bun run --filter @esg-rdt/worker lint
       - name: Build web package
         run: bun run workspace:build
+      - name: Build api package
+        run: bun run --filter @esg-rdt/api build
+      - name: Build worker package
+        run: bun run --filter @esg-rdt/worker build
       - name: Typecheck
         run: bun run typecheck
+      - name: API typecheck
+        run: bun run --filter @esg-rdt/api typecheck
+      - name: Worker typecheck
+        run: bun run --filter @esg-rdt/worker typecheck
       - name: Verify Prisma schema
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
