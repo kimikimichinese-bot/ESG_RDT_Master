@@ -1,10 +1,7 @@
-import { proxyDiagnosticGet } from "../../_lib/diagnostics-proxy.js";
+import { handleV1Health } from "../_lib/local-api.js";
+
+export const runtime = "nodejs";
 
 export async function GET(request) {
-  return proxyDiagnosticGet(
-    request,
-    "/v1/health",
-    { web: "warn", db: "down" },
-    "/v1/health",
-  );
+  return handleV1Health(request);
 }

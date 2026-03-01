@@ -1,0 +1,7 @@
+import { handleJobsList } from "../_lib/local-api.js";
+
+export const runtime = "nodejs";
+
+export async function GET(request) {
+  return handleJobsList(request);
+}

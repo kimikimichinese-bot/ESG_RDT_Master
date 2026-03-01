@@ -183,8 +183,13 @@ Use Neon’s Vercel integration to:
 - `DATABASE_URL_UNPOOLED` (Neon unpooled; recommended for migrations)
 
 **Auth**
-- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`) for user session/auth flows
 - `AUTH_TRUST_HOST=true` (if required by your auth stack)
+
+**Job API auth (separate domain)**
+- `JOB_API_TOKEN`: required secret for `/v1/jobs*` endpoints.
+- Keep `/v1/jobs*` auth decoupled from `AUTH_SECRET`; this is now enforced independently.
+- In production checks this token is used to validate authenticated trigger/list/detail/rate-limit behavior.
 
 **App URLs**
 - `NEXT_PUBLIC_WEB_URL`
@@ -408,6 +413,7 @@ A `CalculationRun` is immutable:
   - DB layer (indexes + constraints)
 - File access checks (Blob URLs must be protected or signed)
 - Rate limiting (optional but recommended)
+  - `/v1/jobs*` endpoints have a separate token policy using `JOB_API_TOKEN`
 - Audit log (append-only, chain-hashed)
 
 ### 11.3 Enterprise controls (V1/P2)
@@ -572,6 +578,7 @@ NEXT_PUBLIC_API_URL="http://localhost:3001"
 
 # Auth
 AUTH_SECRET="__SET_ME__"
+JOB_API_TOKEN="__OPTIONAL_JOB_API_TOKEN__"
 
 # Blob (if used)
 BLOB_READ_WRITE_TOKEN="__SET_ME__"
@@ -598,7 +605,7 @@ UPSTASH_REDIS_REST_TOKEN="__SET_ME__"
 To keep branch protection and CI gates reproducible:
 
 1. Ensure this branch is up to date and all required checks are green.
-2. Confirm the PR status/check summary on GitHub (`lint-build-test`, `Neon/Postgres + env readiness`).
+2. Confirm the PR status/check summary on GitHub (`lint-build-test`, `full-functional-evidence`, `Neon/Postgres + env readiness`, `Full-functional evidence checks`).
 3. Merge from PR using:
    - `gh pr merge <PR_NUMBER> --merge --delete-branch`
 
@@ -620,6 +627,8 @@ For production-readiness gating on `ESG_RDT_Master` (`master`):
 - Required status checks (exact names):
   - `Neon/Postgres + env readiness`
   - `lint-build-test`
+  - `full-functional-evidence`
+  - `Full-functional evidence checks`
 - Branch rules:
   - `master` is protected
   - Strict mode enabled
@@ -645,7 +654,9 @@ Use this for each production-ready push on `master`:
    - `gh workflow run production-readiness.yml -f run_migrations=true --ref master`
 4. Confirm required checks on `master` are green:
    - `Neon/Postgres + env readiness`
+   - `Full-functional evidence checks`
    - `lint-build-test`
+   - `full-functional-evidence`
 5. Merge only when checks are green, then verify deployment:
    - `./scripts/context-check.sh`
    - `vercel ls esg-rdt-master`
@@ -942,6 +953,8 @@ Use this rule:
 3. Require required checks:
    - `Neon/Postgres + env readiness`
    - `lint-build-test`
+   - `Full-functional evidence checks`
+   - `full-functional-evidence`
 4. Require review + merge via PR UI/CLI:
    - `gh pr merge <PR_NUMBER> --merge --delete-branch`
 5. Run one-command full production check only on merged state.

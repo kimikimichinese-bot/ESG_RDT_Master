@@ -1,119 +1,263 @@
-type WorkerResult = {
-  name: string;
-  status: "ok" | "warn";
-  detail: string;
+import { randomUUID } from "node:crypto";
+import { WorkerJobStore } from "@esg-rdt/db";
+
+type WorkerLogEvent = {
+  service: "esg-rdt-master-worker";
+  event: string;
+  version: string;
+  status: "ok" | "warn" | "fail" | "info";
+  message?: string;
+  eventRunId?: string;
+  run?: number;
+  runId?: string;
+  startedAt?: string;
+  cycleStart?: string;
+  finishedAt?: string;
+  workerId: string;
+  durationMs?: number;
 };
 
-type WorkerState = {
+type JobContext = {
+  eventRunId: string;
+  jobType: string;
   startedAt: string;
-  lastRunAt: string | null;
-  runs: number;
-  failures: number;
-  skippedCycles: number;
 };
 
-const DEFAULT_SCHEDULE = "*/5 * * * *";
 const VERSION = process.env.WORKER_VERSION ?? "0.1.0";
+const WORKER_ID = process.env.WORKER_ID ?? `worker-${randomUUID().slice(0, 8)}`;
+const DEFAULT_SCHEDULE = "*/5 * * * *";
+
+const schedule = process.env.WORKER_SCHEDULE_CRON ?? DEFAULT_SCHEDULE;
+const envIntervalMs = process.env.WORKER_INTERVAL_MS;
+const envMaxParallel = process.env.WORKER_MAX_PARALLEL;
+const envStepDelay = process.env.WORKER_STEP_DELAY_MS;
+const envProgressSteps = process.env.WORKER_PROGRESS_STEPS;
+const maxParallel = Number.parseInt(envMaxParallel ?? "1", 10);
+const progressStepDelayMs = Number.parseInt(envStepDelay ?? "650", 10);
+const progressSteps = Number.parseInt(envProgressSteps ?? "8", 10);
 
 const parseCronIntervalMinutes = (expression: string): number | null => {
   const parts = expression.trim().split(/\s+/);
-  if (parts.length !== 5) return null;
+  if (parts.length !== 5) {
+    return null;
+  }
+
   const minuteToken = parts[0];
-  if (minuteToken === "*") return 1;
+  if (minuteToken === "*") {
+    return 1;
+  }
+
   const everyMatch = /^\*\/(\d+)$/.exec(minuteToken);
-  if (!everyMatch) return null;
+  if (!everyMatch) {
+    return null;
+  }
+
   const every = Number(everyMatch[1]);
   return Number.isFinite(every) && every > 0 ? every : null;
 };
 
 const resolveIntervalMs = (): number => {
-  const override = process.env.WORKER_INTERVAL_MS;
-  if (override) {
-    const numeric = Number(override);
-    if (Number.isFinite(numeric) && numeric > 0) return Math.floor(numeric);
+  if (envIntervalMs) {
+    const numeric = Number(envIntervalMs);
+    if (Number.isFinite(numeric) && numeric > 0) {
+      return Math.floor(numeric);
+    }
   }
 
-  const cron = process.env.WORKER_SCHEDULE_CRON ?? DEFAULT_SCHEDULE;
-  const minutes = parseCronIntervalMinutes(cron);
-  if (!minutes) return 5 * 60 * 1000;
-  return minutes * 60 * 1000;
+  const minutes = parseCronIntervalMinutes(schedule);
+  if (!minutes) {
+    return 5 * 60 * 1000;
+  }
+
+  return Math.max(1, Math.floor(minutes)) * 60 * 1000;
 };
 
-const safeNow = () => new Date().toISOString();
+const now = () => new Date().toISOString();
+const delayMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const state: WorkerState = {
-  startedAt: safeNow(),
-  lastRunAt: null,
-  runs: 0,
-  failures: 0,
-  skippedCycles: 0,
+const safeSteps = Number.isFinite(progressSteps) ? Math.min(20, Math.max(2, Math.floor(progressSteps))) : 8;
+const safeStepDelay = Number.isFinite(progressStepDelayMs) ? Math.max(150, Math.floor(progressStepDelayMs)) : 650;
+const workerStateStore = new WorkerJobStore();
+
+const buildLog = (payload: WorkerLogEvent) => JSON.stringify(payload);
+
+const log = (payload: WorkerLogEvent) => {
+  console.log(buildLog(payload));
 };
 
-const checkEventStore = async (): Promise<WorkerResult> => {
-  await Promise.resolve();
-  return {
-    name: "event-store",
-    status: "warn",
-    detail: "Not wired to persistence yet; this is a no-op readiness path.",
+const clamp = (value: number) => Math.max(0, Math.min(100, Math.floor(value)));
+
+const computeSimulatedMessage = (jobType: string, step: number, total: number) => {
+  if (jobType === "health") {
+    return `Collected health signal ${step} of ${total}`;
+  }
+
+  if (jobType === "status") {
+    return `Rebuilt status snapshot ${step} of ${total}`;
+  }
+
+  if (jobType === "tenant-sync") {
+    return `Synced tenant partition ${step} of ${total}`;
+  }
+
+  return `Running ${jobType} (${step}/${total})`;
+};
+
+const reportWorkerState = async (status: "idle" | "busy", activeJobId: string | null = null) => {
+  const nowTick = now();
+  const current = await workerStateStore.getWorkerState();
+  await workerStateStore.reportWorkerState({
+    workerId: WORKER_ID,
+    status,
+    processedJobs: current?.processedJobs ?? 0,
+    activeJobId,
+    lastHeartbeatAt: nowTick,
+    version: VERSION,
+  });
+};
+
+const buildJobResultPayload = (jobType: string, steps: number, context: JobContext) => ({
+  workerId: WORKER_ID,
+  steps,
+  startedAt: context.startedAt,
+  elapsedMs: Date.now() - Date.parse(context.startedAt),
+  runId: context.eventRunId,
+  jobType,
+});
+
+const runSimulatedJob = async (job: import("@esg-rdt/db").WorkerJob) => {
+  const context: JobContext = {
+    eventRunId: randomUUID(),
+    jobType: job.jobType,
+    startedAt: now(),
   };
+
+  for (let step = 1; step <= safeSteps; step += 1) {
+    const targetProgress = clamp((step / safeSteps) * 100);
+    await delayMs(safeStepDelay);
+
+    await workerStateStore.updateJobProgress(
+      job.id,
+      targetProgress,
+      computeSimulatedMessage(job.jobType, step, safeSteps),
+    );
+
+    await reportWorkerState("busy", job.id);
+    log({
+      service: "esg-rdt-master-worker",
+      event: "job_progress",
+      version: VERSION,
+      status: "info",
+      eventRunId: context.eventRunId,
+      runId: job.id,
+      workerId: WORKER_ID,
+      cycleStart: context.startedAt,
+      message: `job ${job.jobType} progress ${targetProgress}%`,
+    });
+  }
+
+  await workerStateStore.completeJob(job.id, buildJobResultPayload(job.jobType, safeSteps, context));
 };
 
-const checkCalculationEngine = async (): Promise<WorkerResult> => {
-  await Promise.resolve();
-  return {
-    name: "calculation-engine",
-    status: "warn",
-    detail: "Calculation jobs are defined but not yet implemented.",
-  };
+const runJob = async (job: import("@esg-rdt/db").WorkerJob, runId: string) => {
+  const startedAt = now();
+
+  try {
+    log({
+      service: "esg-rdt-master-worker",
+      event: "job_start",
+      version: VERSION,
+      status: "info",
+      eventRunId: runId,
+      runId: job.id,
+      workerId: WORKER_ID,
+      startedAt,
+      message: `starting job ${job.jobType}`,
+    });
+
+    await runSimulatedJob(job);
+
+    await reportWorkerState("idle", null);
+    log({
+      service: "esg-rdt-master-worker",
+      event: "job_complete",
+      version: VERSION,
+      status: "ok",
+      eventRunId: runId,
+      runId: job.id,
+      workerId: WORKER_ID,
+      finishedAt: now(),
+      message: `completed job ${job.id}`,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown worker error";
+    await workerStateStore.failJob(job.id, message);
+    await reportWorkerState("idle", null);
+    log({
+      service: "esg-rdt-master-worker",
+      event: "job_fail",
+      version: VERSION,
+      status: "fail",
+      eventRunId: runId,
+      runId: job.id,
+      workerId: WORKER_ID,
+      message,
+    });
+    throw error;
+  }
 };
 
 const runWorkerCycle = async () => {
-  const cycleStart = safeNow();
-  const runId = Math.random().toString(16).slice(2);
-  state.runs += 1;
-  state.lastRunAt = cycleStart;
+  const cycleStart = now();
+  const cycleId = randomUUID();
 
-  try {
-    const checks = await Promise.all([checkEventStore(), checkCalculationEngine()]);
-    const failed = checks.filter((result) => result.status !== "ok");
-    const status = failed.length === 0 ? "ok" : "warn";
+  if (maxParallel <= 0) {
+    log({
+      service: "esg-rdt-master-worker",
+      event: "cycle_skipped",
+      version: VERSION,
+      status: "warn",
+      runId: cycleId,
+      workerId: WORKER_ID,
+      message: "maxParallel is set to 0",
+    });
+    return;
+  }
 
-    console.log(
-      JSON.stringify({
-        service: "esg-rdt-master-worker",
-        event: "cycle_complete",
-        version: VERSION,
-        status,
-        runId,
-        run: state.runs,
-        startedAt: state.startedAt,
-        cycleStart,
-        checks,
-      }),
-    );
-  } catch (error) {
-    state.failures += 1;
-    const message = error instanceof Error ? error.message : "unknown error";
-    console.error(
-      JSON.stringify({
-        service: "esg-rdt-master-worker",
-        event: "cycle_failed",
-        version: VERSION,
-        status: "fail",
-        runId,
-        run: state.runs,
-        startedAt: state.startedAt,
-        cycleStart,
-        message,
-      }),
-    );
+  await reportWorkerState("idle", null);
+
+  const claimedJobs: Array<import("@esg-rdt/db").WorkerJob> = [];
+  for (let slot = 0; slot < maxParallel; slot += 1) {
+    const job = await workerStateStore.claimNextQueuedJob(WORKER_ID);
+    if (!job) {
+      break;
+    }
+    claimedJobs.push(job);
+  }
+
+  if (claimedJobs.length === 0) {
+    log({
+      service: "esg-rdt-master-worker",
+      event: "cycle_idle",
+      version: VERSION,
+      status: "info",
+      runId: cycleId,
+      workerId: WORKER_ID,
+      message: "no queued jobs",
+      cycleStart,
+    });
+    return;
+  }
+
+  for (const job of claimedJobs) {
+    await runJob(job, cycleId);
   }
 };
 
 const intervalMs = resolveIntervalMs();
-const schedule = process.env.WORKER_SCHEDULE_CRON ?? DEFAULT_SCHEDULE;
 let running = true;
 let cycleInFlight = false;
+let cycles = 0;
 
 console.log(
   JSON.stringify({
@@ -122,46 +266,83 @@ console.log(
     version: VERSION,
     schedule,
     intervalMs,
+    workerId: WORKER_ID,
+    steps: safeSteps,
+    stepDelayMs: safeStepDelay,
+    maxParallel,
   }),
 );
 
 const loop = async () => {
-  if (!running) return;
+  if (!running) {
+    return;
+  }
+
   if (cycleInFlight) {
-    state.skippedCycles += 1;
-    console.warn(
-      JSON.stringify({
-        event: "cycle_skipped",
-        service: "esg-rdt-master-worker",
-        version: VERSION,
-        schedule,
-        intervalMs,
-        reason: "previous_cycle_inflight",
-      }),
-    );
+    log({
+      service: "esg-rdt-master-worker",
+      event: "cycle_skipped",
+      version: VERSION,
+      status: "warn",
+      runId: randomUUID(),
+      workerId: WORKER_ID,
+      message: "previous cycle is still in flight",
+    });
     return;
   }
 
   cycleInFlight = true;
+  cycles += 1;
+  const cycleStart = now();
+
   try {
     await runWorkerCycle();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown error";
+    log({
+      service: "esg-rdt-master-worker",
+      event: "cycle_failed",
+      version: VERSION,
+      status: "fail",
+      runId: randomUUID(),
+      workerId: WORKER_ID,
+      message,
+    });
   } finally {
     cycleInFlight = false;
+    await reportWorkerState("idle", null);
+    await workerStateStore.cleanupCompletedJobs();
+
+    log({
+      service: "esg-rdt-master-worker",
+      event: "cycle_complete",
+      version: VERSION,
+      status: "ok",
+      runId: randomUUID(),
+      workerId: WORKER_ID,
+      message: `cycle complete (#${cycles})`,
+      cycleStart,
+    });
   }
 };
 
+void reportWorkerState("idle", null);
 loop();
 const timer = setInterval(loop, intervalMs);
 
 const shutdown = () => {
   running = false;
   clearInterval(timer);
-  console.log(JSON.stringify({
-    event: "worker_shutdown",
+  void reportWorkerState("idle", null);
+  log({
     service: "esg-rdt-master-worker",
+    event: "worker_shutdown",
     version: VERSION,
-    state,
-  }));
+    status: "info",
+    runId: randomUUID(),
+    workerId: WORKER_ID,
+    message: `shutdown after ${cycles} cycles`,
+  });
   process.exit(0);
 };
 
