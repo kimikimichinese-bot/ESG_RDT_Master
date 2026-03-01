@@ -499,16 +499,15 @@ export const ensureEnterpriseSchema = async () => {
       `;
 
       await sql`
-        UPDATE sites s
-        SET company_id = fallback_company.id
-        FROM LATERAL (
-          SELECT c.id
+        UPDATE sites
+        SET company_id = fallback_company.company_id
+        FROM (
+          SELECT DISTINCT ON (c.tenant_id) c.tenant_id, c.id AS company_id
           FROM companies c
-          WHERE c.tenant_id = s.tenant_id
-          ORDER BY c.is_holding DESC, c.created_at ASC
-          LIMIT 1
+          ORDER BY c.tenant_id, c.is_holding DESC, c.created_at ASC
         ) fallback_company
-        WHERE s.company_id IS NULL
+        WHERE sites.company_id IS NULL
+          AND fallback_company.tenant_id = sites.tenant_id
       `;
 
       await sql`ALTER TABLE sites ALTER COLUMN company_id SET NOT NULL`;
