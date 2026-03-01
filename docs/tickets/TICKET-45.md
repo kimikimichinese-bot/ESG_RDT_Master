@@ -23,6 +23,6 @@ Add one more deterministic one-command readiness continuity check focused on REA
 TICKET45_RELEASE_TAG="v1.0.6" \
 TICKET45_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET45_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-45-production-readiness-readme-lineage-check-v2.sh
 ```

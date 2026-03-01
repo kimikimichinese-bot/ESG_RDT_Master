@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
+readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-kimikimichineses-projects.vercel.app}"
 readonly TICKET4_TAG="${TICKET4_TAG:-v1.0.4}"
 readonly WORKFLOW_NAME="${TICKET4_WORKFLOW:-production-readiness}"
 readonly OUTFILE="${TICKET4_OUTFILE:-/tmp/release-ticket-4-signature.md}"

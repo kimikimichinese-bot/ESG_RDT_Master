@@ -22,6 +22,6 @@ Strengthen continuity checks across Ticket #24 and add an evidence hardening wra
 TICKET25_RELEASE_TAG="v1.0.6" \
 TICKET25_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET25_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-25-production-readiness-evidence-continuity.sh
 ```

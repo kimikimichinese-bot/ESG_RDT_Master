@@ -23,6 +23,6 @@ Add a deterministic one-command evidence chain handoff check to validate product
 TICKET37_RELEASE_TAG="v1.0.6" \
 TICKET37_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET37_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-37-production-readiness-evidence-chain-handoff.sh
 ```

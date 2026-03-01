@@ -23,6 +23,6 @@ Add one-command evidence wrap-up check focused on deterministic continuity valid
 TICKET248_RELEASE_TAG="v1.0.6" \
 TICKET248_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET248_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-248-production-readiness-evidence-continuity-wrapup.sh
 ```

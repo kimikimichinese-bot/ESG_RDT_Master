@@ -31,7 +31,7 @@ documentation trail in `README.md` stays coherent with release evidence requirem
 ```bash
 TICKET18_RELEASE_TAG="v1.0.6" \
 TICKET18_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-18-readme-audit.sh
 ```
 

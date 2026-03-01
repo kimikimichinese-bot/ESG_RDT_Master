@@ -23,6 +23,6 @@ Add one-command wrap-up readiness continuity validation focused on final sequenc
 TICKET52_RELEASE_TAG="v1.0.6" \
 TICKET52_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET52_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-52-production-readiness-continuity-wrapup.sh
 ```

@@ -23,6 +23,6 @@ Add a deterministic one-command evidence drift continuity check to validate prod
 TICKET39_RELEASE_TAG="v1.0.6" \
 TICKET39_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET39_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-39-production-readiness-evidence-drift-continuity.sh
 ```

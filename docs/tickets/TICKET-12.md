@@ -26,7 +26,7 @@ artifacts (workflow state + endpoint contracts + release/docs linkage) to suppor
 
 ```bash
 TICKET12_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-12-readiness-evidence-hardening.sh
 ```
 

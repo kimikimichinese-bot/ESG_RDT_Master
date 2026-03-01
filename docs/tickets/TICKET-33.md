@@ -23,6 +23,6 @@ Add a deterministic one-command evidence lifecycle check to validate production-
 TICKET33_RELEASE_TAG="v1.0.6" \
 TICKET33_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET33_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-33-production-readiness-evidence-lifecycle.sh
 ```

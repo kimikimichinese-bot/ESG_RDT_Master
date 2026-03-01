@@ -23,6 +23,6 @@ Add a deterministic one-command evidence lockdown check for production-readiness
 TICKET32_RELEASE_TAG="v1.0.6" \
 TICKET32_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET32_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-32-production-readiness-evidence-lockdown.sh
 ```

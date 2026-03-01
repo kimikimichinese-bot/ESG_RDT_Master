@@ -34,6 +34,6 @@ runbooks after each merge.
 TICKET22_RELEASE_TAG="v1.0.6" \
 TICKET22_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET22_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-22-production-readiness-docs-hygiene.sh
 ```

@@ -27,7 +27,7 @@ one-command route to validate docs + scripts + runtime checks before and after r
 
 ```bash
 TICKET10_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-10-readiness-docs-hardening.sh
 ```
 

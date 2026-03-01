@@ -21,6 +21,6 @@ Create a deterministic handoff block for operations and future agents to verify 
 
 ```bash
 TICKET6_EXPECTED="$(git rev-parse --short=8 v1.0.5^{})" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-6-production-handoff.sh
 ```

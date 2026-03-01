@@ -23,6 +23,6 @@ Add a deterministic one-command handoff continuity check to validate production-
 TICKET38_RELEASE_TAG="v1.0.6" \
 TICKET38_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET38_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-38-production-readiness-handoff-continuity.sh
 ```

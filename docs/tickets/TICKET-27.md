@@ -23,6 +23,6 @@ Add a deterministic one-command pre-merge check for docs continuity and operatio
 TICKET27_RELEASE_TAG="v1.0.6" \
 TICKET27_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET27_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-27-production-readiness-docs-hardening.sh
 ```

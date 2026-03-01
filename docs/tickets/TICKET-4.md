@@ -25,6 +25,6 @@ after production-ready merges, without altering application runtime or API contr
 
 ```bash
 TICKET4_TAG="v1.0.4" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-4-release-signature.sh
 ```

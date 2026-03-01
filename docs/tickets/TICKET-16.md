@@ -30,6 +30,6 @@ signature block while validating production readiness gating and endpoint contra
 ```bash
 TICKET16_RELEASE_TAG="v1.0.6" \
 TICKET16_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-16-release-log-evidence-format.sh
 ```

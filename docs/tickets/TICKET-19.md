@@ -34,7 +34,7 @@ ticket documentation and guarantees the runbook chain remains coherent.
 ```bash
 TICKET19_RELEASE_TAG="v1.0.6" \
 TICKET19_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-19-readme-continuity.sh
 ```
 

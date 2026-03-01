@@ -23,6 +23,6 @@ Add one-command evidence continuity check focused on deterministic continuity va
 TICKET54_RELEASE_TAG="v1.0.6" \
 TICKET54_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET54_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-54-production-readiness-evidence-continuity.sh
 ```

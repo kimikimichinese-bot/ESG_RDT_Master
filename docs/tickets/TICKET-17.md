@@ -32,6 +32,6 @@ and required operational checks used in release handoff.
 ```bash
 TICKET17_RELEASE_TAG="v1.0.6" \
 TICKET17_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-17-readiness-observability-log-checks.sh
 ```

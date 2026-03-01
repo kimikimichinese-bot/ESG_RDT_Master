@@ -29,6 +29,6 @@ emits a tiny evidence block suitable for handoff notes.
 ```bash
 TICKET14_RELEASE_TAG="v1.0.6" \
 TICKET14_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-14-production-readiness-release-log-compact.sh
 ```

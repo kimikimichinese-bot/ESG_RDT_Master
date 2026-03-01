@@ -23,6 +23,6 @@ Add one-command readiness continuity finalization check focused on final sequenc
 TICKET50_RELEASE_TAG="v1.0.6" \
 TICKET50_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET50_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-50-production-readiness-continuity-finalization.sh
 ```

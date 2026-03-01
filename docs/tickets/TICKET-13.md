@@ -30,6 +30,6 @@ handover.
 ```bash
 TICKET13_RELEASE_TAG="v1.0.6" \
 TICKET13_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-13-release-audit-hardening.sh
 ```

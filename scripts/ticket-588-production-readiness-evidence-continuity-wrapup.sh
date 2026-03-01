@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
+readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-kimikimichineses-projects.vercel.app}"
 readonly WORKFLOW_READINESS="${TICKET588_WORKFLOW_READINESS:-production-readiness}"
 readonly WORKFLOW_LINT="${TICKET588_WORKFLOW_LINT:-ci}"
 readonly WORKFLOW_LINT_FALLBACK="${TICKET588_WORKFLOW_LINT_FALLBACK:-lint-build-test}"

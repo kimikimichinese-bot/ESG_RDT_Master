@@ -23,6 +23,6 @@ Add a deterministic one-command readiness traceability check that validates post
 TICKET35_RELEASE_TAG="v1.0.6" \
 TICKET35_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET35_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-35-production-readiness-docs-traceability.sh
 ```

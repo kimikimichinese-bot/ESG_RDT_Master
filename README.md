@@ -675,8 +675,8 @@ For production-readiness gating on `ESG_RDT_Master` (`master`):
   - Admin enforcement enabled
 
 Health monitoring endpoints available on Vercel:
-- `https://esg-rdt-master-pi.vercel.app/api/ready`
-- `https://esg-rdt-master-pi.vercel.app/api/health`
+- `https://esg-rdt-master-kimikimichineses-projects.vercel.app/api/ready`
+- `https://esg-rdt-master-kimikimichineses-projects.vercel.app/api/health`
 
 ### Final Go-Live Checklist (Production)
 
@@ -699,22 +699,22 @@ Use this for each production-ready push on `master`:
 5. Merge only when checks are green, then verify deployment:
    - `./scripts/context-check.sh`
    - `vercel ls esg-rdt-master`
-   - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready`
-   - `curl -sfS https://esg-rdt-master-pi.vercel.app/api/health`
+   - `curl -sfS https://esg-rdt-master-kimikimichineses-projects.vercel.app/api/ready`
+   - `curl -sfS https://esg-rdt-master-kimikimichineses-projects.vercel.app/api/health`
 
 ### Uptime & alias rollout note (kimikimichinese-bot)
 
-- Primary production alias: `esg-rdt-master-pi.vercel.app`
+- Primary production alias: `esg-rdt-master-kimikimichineses-projects.vercel.app`
 - Latest known production deployment: `https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app`
 - Alias update pattern used during rollout: push → deploy → alias points to latest production-ready deployment on Vercel.
 - Quick rollout checks:
   - `vercel ls esg-rdt-master`
-  - `vercel alias ls | grep esg-rdt-master-pi.vercel.app`
+  - `vercel alias ls | grep esg-rdt-master-kimikimichineses-projects.vercel.app`
 
 ### One-command full production check (copy-paste)
 
 ```bash
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app"
 PROD_DEPLOYMENT="https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app"
 PROD_EXPECTED_COMMIT="$(git rev-parse --short v1.0.2)"
 RUN_PROD_DEPLOY="${RUN_PROD_DEPLOY:-false}"
@@ -729,7 +729,7 @@ sleep 30 && \
 gh run list --workflow production-readiness --branch master --limit 1 && \
 ./scripts/context-check.sh && \
 if [[ "${RUN_PROD_DEPLOY}" == "true" ]]; then vercel --prod --yes; else echo "RUN_PROD_DEPLOY=false, skip vercel --prod"; fi && \
-curl -sfS https://esg-rdt-master-pi.vercel.app/api/ready && \
+curl -sfS https://esg-rdt-master-kimikimichineses-projects.vercel.app/api/ready && \
 curl -sfS "${PROD_ALIAS}/api/health" | tee /tmp/health.json && \
 grep -q "\"version\":\"${PROD_EXPECTED_COMMIT}\"" /tmp/health.json && \
 echo "Health commit check passed."
@@ -797,7 +797,7 @@ TICKET3_EXPECTED_COMMIT="$(git rev-parse --short=8 HEAD)" \
 
 ```bash
 TICKET4_TAG="v1.0.4" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-4-release-signature.sh
 ```
 
@@ -805,7 +805,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET5_TAG="v1.0.4" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-5-audit-bundle.sh
 ```
 
@@ -813,7 +813,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET6_EXPECTED="v1.0.5^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-6-production-handoff.sh
 ```
 
@@ -821,7 +821,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET7_EXPECTED_COMMIT="v1.0.5^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-7-release-evidence-pack.sh
 ```
 
@@ -829,14 +829,14 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET8_EXPECTED_COMMIT="v1.0.5^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-8-production-drift.sh
 ```
 
 ### Ticket #9 production readiness automation
 
 ```bash
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-9-production-readiness-automation.sh
 ```
 
@@ -848,7 +848,7 @@ To validate a different deploy commit, set `TICKET9_EXPECTED_COMMIT` explicitly:
 
 ```bash
 TICKET10_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-10-readiness-docs-hardening.sh
 ```
 
@@ -856,7 +856,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET11_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-11-production-readiness-sop-hardening.sh
 ```
 
@@ -864,7 +864,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 
 ```bash
 TICKET12_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-12-readiness-evidence-hardening.sh
 ```
 
@@ -873,7 +873,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET13_RELEASE_TAG="v1.0.6" \
 TICKET13_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-13-release-audit-hardening.sh
 ```
 
@@ -882,7 +882,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET14_RELEASE_TAG="v1.0.6" \
 TICKET14_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-14-production-readiness-release-log-compact.sh
 ```
 
@@ -891,7 +891,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET15_RELEASE_TAG="v1.0.6" \
 TICKET15_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-15-production-readiness-mandatory-docs.sh
 ```
 
@@ -900,7 +900,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET16_RELEASE_TAG="v1.0.6" \
 TICKET16_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-16-release-log-evidence-format.sh
 ```
 
@@ -909,7 +909,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET17_RELEASE_TAG="v1.0.6" \
 TICKET17_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-17-readiness-observability-log-checks.sh
 ```
 
@@ -918,7 +918,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET18_RELEASE_TAG="v1.0.6" \
 TICKET18_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-18-readme-audit.sh
 ```
 
@@ -927,7 +927,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ```bash
 TICKET19_RELEASE_TAG="v1.0.6" \
 TICKET19_EXPECTED_COMMIT="v1.0.6^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-19-readme-continuity.sh
 ```
 
@@ -937,7 +937,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET20_RELEASE_TAG="v1.0.6" \
 TICKET20_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET20_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-20-log-depth-checks.sh
 ```
 
@@ -947,7 +947,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET21_RELEASE_TAG="v1.0.6" \
 TICKET21_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET21_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-21-readiness-hardening.sh
 ```
 
@@ -957,7 +957,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET22_RELEASE_TAG="v1.0.6" \
 TICKET22_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET22_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-22-production-readiness-docs-hygiene.sh
 ```
 
@@ -967,7 +967,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET23_RELEASE_TAG="v1.0.6" \
 TICKET23_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET23_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-23-production-readiness-docs-hygiene-continuity.sh
 ```
 
@@ -977,7 +977,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET24_RELEASE_TAG="v1.0.6" \
 TICKET24_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET24_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-24-production-readiness-ops-handoff.sh
 ```
 
@@ -1013,7 +1013,7 @@ Keep `dituccios` and every other project fully in separate branches/credentials 
 TICKET25_RELEASE_TAG="v1.0.6" \
 TICKET25_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET25_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-25-production-readiness-evidence-continuity.sh
 ```
 
@@ -1023,7 +1023,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET26_RELEASE_TAG="v1.0.6" \
 TICKET26_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET26_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-26-production-readiness-ops-drift-check.sh
 ```
 
@@ -1033,7 +1033,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET27_RELEASE_TAG="v1.0.6" \
 TICKET27_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET27_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-27-production-readiness-docs-hardening.sh
 ```
 
@@ -1043,7 +1043,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET28_RELEASE_TAG="v1.0.6" \
 TICKET28_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET28_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-28-production-readiness-sop-check.sh
 ```
 
@@ -1053,7 +1053,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET29_RELEASE_TAG="v1.0.6" \
 TICKET29_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET29_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-29-production-readiness-ops-sanity.sh
 ```
 
@@ -1063,7 +1063,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET30_RELEASE_TAG="v1.0.6" \
 TICKET30_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET30_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-30-production-readiness-continuity-check.sh
 ```
 
@@ -1073,7 +1073,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET31_RELEASE_TAG="v1.0.6" \
 TICKET31_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET31_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-31-production-readiness-rollover-check.sh
 ```
 
@@ -1083,7 +1083,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET32_RELEASE_TAG="v1.0.6" \
 TICKET32_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET32_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-32-production-readiness-evidence-lockdown.sh
 ```
 
@@ -1093,7 +1093,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET33_RELEASE_TAG="v1.0.6" \
 TICKET33_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET33_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-33-production-readiness-evidence-lifecycle.sh
 ```
 
@@ -1103,7 +1103,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET34_RELEASE_TAG="v1.0.6" \
 TICKET34_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET34_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-34-production-readiness-evidence-continuity.sh
 ```
 
@@ -1113,7 +1113,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET35_RELEASE_TAG="v1.0.6" \
 TICKET35_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET35_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-35-production-readiness-docs-traceability.sh
 ```
 
@@ -1123,7 +1123,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET36_RELEASE_TAG="v1.0.6" \
 TICKET36_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET36_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-36-production-readiness-evidence-trace-check.sh
 ```
 
@@ -1133,7 +1133,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET37_RELEASE_TAG="v1.0.6" \
 TICKET37_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET37_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-37-production-readiness-evidence-chain-handoff.sh
 ```
 
@@ -1143,7 +1143,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET38_RELEASE_TAG="v1.0.6" \
 TICKET38_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET38_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-38-production-readiness-handoff-continuity.sh
 ```
 
@@ -1153,7 +1153,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET39_RELEASE_TAG="v1.0.6" \
 TICKET39_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET39_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-39-production-readiness-evidence-drift-continuity.sh
 ```
 
@@ -1163,7 +1163,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET40_RELEASE_TAG="v1.0.6" \
 TICKET40_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET40_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-40-production-readiness-evidence-drift-continuity.sh
 ```
 
@@ -1173,7 +1173,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET41_RELEASE_TAG="v1.0.6" \
 TICKET41_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET41_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-41-production-readiness-continuity-hardening.sh
 ```
 
@@ -1183,7 +1183,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET42_RELEASE_TAG="v1.0.6" \
 TICKET42_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET42_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-42-production-readiness-readme-lineage.sh
 ```
 
@@ -1193,7 +1193,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET43_RELEASE_TAG="v1.0.6" \
 TICKET43_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET43_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-43-production-readiness-readme-lineage-check.sh
 ```
 
@@ -1203,7 +1203,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET44_RELEASE_TAG="v1.0.6" \
 TICKET44_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET44_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-44-production-readiness-readme-lineage-check-v2.sh
 ```
 
@@ -1213,7 +1213,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET45_RELEASE_TAG="v1.0.6" \
 TICKET45_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET45_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-45-production-readiness-readme-lineage-check-v2.sh
 ```
 
@@ -1223,7 +1223,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET46_RELEASE_TAG="v1.0.6" \
 TICKET46_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET46_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-46-production-readiness-readme-lineage-check-v2.sh
 ```
 
@@ -1235,7 +1235,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET47_RELEASE_TAG="v1.0.6" \
 TICKET47_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET47_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-47-production-readiness-log-depth-continuity-check.sh
 ```
 
@@ -1247,7 +1247,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET48_RELEASE_TAG="v1.0.6" \
 TICKET48_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET48_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-48-production-readiness-log-depth-continuity-check.sh
 ```
 
@@ -1259,7 +1259,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET49_RELEASE_TAG="v1.0.6" \
 TICKET49_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET49_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-49-production-readiness-log-depth-continuity-check.sh
 ```
 
@@ -1271,7 +1271,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET50_RELEASE_TAG="v1.0.6" \
 TICKET50_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET50_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-50-production-readiness-continuity-finalization.sh
 ```
 
@@ -1283,7 +1283,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET51_RELEASE_TAG="v1.0.6" \
 TICKET51_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET51_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-51-production-readiness-completion.sh
 ```
 
@@ -1295,7 +1295,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET52_RELEASE_TAG="v1.0.6" \
 TICKET52_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET52_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-52-production-readiness-continuity-wrapup.sh
 ```
 
@@ -1307,7 +1307,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET53_RELEASE_TAG="v1.0.6" \
 TICKET53_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET53_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-53-production-readiness-evidence-wrap-check.sh
 ```
 
@@ -1319,7 +1319,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET54_RELEASE_TAG="v1.0.6" \
 TICKET54_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET54_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-54-production-readiness-evidence-continuity.sh
 ```
 
@@ -1331,7 +1331,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET55_RELEASE_TAG="v1.0.6" \
 TICKET55_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET55_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-55-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1343,7 +1343,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET56_RELEASE_TAG="v1.0.6" \
 TICKET56_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET56_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-56-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1355,7 +1355,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET57_RELEASE_TAG="v1.0.6" \
 TICKET57_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET57_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-57-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1367,7 +1367,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET58_RELEASE_TAG="v1.0.6" \
 TICKET58_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET58_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-58-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1379,7 +1379,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET59_RELEASE_TAG="v1.0.6" \
 TICKET59_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET59_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-59-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1391,7 +1391,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET60_RELEASE_TAG="v1.0.6" \
 TICKET60_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET60_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-60-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1403,7 +1403,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET61_RELEASE_TAG="v1.0.6" \
 TICKET61_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET61_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-61-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1415,7 +1415,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET62_RELEASE_TAG="v1.0.6" \
 TICKET62_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET62_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-62-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1427,7 +1427,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET63_RELEASE_TAG="v1.0.6" \
 TICKET63_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET63_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-63-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1439,7 +1439,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET64_RELEASE_TAG="v1.0.6" \
 TICKET64_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET64_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-64-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1451,7 +1451,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET65_RELEASE_TAG="v1.0.6" \
 TICKET65_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET65_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-65-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1463,7 +1463,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET66_RELEASE_TAG="v1.0.6" \
 TICKET66_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET66_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-66-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1475,7 +1475,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET67_RELEASE_TAG="v1.0.6" \
 TICKET67_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET67_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-67-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1487,7 +1487,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET68_RELEASE_TAG="v1.0.6" \
 TICKET68_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET68_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-68-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1499,7 +1499,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET69_RELEASE_TAG="v1.0.6" \
 TICKET69_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET69_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-69-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1511,7 +1511,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET70_RELEASE_TAG="v1.0.6" \
 TICKET70_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET70_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-70-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1523,7 +1523,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET71_RELEASE_TAG="v1.0.6" \
 TICKET71_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET71_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-71-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1535,7 +1535,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET72_RELEASE_TAG="v1.0.6" \
 TICKET72_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET72_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-72-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1547,7 +1547,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET73_RELEASE_TAG="v1.0.6" \
 TICKET73_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET73_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-73-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1559,7 +1559,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET74_RELEASE_TAG="v1.0.6" \
 TICKET74_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET74_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-74-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1571,7 +1571,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET75_RELEASE_TAG="v1.0.6" \
 TICKET75_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET75_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-75-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1583,7 +1583,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET76_RELEASE_TAG="v1.0.6" \
 TICKET76_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET76_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-76-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1595,7 +1595,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET77_RELEASE_TAG="v1.0.6" \
 TICKET77_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET77_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-77-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1607,7 +1607,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET78_RELEASE_TAG="v1.0.6" \
 TICKET78_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET78_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-78-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1619,7 +1619,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET79_RELEASE_TAG="v1.0.6" \
 TICKET79_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET79_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-79-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1631,7 +1631,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET81_RELEASE_TAG="v1.0.6" \
 TICKET81_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET81_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-81-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1643,7 +1643,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET82_RELEASE_TAG="v1.0.6" \
 TICKET82_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET82_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-82-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1655,7 +1655,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET83_RELEASE_TAG="v1.0.6" \
 TICKET83_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET83_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-83-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1667,7 +1667,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET84_RELEASE_TAG="v1.0.6" \
 TICKET84_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET84_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-84-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1679,7 +1679,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET85_RELEASE_TAG="v1.0.6" \
 TICKET85_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET85_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-85-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1691,7 +1691,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET86_RELEASE_TAG="v1.0.6" \
 TICKET86_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET86_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-86-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1704,7 +1704,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET87_RELEASE_TAG="v1.0.6" \
 TICKET87_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET87_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-87-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1716,7 +1716,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET88_RELEASE_TAG="v1.0.6" \
 TICKET88_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET88_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-88-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1728,7 +1728,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET89_RELEASE_TAG="v1.0.6" \
 TICKET89_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET89_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-89-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1740,7 +1740,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET90_RELEASE_TAG="v1.0.6" \
 TICKET90_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET90_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-90-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1752,7 +1752,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET91_RELEASE_TAG="v1.0.6" \
 TICKET91_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET91_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-91-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1764,7 +1764,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET92_RELEASE_TAG="v1.0.6" \
 TICKET92_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET92_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-92-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1776,7 +1776,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET93_RELEASE_TAG="v1.0.6" \
 TICKET93_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET93_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-93-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1788,7 +1788,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET94_RELEASE_TAG="v1.0.6" \
 TICKET94_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET94_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-94-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1800,7 +1800,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET95_RELEASE_TAG="v1.0.6" \
 TICKET95_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET95_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-95-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1812,7 +1812,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET96_RELEASE_TAG="v1.0.6" \
 TICKET96_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET96_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-96-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1824,7 +1824,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET97_RELEASE_TAG="v1.0.6" \
 TICKET97_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET97_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-97-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1837,7 +1837,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET98_RELEASE_TAG="v1.0.6" \
 TICKET98_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET98_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-98-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1850,7 +1850,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET99_RELEASE_TAG="v1.0.6" \
 TICKET99_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET99_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-99-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1864,7 +1864,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET100_RELEASE_TAG="v1.0.6" \
 TICKET100_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET100_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-100-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1877,7 +1877,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET101_RELEASE_TAG="v1.0.6" \
 TICKET101_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET101_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-101-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1890,7 +1890,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET102_RELEASE_TAG="v1.0.6" \
 TICKET102_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET102_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-102-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1903,7 +1903,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET103_RELEASE_TAG="v1.0.6" \
 TICKET103_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET103_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-103-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1916,7 +1916,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET104_RELEASE_TAG="v1.0.6" \
 TICKET104_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET104_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-104-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1929,7 +1929,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET105_RELEASE_TAG="v1.0.6" \
 TICKET105_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET105_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-105-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1941,7 +1941,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET106_RELEASE_TAG="v1.0.6" \
 TICKET106_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET106_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-106-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1953,7 +1953,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET107_RELEASE_TAG="v1.0.6" \
 TICKET107_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET107_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-107-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1965,7 +1965,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET108_RELEASE_TAG="v1.0.6" \
 TICKET108_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET108_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-108-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1977,7 +1977,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET109_RELEASE_TAG="v1.0.6" \
 TICKET109_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET109_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-109-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -1989,7 +1989,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET110_RELEASE_TAG="v1.0.6" \
 TICKET110_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET110_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-110-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2001,7 +2001,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET111_RELEASE_TAG="v1.0.6" \
 TICKET111_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET111_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-111-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2013,7 +2013,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET112_RELEASE_TAG="v1.0.6" \
 TICKET112_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET112_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-112-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2025,7 +2025,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET113_RELEASE_TAG="v1.0.6" \
 TICKET113_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET113_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-113-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2037,7 +2037,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET114_RELEASE_TAG="v1.0.6" \
 TICKET114_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET114_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-114-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2049,7 +2049,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET115_RELEASE_TAG="v1.0.6" \
 TICKET115_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET115_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-115-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2061,7 +2061,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET116_RELEASE_TAG="v1.0.6" \
 TICKET116_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET116_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-116-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2073,7 +2073,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET117_RELEASE_TAG="v1.0.6" \
 TICKET117_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET117_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-117-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2085,7 +2085,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET118_RELEASE_TAG="v1.0.6" \
 TICKET118_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET118_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-118-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2097,7 +2097,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET119_RELEASE_TAG="v1.0.6" \
 TICKET119_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET119_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-119-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2109,7 +2109,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET120_RELEASE_TAG="v1.0.6" \
 TICKET120_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET120_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-120-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2121,7 +2121,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET121_RELEASE_TAG="v1.0.6" \
 TICKET121_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET121_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-121-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2133,7 +2133,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET122_RELEASE_TAG="v1.0.6" \
 TICKET122_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET122_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-122-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2145,7 +2145,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET123_RELEASE_TAG="v1.0.6" \
 TICKET123_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET123_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-123-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2157,7 +2157,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET124_RELEASE_TAG="v1.0.6" \
 TICKET124_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET124_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-124-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2169,7 +2169,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET125_RELEASE_TAG="v1.0.6" \
 TICKET125_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET125_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-125-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2181,7 +2181,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET126_RELEASE_TAG="v1.0.6" \
 TICKET126_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET126_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-126-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2193,7 +2193,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET127_RELEASE_TAG="v1.0.6" \
 TICKET127_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET127_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-127-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2205,7 +2205,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET128_RELEASE_TAG="v1.0.6" \
 TICKET128_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET128_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-128-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2217,7 +2217,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET129_RELEASE_TAG="v1.0.6" \
 TICKET129_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET129_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-129-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2229,7 +2229,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET130_RELEASE_TAG="v1.0.6" \
 TICKET130_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET130_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-130-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2241,7 +2241,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET131_RELEASE_TAG="v1.0.6" \
 TICKET131_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET131_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-131-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2253,7 +2253,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET132_RELEASE_TAG="v1.0.6" \
 TICKET132_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET132_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-132-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2265,7 +2265,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET133_RELEASE_TAG="v1.0.6" \
 TICKET133_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET133_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-133-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2277,7 +2277,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET134_RELEASE_TAG="v1.0.6" \
 TICKET134_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET134_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-134-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2289,7 +2289,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET135_RELEASE_TAG="v1.0.6" \
 TICKET135_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET135_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-135-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2301,7 +2301,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET136_RELEASE_TAG="v1.0.6" \
 TICKET136_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET136_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-136-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2313,7 +2313,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET137_RELEASE_TAG="v1.0.6" \
 TICKET137_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET137_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-137-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2325,7 +2325,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET138_RELEASE_TAG="v1.0.6" \
 TICKET138_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET138_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-138-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2337,7 +2337,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET139_RELEASE_TAG="v1.0.6" \
 TICKET139_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET139_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-139-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2349,7 +2349,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET140_RELEASE_TAG="v1.0.6" \
 TICKET140_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET140_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-140-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2361,7 +2361,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET141_RELEASE_TAG="v1.0.6" \
 TICKET141_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET141_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-141-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2373,7 +2373,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET142_RELEASE_TAG="v1.0.6" \
 TICKET142_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET142_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-142-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2385,7 +2385,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET143_RELEASE_TAG="v1.0.6" \
 TICKET143_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET143_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-143-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2397,7 +2397,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET144_RELEASE_TAG="v1.0.6" \
 TICKET144_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET144_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-144-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #145 production readiness evidence continuity wrapup
@@ -2408,7 +2408,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET145_RELEASE_TAG="v1.0.6" \
 TICKET145_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET145_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-145-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2420,7 +2420,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET146_RELEASE_TAG="v1.0.6" \
 TICKET146_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET146_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-146-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2433,7 +2433,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET147_RELEASE_TAG="v1.0.6" \
 TICKET147_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET147_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-147-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2447,7 +2447,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET148_RELEASE_TAG="v1.0.6" \
 TICKET148_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET148_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-148-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2459,7 +2459,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET149_RELEASE_TAG="v1.0.6" \
 TICKET149_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET149_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-149-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2471,7 +2471,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET150_RELEASE_TAG="v1.0.6" \
 TICKET150_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET150_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-150-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2488,7 +2488,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET151_RELEASE_TAG="v1.0.6" \
 TICKET151_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET151_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-151-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2500,7 +2500,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET152_RELEASE_TAG="v1.0.6" \
 TICKET152_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET152_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-152-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2513,7 +2513,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET153_RELEASE_TAG="v1.0.6" \
 TICKET153_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET153_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-153-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #154 production readiness evidence continuity wrapup
@@ -2524,7 +2524,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET154_RELEASE_TAG="v1.0.6" \
 TICKET154_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET154_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-154-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #155 production readiness evidence continuity wrapup
@@ -2535,7 +2535,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET155_RELEASE_TAG="v1.0.6" \
 TICKET155_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET155_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-155-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #156 production readiness evidence continuity wrapup
@@ -2546,7 +2546,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET156_RELEASE_TAG="v1.0.6" \
 TICKET156_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET156_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-156-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #157 production readiness evidence continuity wrapup
@@ -2557,7 +2557,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET157_RELEASE_TAG="v1.0.6" \
 TICKET157_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET157_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-157-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #158 production readiness evidence continuity wrapup
@@ -2568,7 +2568,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET158_RELEASE_TAG="v1.0.6" \
 TICKET158_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET158_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-158-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #159 production readiness evidence continuity wrapup
@@ -2579,7 +2579,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET159_RELEASE_TAG="v1.0.6" \
 TICKET159_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET159_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-159-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2591,7 +2591,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET168_RELEASE_TAG="v1.0.6" \
 TICKET168_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET168_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-168-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2603,7 +2603,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET169_RELEASE_TAG="v1.0.6" \
 TICKET169_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET169_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-169-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2615,7 +2615,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET170_RELEASE_TAG="v1.0.6" \
 TICKET170_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET170_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-170-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #170 production readiness evidence continuity wrapup
@@ -2632,7 +2632,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET171_RELEASE_TAG="v1.0.6" \
 TICKET171_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET171_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-171-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2700,7 +2700,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET172_RELEASE_TAG="v1.0.6" \
 TICKET172_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET172_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-172-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2712,7 +2712,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET173_RELEASE_TAG="v1.0.6" \
 TICKET173_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET173_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-173-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2724,7 +2724,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET174_RELEASE_TAG="v1.0.6" \
 TICKET174_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET174_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-174-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2736,7 +2736,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET175_RELEASE_TAG="v1.0.6" \
 TICKET175_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET175_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-175-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2749,7 +2749,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET176_RELEASE_TAG="v1.0.6" \
 TICKET176_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET176_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-176-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2762,7 +2762,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET177_RELEASE_TAG="v1.0.6" \
 TICKET177_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET177_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-177-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2775,7 +2775,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET178_RELEASE_TAG="v1.0.6" \
 TICKET178_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET178_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-178-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2788,7 +2788,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET179_RELEASE_TAG="v1.0.6" \
 TICKET179_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET179_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-179-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2801,7 +2801,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET180_RELEASE_TAG="v1.0.6" \
 TICKET180_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET180_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-180-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2814,7 +2814,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET181_RELEASE_TAG="v1.0.6" \
 TICKET181_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET181_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-181-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2826,7 +2826,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET182_RELEASE_TAG="v1.0.6" \
 TICKET182_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET182_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-182-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2838,7 +2838,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET183_RELEASE_TAG="v1.0.6" \
 TICKET183_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET183_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-183-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2850,7 +2850,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET184_RELEASE_TAG="v1.0.6" \
 TICKET184_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET184_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-184-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2862,7 +2862,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET185_RELEASE_TAG="v1.0.6" \
 TICKET185_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET185_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-185-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #186 production readiness evidence continuity wrapup
@@ -2873,7 +2873,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET186_RELEASE_TAG="v1.0.6" \
 TICKET186_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET186_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-186-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #187 production readiness evidence continuity wrapup
@@ -2884,7 +2884,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET187_RELEASE_TAG="v1.0.6" \
 TICKET187_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET187_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-187-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #188 production readiness evidence continuity wrapup
@@ -2895,7 +2895,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET188_RELEASE_TAG="v1.0.6" \
 TICKET188_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET188_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-188-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #189 production readiness evidence continuity wrapup
@@ -2906,7 +2906,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET189_RELEASE_TAG="v1.0.6" \
 TICKET189_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET189_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-189-production-readiness-evidence-continuity-wrapup.sh
 ```
 ### Ticket #190 production readiness evidence continuity wrapup
@@ -2917,7 +2917,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET190_RELEASE_TAG="v1.0.6" \
 TICKET190_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET190_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-190-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2930,7 +2930,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET191_RELEASE_TAG="v1.0.6" \
 TICKET191_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET191_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-191-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2942,7 +2942,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET192_RELEASE_TAG="v1.0.6" \
 TICKET192_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET192_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-192-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2954,7 +2954,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET193_RELEASE_TAG="v1.0.6" \
 TICKET193_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET193_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-193-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2966,7 +2966,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET194_RELEASE_TAG="v1.0.6" \
 TICKET194_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET194_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-194-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2978,7 +2978,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET195_RELEASE_TAG="v1.0.6" \
 TICKET195_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET195_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-195-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -2990,7 +2990,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET196_RELEASE_TAG="v1.0.6" \
 TICKET196_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET196_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-196-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3002,7 +3002,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET197_RELEASE_TAG="v1.0.6" \
 TICKET197_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET197_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-197-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3014,7 +3014,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET198_RELEASE_TAG="v1.0.6" \
 TICKET198_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET198_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-198-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3026,7 +3026,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET160_RELEASE_TAG="v1.0.6" \
 TICKET160_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET160_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-160-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3038,7 +3038,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET161_RELEASE_TAG="v1.0.6" \
 TICKET161_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET161_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-161-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3050,7 +3050,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET162_RELEASE_TAG="v1.0.6" \
 TICKET162_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET162_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-162-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3062,7 +3062,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET163_RELEASE_TAG="v1.0.6" \
 TICKET163_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET163_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-163-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3074,7 +3074,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET164_RELEASE_TAG="v1.0.6" \
 TICKET164_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET164_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-164-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3086,7 +3086,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET165_RELEASE_TAG="v1.0.6" \
 TICKET165_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET165_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-165-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3098,7 +3098,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET166_RELEASE_TAG="v1.0.6" \
 TICKET166_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET166_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-166-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3110,7 +3110,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET167_RELEASE_TAG="v1.0.6" \
 TICKET167_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET167_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-167-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3122,7 +3122,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET199_RELEASE_TAG="v1.0.6" \
 TICKET199_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET199_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-199-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3134,7 +3134,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET200_RELEASE_TAG="v1.0.6" \
 TICKET200_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET200_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-200-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3146,7 +3146,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET201_RELEASE_TAG="v1.0.6" \
 TICKET201_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET201_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-201-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3158,7 +3158,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET202_RELEASE_TAG="v1.0.6" \
 TICKET202_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET202_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-202-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3170,7 +3170,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET203_RELEASE_TAG="v1.0.6" \
 TICKET203_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET203_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-203-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3182,7 +3182,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET204_RELEASE_TAG="v1.0.6" \
 TICKET204_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET204_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-204-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3194,7 +3194,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET205_RELEASE_TAG="v1.0.6" \
 TICKET205_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET205_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-205-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3206,7 +3206,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET206_RELEASE_TAG="v1.0.6" \
 TICKET206_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET206_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-206-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3218,7 +3218,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET207_RELEASE_TAG="v1.0.6" \
 TICKET207_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET207_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-207-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3230,7 +3230,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET208_RELEASE_TAG="v1.0.6" \
 TICKET208_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET208_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-208-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3242,7 +3242,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET209_RELEASE_TAG="v1.0.6" \
 TICKET209_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET209_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-209-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3255,7 +3255,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET210_RELEASE_TAG="v1.0.6" \
 TICKET210_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET210_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-210-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3268,7 +3268,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET211_RELEASE_TAG="v1.0.6" \
 TICKET211_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET211_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-211-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3281,7 +3281,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET212_RELEASE_TAG="v1.0.6" \
 TICKET212_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET212_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-212-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3294,7 +3294,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET213_RELEASE_TAG="v1.0.6" \
 TICKET213_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET213_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-213-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3307,7 +3307,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET214_RELEASE_TAG="v1.0.6" \
 TICKET214_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET214_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-214-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3320,7 +3320,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET215_RELEASE_TAG="v1.0.6" \
 TICKET215_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET215_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-215-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3333,7 +3333,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET216_RELEASE_TAG="v1.0.6" \
 TICKET216_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET216_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-216-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3346,7 +3346,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET217_RELEASE_TAG="v1.0.6" \
 TICKET217_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET217_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-217-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3359,7 +3359,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET218_RELEASE_TAG="v1.0.6" \
 TICKET218_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET218_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-218-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3372,7 +3372,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET219_RELEASE_TAG="v1.0.6" \
 TICKET219_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET219_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-219-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3385,7 +3385,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET220_RELEASE_TAG="v1.0.6" \
 TICKET220_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET220_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-220-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3398,7 +3398,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET221_RELEASE_TAG="v1.0.6" \
 TICKET221_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET221_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-221-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3411,7 +3411,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET222_RELEASE_TAG="v1.0.6" \
 TICKET222_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET222_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-222-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3424,7 +3424,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET223_RELEASE_TAG="v1.0.6" \
 TICKET223_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET223_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-223-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3437,7 +3437,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET224_RELEASE_TAG="v1.0.6" \
 TICKET224_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET224_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-224-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3450,7 +3450,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET225_RELEASE_TAG="v1.0.6" \
 TICKET225_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET225_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-225-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3463,7 +3463,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET226_RELEASE_TAG="v1.0.6" \
 TICKET226_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET226_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-226-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3476,7 +3476,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET227_RELEASE_TAG="v1.0.6" \
 TICKET227_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET227_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-227-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3489,7 +3489,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET228_RELEASE_TAG="v1.0.6" \
 TICKET228_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET228_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-228-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3502,7 +3502,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET229_RELEASE_TAG="v1.0.6" \
 TICKET229_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET229_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-229-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3515,7 +3515,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET230_RELEASE_TAG="v1.0.6" \
 TICKET230_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET230_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-230-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3528,7 +3528,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET231_RELEASE_TAG="v1.0.6" \
 TICKET231_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET231_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-231-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3541,7 +3541,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET232_RELEASE_TAG="v1.0.6" \
 TICKET232_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET232_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-232-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3554,7 +3554,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET233_RELEASE_TAG="v1.0.6" \
 TICKET233_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET233_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-233-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3567,7 +3567,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET234_RELEASE_TAG="v1.0.6" \
 TICKET234_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET234_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-234-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3580,7 +3580,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET235_RELEASE_TAG="v1.0.6" \
 TICKET235_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET235_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-235-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3593,7 +3593,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET236_RELEASE_TAG="v1.0.6" \
 TICKET236_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET236_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-236-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3606,7 +3606,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET237_RELEASE_TAG="v1.0.6" \
 TICKET237_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET237_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-237-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3619,7 +3619,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET238_RELEASE_TAG="v1.0.6" \
 TICKET238_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET238_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-238-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3632,7 +3632,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET239_RELEASE_TAG="v1.0.6" \
 TICKET239_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET239_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-239-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3645,7 +3645,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET240_RELEASE_TAG="v1.0.6" \
 TICKET240_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET240_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-240-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3658,7 +3658,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET241_RELEASE_TAG="v1.0.6" \
 TICKET241_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET241_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-241-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3671,7 +3671,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET242_RELEASE_TAG="v1.0.6" \
 TICKET242_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET242_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-242-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3684,7 +3684,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET243_RELEASE_TAG="v1.0.6" \
 TICKET243_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET243_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-243-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3697,7 +3697,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET244_RELEASE_TAG="v1.0.6" \
 TICKET244_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET244_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-244-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3710,7 +3710,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET245_RELEASE_TAG="v1.0.6" \
 TICKET245_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET245_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-245-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3723,7 +3723,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET246_RELEASE_TAG="v1.0.6" \
 TICKET246_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET246_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-246-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3736,7 +3736,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET247_RELEASE_TAG="v1.0.6" \
 TICKET247_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET247_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-247-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3749,7 +3749,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET248_RELEASE_TAG="v1.0.6" \
 TICKET248_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET248_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-248-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3762,7 +3762,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET249_RELEASE_TAG="v1.0.6" \
 TICKET249_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET249_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-249-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3775,7 +3775,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET250_RELEASE_TAG="v1.0.6" \
 TICKET250_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET250_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-250-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3788,7 +3788,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET251_RELEASE_TAG="v1.0.6" \
 TICKET251_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET251_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-251-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3801,7 +3801,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET252_RELEASE_TAG="v1.0.6" \
 TICKET252_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET252_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-252-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3814,7 +3814,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET253_RELEASE_TAG="v1.0.6" \
 TICKET253_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET253_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-253-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3827,7 +3827,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET254_RELEASE_TAG="v1.0.6" \
 TICKET254_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET254_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-254-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3840,7 +3840,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET255_RELEASE_TAG="v1.0.6" \
 TICKET255_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET255_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-255-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3853,7 +3853,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET256_RELEASE_TAG="v1.0.6" \
 TICKET256_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET256_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-256-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3866,7 +3866,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET257_RELEASE_TAG="v1.0.6" \
 TICKET257_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET257_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-257-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3879,7 +3879,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET258_RELEASE_TAG="v1.0.6" \
 TICKET258_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET258_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-258-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3892,7 +3892,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET259_RELEASE_TAG="v1.0.6" \
 TICKET259_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET259_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-259-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3905,7 +3905,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET260_RELEASE_TAG="v1.0.6" \
 TICKET260_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET260_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-260-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3918,7 +3918,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET261_RELEASE_TAG="v1.0.6" \
 TICKET261_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET261_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-261-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3931,7 +3931,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET262_RELEASE_TAG="v1.0.6" \
 TICKET262_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET262_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-262-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3944,7 +3944,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET263_RELEASE_TAG="v1.0.6" \
 TICKET263_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET263_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-263-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3957,7 +3957,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET264_RELEASE_TAG="v1.0.6" \
 TICKET264_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET264_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-264-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3970,7 +3970,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET265_RELEASE_TAG="v1.0.6" \
 TICKET265_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET265_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-265-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3983,7 +3983,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET266_RELEASE_TAG="v1.0.6" \
 TICKET266_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET266_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-266-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -3996,7 +3996,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET267_RELEASE_TAG="v1.0.6" \
 TICKET267_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET267_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-267-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4009,7 +4009,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET268_RELEASE_TAG="v1.0.6" \
 TICKET268_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET268_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-268-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4022,7 +4022,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET269_RELEASE_TAG="v1.0.6" \
 TICKET269_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET269_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-269-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4035,7 +4035,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET270_RELEASE_TAG="v1.0.6" \
 TICKET270_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET270_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-270-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4048,7 +4048,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET271_RELEASE_TAG="v1.0.6" \
 TICKET271_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET271_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-271-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4061,7 +4061,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET272_RELEASE_TAG="v1.0.6" \
 TICKET272_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET272_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-272-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4074,7 +4074,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET273_RELEASE_TAG="v1.0.6" \
 TICKET273_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET273_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-273-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4087,7 +4087,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET274_RELEASE_TAG="v1.0.6" \
 TICKET274_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET274_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-274-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4100,7 +4100,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET275_RELEASE_TAG="v1.0.6" \
 TICKET275_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET275_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-275-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4113,7 +4113,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET276_RELEASE_TAG="v1.0.6" \
 TICKET276_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET276_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-276-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4126,7 +4126,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET277_RELEASE_TAG="v1.0.6" \
 TICKET277_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET277_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-277-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4139,7 +4139,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET278_RELEASE_TAG="v1.0.6" \
 TICKET278_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET278_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-278-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4152,7 +4152,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET279_RELEASE_TAG="v1.0.6" \
 TICKET279_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET279_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-279-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4165,7 +4165,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET280_RELEASE_TAG="v1.0.6" \
 TICKET280_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET280_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-280-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4178,7 +4178,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET281_RELEASE_TAG="v1.0.6" \
 TICKET281_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET281_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-281-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4191,7 +4191,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET282_RELEASE_TAG="v1.0.6" \
 TICKET282_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET282_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-282-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4204,7 +4204,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET283_RELEASE_TAG="v1.0.6" \
 TICKET283_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET283_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-283-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4217,7 +4217,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET284_RELEASE_TAG="v1.0.6" \
 TICKET284_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET284_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-284-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4230,7 +4230,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET285_RELEASE_TAG="v1.0.6" \
 TICKET285_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET285_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-285-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4243,7 +4243,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET286_RELEASE_TAG="v1.0.6" \
 TICKET286_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET286_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-286-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4256,7 +4256,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET287_RELEASE_TAG="v1.0.6" \
 TICKET287_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET287_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-287-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4269,7 +4269,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET288_RELEASE_TAG="v1.0.6" \
 TICKET288_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET288_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-288-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4282,7 +4282,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET289_RELEASE_TAG="v1.0.6" \
 TICKET289_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET289_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-289-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4295,7 +4295,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET290_RELEASE_TAG="v1.0.6" \
 TICKET290_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET290_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-290-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4308,7 +4308,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET291_RELEASE_TAG="v1.0.6" \
 TICKET291_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET291_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-291-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4321,7 +4321,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET292_RELEASE_TAG="v1.0.6" \
 TICKET292_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET292_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-292-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4334,7 +4334,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET293_RELEASE_TAG="v1.0.6" \
 TICKET293_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET293_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-293-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4347,7 +4347,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET294_RELEASE_TAG="v1.0.6" \
 TICKET294_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET294_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-294-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4360,7 +4360,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET295_RELEASE_TAG="v1.0.6" \
 TICKET295_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET295_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-295-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4373,7 +4373,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET296_RELEASE_TAG="v1.0.6" \
 TICKET296_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET296_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-296-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4386,7 +4386,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET297_RELEASE_TAG="v1.0.6" \
 TICKET297_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET297_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-297-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4399,7 +4399,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET298_RELEASE_TAG="v1.0.6" \
 TICKET298_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET298_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-298-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4412,7 +4412,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET299_RELEASE_TAG="v1.0.6" \
 TICKET299_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET299_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-299-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4425,7 +4425,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET300_RELEASE_TAG="v1.0.6" \
 TICKET300_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET300_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-300-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4438,7 +4438,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET301_RELEASE_TAG="v1.0.6" \
 TICKET301_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET301_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-301-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4451,7 +4451,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET302_RELEASE_TAG="v1.0.6" \
 TICKET302_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET302_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-302-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4464,7 +4464,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET303_RELEASE_TAG="v1.0.6" \
 TICKET303_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET303_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-303-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4477,7 +4477,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET304_RELEASE_TAG="v1.0.6" \
 TICKET304_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET304_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-304-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4490,7 +4490,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET305_RELEASE_TAG="v1.0.6" \
 TICKET305_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET305_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-305-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4503,7 +4503,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET306_RELEASE_TAG="v1.0.6" \
 TICKET306_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET306_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-306-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4516,7 +4516,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET307_RELEASE_TAG="v1.0.6" \
 TICKET307_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET307_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-307-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4529,7 +4529,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET308_RELEASE_TAG="v1.0.6" \
 TICKET308_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET308_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-308-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4542,7 +4542,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET309_RELEASE_TAG="v1.0.6" \
 TICKET309_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET309_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-309-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4555,7 +4555,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET310_RELEASE_TAG="v1.0.6" \
 TICKET310_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET310_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-310-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4568,7 +4568,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET311_RELEASE_TAG="v1.0.6" \
 TICKET311_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET311_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-311-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4581,7 +4581,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET312_RELEASE_TAG="v1.0.6" \
 TICKET312_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET312_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-312-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4594,7 +4594,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET313_RELEASE_TAG="v1.0.6" \
 TICKET313_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET313_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-313-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4607,7 +4607,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET314_RELEASE_TAG="v1.0.6" \
 TICKET314_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET314_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-314-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4620,7 +4620,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET315_RELEASE_TAG="v1.0.6" \
 TICKET315_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET315_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-315-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4633,7 +4633,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET316_RELEASE_TAG="v1.0.6" \
 TICKET316_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET316_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-316-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4646,7 +4646,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET317_RELEASE_TAG="v1.0.6" \
 TICKET317_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET317_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-317-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4659,7 +4659,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET318_RELEASE_TAG="v1.0.6" \
 TICKET318_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET318_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-318-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4672,7 +4672,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET319_RELEASE_TAG="v1.0.6" \
 TICKET319_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET319_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-319-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4685,7 +4685,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET320_RELEASE_TAG="v1.0.6" \
 TICKET320_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET320_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-320-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4698,7 +4698,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET321_RELEASE_TAG="v1.0.6" \
 TICKET321_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET321_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-321-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4711,7 +4711,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET322_RELEASE_TAG="v1.0.6" \
 TICKET322_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET322_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-322-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4724,7 +4724,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET323_RELEASE_TAG="v1.0.6" \
 TICKET323_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET323_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-323-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4737,7 +4737,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET324_RELEASE_TAG="v1.0.6" \
 TICKET324_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET324_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-324-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4750,7 +4750,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET325_RELEASE_TAG="v1.0.6" \
 TICKET325_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET325_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-325-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4763,7 +4763,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET326_RELEASE_TAG="v1.0.6" \
 TICKET326_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET326_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-326-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4776,7 +4776,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET327_RELEASE_TAG="v1.0.6" \
 TICKET327_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET327_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-327-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4789,7 +4789,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET328_RELEASE_TAG="v1.0.6" \
 TICKET328_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET328_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-328-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4802,7 +4802,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET329_RELEASE_TAG="v1.0.6" \
 TICKET329_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET329_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-329-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4815,7 +4815,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET330_RELEASE_TAG="v1.0.6" \
 TICKET330_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET330_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-330-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4828,7 +4828,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET331_RELEASE_TAG="v1.0.6" \
 TICKET331_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET331_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-331-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4841,7 +4841,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET332_RELEASE_TAG="v1.0.6" \
 TICKET332_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET332_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-332-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4854,7 +4854,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET333_RELEASE_TAG="v1.0.6" \
 TICKET333_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET333_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-333-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4867,7 +4867,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET334_RELEASE_TAG="v1.0.6" \
 TICKET334_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET334_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-334-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4880,7 +4880,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET335_RELEASE_TAG="v1.0.6" \
 TICKET335_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET335_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-335-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4893,7 +4893,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET336_RELEASE_TAG="v1.0.6" \
 TICKET336_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET336_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-336-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4906,7 +4906,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET337_RELEASE_TAG="v1.0.6" \
 TICKET337_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET337_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-337-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4919,7 +4919,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET338_RELEASE_TAG="v1.0.6" \
 TICKET338_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET338_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-338-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4932,7 +4932,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET339_RELEASE_TAG="v1.0.6" \
 TICKET339_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET339_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-339-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4945,7 +4945,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET340_RELEASE_TAG="v1.0.6" \
 TICKET340_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET340_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-340-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4958,7 +4958,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET341_RELEASE_TAG="v1.0.6" \
 TICKET341_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET341_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-341-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4971,7 +4971,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET342_RELEASE_TAG="v1.0.6" \
 TICKET342_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET342_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-342-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4984,7 +4984,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET343_RELEASE_TAG="v1.0.6" \
 TICKET343_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET343_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-343-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -4997,7 +4997,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET344_RELEASE_TAG="v1.0.6" \
 TICKET344_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET344_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-344-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5010,7 +5010,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET345_RELEASE_TAG="v1.0.6" \
 TICKET345_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET345_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-345-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5023,7 +5023,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET346_RELEASE_TAG="v1.0.6" \
 TICKET346_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET346_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-346-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5036,7 +5036,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET347_RELEASE_TAG="v1.0.6" \
 TICKET347_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET347_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-347-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5049,7 +5049,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET348_RELEASE_TAG="v1.0.6" \
 TICKET348_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET348_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-348-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5062,7 +5062,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET349_RELEASE_TAG="v1.0.6" \
 TICKET349_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET349_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-349-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5075,7 +5075,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET350_RELEASE_TAG="v1.0.6" \
 TICKET350_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET350_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-350-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5088,7 +5088,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET351_RELEASE_TAG="v1.0.6" \
 TICKET351_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET351_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-351-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5101,7 +5101,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET352_RELEASE_TAG="v1.0.6" \
 TICKET352_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET352_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-352-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5114,7 +5114,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET353_RELEASE_TAG="v1.0.6" \
 TICKET353_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET353_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-353-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5127,7 +5127,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET354_RELEASE_TAG="v1.0.6" \
 TICKET354_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET354_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-354-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5140,7 +5140,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET355_RELEASE_TAG="v1.0.6" \
 TICKET355_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET355_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-355-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5153,7 +5153,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET356_RELEASE_TAG="v1.0.6" \
 TICKET356_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET356_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-356-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5166,7 +5166,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET357_RELEASE_TAG="v1.0.6" \
 TICKET357_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET357_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-357-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5179,7 +5179,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET358_RELEASE_TAG="v1.0.6" \
 TICKET358_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET358_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-358-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5192,7 +5192,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET359_RELEASE_TAG="v1.0.6" \
 TICKET359_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET359_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-359-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5205,7 +5205,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET360_RELEASE_TAG="v1.0.6" \
 TICKET360_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET360_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-360-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5218,7 +5218,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET361_RELEASE_TAG="v1.0.6" \
 TICKET361_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET361_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-361-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5231,7 +5231,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET362_RELEASE_TAG="v1.0.6" \
 TICKET362_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET362_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-362-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5244,7 +5244,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET363_RELEASE_TAG="v1.0.6" \
 TICKET363_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET363_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-363-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5257,7 +5257,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET364_RELEASE_TAG="v1.0.6" \
 TICKET364_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET364_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-364-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5270,7 +5270,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET365_RELEASE_TAG="v1.0.6" \
 TICKET365_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET365_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-365-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5283,7 +5283,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET366_RELEASE_TAG="v1.0.6" \
 TICKET366_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET366_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-366-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5296,7 +5296,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET367_RELEASE_TAG="v1.0.6" \
 TICKET367_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET367_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-367-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5309,7 +5309,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET368_RELEASE_TAG="v1.0.6" \
 TICKET368_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET368_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-368-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5322,7 +5322,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET369_RELEASE_TAG="v1.0.6" \
 TICKET369_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET369_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-369-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5335,7 +5335,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET370_RELEASE_TAG="v1.0.6" \
 TICKET370_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET370_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-370-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5348,7 +5348,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET371_RELEASE_TAG="v1.0.6" \
 TICKET371_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET371_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-371-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5361,7 +5361,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET372_RELEASE_TAG="v1.0.6" \
 TICKET372_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET372_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-372-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5374,7 +5374,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET373_RELEASE_TAG="v1.0.6" \
 TICKET373_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET373_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-373-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5387,7 +5387,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET374_RELEASE_TAG="v1.0.6" \
 TICKET374_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET374_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-374-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5400,7 +5400,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET375_RELEASE_TAG="v1.0.6" \
 TICKET375_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET375_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-375-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5413,7 +5413,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET376_RELEASE_TAG="v1.0.6" \
 TICKET376_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET376_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-376-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5426,7 +5426,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET377_RELEASE_TAG="v1.0.6" \
 TICKET377_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET377_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-377-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5439,7 +5439,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET378_RELEASE_TAG="v1.0.6" \
 TICKET378_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET378_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-378-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5452,7 +5452,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET379_RELEASE_TAG="v1.0.6" \
 TICKET379_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET379_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-379-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5465,7 +5465,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET380_RELEASE_TAG="v1.0.6" \
 TICKET380_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET380_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-380-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5478,7 +5478,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET381_RELEASE_TAG="v1.0.6" \
 TICKET381_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET381_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-381-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5491,7 +5491,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET382_RELEASE_TAG="v1.0.6" \
 TICKET382_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET382_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-382-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5504,7 +5504,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET383_RELEASE_TAG="v1.0.6" \
 TICKET383_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET383_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-383-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5517,7 +5517,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET384_RELEASE_TAG="v1.0.6" \
 TICKET384_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET384_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-384-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5530,7 +5530,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET385_RELEASE_TAG="v1.0.6" \
 TICKET385_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET385_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-385-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5543,7 +5543,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET386_RELEASE_TAG="v1.0.6" \
 TICKET386_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET386_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-386-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5556,7 +5556,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET387_RELEASE_TAG="v1.0.6" \
 TICKET387_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET387_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-387-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5569,7 +5569,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET388_RELEASE_TAG="v1.0.6" \
 TICKET388_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET388_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-388-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5582,7 +5582,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET389_RELEASE_TAG="v1.0.6" \
 TICKET389_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET389_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-389-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5595,7 +5595,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET390_RELEASE_TAG="v1.0.6" \
 TICKET390_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET390_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-390-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5608,7 +5608,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET391_RELEASE_TAG="v1.0.6" \
 TICKET391_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET391_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-391-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5621,7 +5621,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET392_RELEASE_TAG="v1.0.6" \
 TICKET392_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET392_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-392-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5634,7 +5634,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET393_RELEASE_TAG="v1.0.6" \
 TICKET393_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET393_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-393-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5647,7 +5647,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET394_RELEASE_TAG="v1.0.6" \
 TICKET394_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET394_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-394-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5660,7 +5660,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET395_RELEASE_TAG="v1.0.6" \
 TICKET395_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET395_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-395-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5673,7 +5673,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET396_RELEASE_TAG="v1.0.6" \
 TICKET396_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET396_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-396-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5686,7 +5686,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET397_RELEASE_TAG="v1.0.6" \
 TICKET397_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET397_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-397-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5699,7 +5699,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET398_RELEASE_TAG="v1.0.6" \
 TICKET398_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET398_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-398-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5712,7 +5712,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET399_RELEASE_TAG="v1.0.6" \
 TICKET399_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET399_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-399-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5725,7 +5725,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET400_RELEASE_TAG="v1.0.6" \
 TICKET400_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET400_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-400-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5738,7 +5738,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET401_RELEASE_TAG="v1.0.6" \
 TICKET401_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET401_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-401-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5751,7 +5751,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET402_RELEASE_TAG="v1.0.6" \
 TICKET402_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET402_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-402-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5764,7 +5764,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET403_RELEASE_TAG="v1.0.6" \
 TICKET403_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET403_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-403-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5777,7 +5777,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET404_RELEASE_TAG="v1.0.6" \
 TICKET404_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET404_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-404-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5790,7 +5790,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET405_RELEASE_TAG="v1.0.6" \
 TICKET405_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET405_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-405-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5803,7 +5803,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET406_RELEASE_TAG="v1.0.6" \
 TICKET406_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET406_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-406-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5816,7 +5816,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET407_RELEASE_TAG="v1.0.6" \
 TICKET407_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET407_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-407-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5829,7 +5829,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET408_RELEASE_TAG="v1.0.6" \
 TICKET408_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET408_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-408-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5842,7 +5842,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET409_RELEASE_TAG="v1.0.6" \
 TICKET409_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET409_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-409-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5855,7 +5855,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET410_RELEASE_TAG="v1.0.6" \
 TICKET410_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET410_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-410-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5868,7 +5868,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET411_RELEASE_TAG="v1.0.6" \
 TICKET411_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET411_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-411-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5881,7 +5881,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET412_RELEASE_TAG="v1.0.6" \
 TICKET412_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET412_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-412-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5894,7 +5894,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET413_RELEASE_TAG="v1.0.6" \
 TICKET413_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET413_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-413-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5907,7 +5907,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET414_RELEASE_TAG="v1.0.6" \
 TICKET414_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET414_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-414-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5920,7 +5920,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET415_RELEASE_TAG="v1.0.6" \
 TICKET415_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET415_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-415-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5933,7 +5933,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET416_RELEASE_TAG="v1.0.6" \
 TICKET416_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET416_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-416-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5946,7 +5946,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET417_RELEASE_TAG="v1.0.6" \
 TICKET417_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET417_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-417-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5959,7 +5959,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET418_RELEASE_TAG="v1.0.6" \
 TICKET418_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET418_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-418-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5972,7 +5972,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET419_RELEASE_TAG="v1.0.6" \
 TICKET419_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET419_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-419-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5985,7 +5985,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET420_RELEASE_TAG="v1.0.6" \
 TICKET420_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET420_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-420-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -5998,7 +5998,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET421_RELEASE_TAG="v1.0.6" \
 TICKET421_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET421_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-421-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6011,7 +6011,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET422_RELEASE_TAG="v1.0.6" \
 TICKET422_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET422_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-422-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6024,7 +6024,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET423_RELEASE_TAG="v1.0.6" \
 TICKET423_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET423_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-423-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6037,7 +6037,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET424_RELEASE_TAG="v1.0.6" \
 TICKET424_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET424_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-424-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6050,7 +6050,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET425_RELEASE_TAG="v1.0.6" \
 TICKET425_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET425_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-425-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6063,7 +6063,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET426_RELEASE_TAG="v1.0.6" \
 TICKET426_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET426_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-426-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6076,7 +6076,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET427_RELEASE_TAG="v1.0.6" \
 TICKET427_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET427_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-427-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6089,7 +6089,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET428_RELEASE_TAG="v1.0.6" \
 TICKET428_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET428_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-428-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6102,7 +6102,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET429_RELEASE_TAG="v1.0.6" \
 TICKET429_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET429_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-429-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6115,7 +6115,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET430_RELEASE_TAG="v1.0.6" \
 TICKET430_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET430_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-430-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6128,7 +6128,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET431_RELEASE_TAG="v1.0.6" \
 TICKET431_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET431_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-431-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6141,7 +6141,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET432_RELEASE_TAG="v1.0.6" \
 TICKET432_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET432_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-432-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6154,7 +6154,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET433_RELEASE_TAG="v1.0.6" \
 TICKET433_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET433_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-433-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6167,7 +6167,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET434_RELEASE_TAG="v1.0.6" \
 TICKET434_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET434_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-434-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6180,7 +6180,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET435_RELEASE_TAG="v1.0.6" \
 TICKET435_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET435_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-435-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6193,7 +6193,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET436_RELEASE_TAG="v1.0.6" \
 TICKET436_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET436_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-436-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6206,7 +6206,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET437_RELEASE_TAG="v1.0.6" \
 TICKET437_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET437_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-437-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6219,7 +6219,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET438_RELEASE_TAG="v1.0.6" \
 TICKET438_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET438_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-438-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6232,7 +6232,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET439_RELEASE_TAG="v1.0.6" \
 TICKET439_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET439_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-439-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6245,7 +6245,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET440_RELEASE_TAG="v1.0.6" \
 TICKET440_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET440_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-440-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6258,7 +6258,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET441_RELEASE_TAG="v1.0.6" \
 TICKET441_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET441_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-441-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6271,7 +6271,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET442_RELEASE_TAG="v1.0.6" \
 TICKET442_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET442_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-442-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6284,7 +6284,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET443_RELEASE_TAG="v1.0.6" \
 TICKET443_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET443_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-443-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6297,7 +6297,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET444_RELEASE_TAG="v1.0.6" \
 TICKET444_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET444_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-444-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6310,7 +6310,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET445_RELEASE_TAG="v1.0.6" \
 TICKET445_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET445_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-445-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6323,7 +6323,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET446_RELEASE_TAG="v1.0.6" \
 TICKET446_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET446_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-446-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6336,7 +6336,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET447_RELEASE_TAG="v1.0.6" \
 TICKET447_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET447_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-447-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6349,7 +6349,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET448_RELEASE_TAG="v1.0.6" \
 TICKET448_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET448_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-448-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6362,7 +6362,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET449_RELEASE_TAG="v1.0.6" \
 TICKET449_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET449_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-449-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6375,7 +6375,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET450_RELEASE_TAG="v1.0.6" \
 TICKET450_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET450_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-450-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6388,7 +6388,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET451_RELEASE_TAG="v1.0.6" \
 TICKET451_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET451_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-451-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6401,7 +6401,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET452_RELEASE_TAG="v1.0.6" \
 TICKET452_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET452_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-452-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6414,7 +6414,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET453_RELEASE_TAG="v1.0.6" \
 TICKET453_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET453_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-453-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6427,7 +6427,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET454_RELEASE_TAG="v1.0.6" \
 TICKET454_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET454_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-454-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6440,7 +6440,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET455_RELEASE_TAG="v1.0.6" \
 TICKET455_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET455_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-455-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6453,7 +6453,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET456_RELEASE_TAG="v1.0.6" \
 TICKET456_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET456_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-456-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6466,7 +6466,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET457_RELEASE_TAG="v1.0.6" \
 TICKET457_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET457_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-457-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6479,7 +6479,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET458_RELEASE_TAG="v1.0.6" \
 TICKET458_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET458_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-458-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6492,7 +6492,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET459_RELEASE_TAG="v1.0.6" \
 TICKET459_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET459_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-459-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6505,7 +6505,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET460_RELEASE_TAG="v1.0.6" \
 TICKET460_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET460_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-460-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6518,7 +6518,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET461_RELEASE_TAG="v1.0.6" \
 TICKET461_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET461_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-461-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6531,7 +6531,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET462_RELEASE_TAG="v1.0.6" \
 TICKET462_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET462_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-462-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6544,7 +6544,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET463_RELEASE_TAG="v1.0.6" \
 TICKET463_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET463_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-463-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6557,7 +6557,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET464_RELEASE_TAG="v1.0.6" \
 TICKET464_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET464_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-464-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6570,7 +6570,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET465_RELEASE_TAG="v1.0.6" \
 TICKET465_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET465_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-465-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6583,7 +6583,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET466_RELEASE_TAG="v1.0.6" \
 TICKET466_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET466_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-466-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6596,7 +6596,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET467_RELEASE_TAG="v1.0.6" \
 TICKET467_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET467_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-467-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6609,7 +6609,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET468_RELEASE_TAG="v1.0.6" \
 TICKET468_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET468_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-468-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6622,7 +6622,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET469_RELEASE_TAG="v1.0.6" \
 TICKET469_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET469_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-469-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6635,7 +6635,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET470_RELEASE_TAG="v1.0.6" \
 TICKET470_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET470_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-470-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6648,7 +6648,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET471_RELEASE_TAG="v1.0.6" \
 TICKET471_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET471_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-471-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6661,7 +6661,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET472_RELEASE_TAG="v1.0.6" \
 TICKET472_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET472_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-472-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6674,7 +6674,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET473_RELEASE_TAG="v1.0.6" \
 TICKET473_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET473_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-473-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6687,7 +6687,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET474_RELEASE_TAG="v1.0.6" \
 TICKET474_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET474_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-474-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6700,7 +6700,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET475_RELEASE_TAG="v1.0.6" \
 TICKET475_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET475_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-475-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6713,7 +6713,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET476_RELEASE_TAG="v1.0.6" \
 TICKET476_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET476_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-476-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6726,7 +6726,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET477_RELEASE_TAG="v1.0.6" \
 TICKET477_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET477_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-477-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6739,7 +6739,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET478_RELEASE_TAG="v1.0.6" \
 TICKET478_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET478_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-478-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6752,7 +6752,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET479_RELEASE_TAG="v1.0.6" \
 TICKET479_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET479_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-479-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6765,7 +6765,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET480_RELEASE_TAG="v1.0.6" \
 TICKET480_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET480_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-480-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6778,7 +6778,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET481_RELEASE_TAG="v1.0.6" \
 TICKET481_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET481_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-481-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6791,7 +6791,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET482_RELEASE_TAG="v1.0.6" \
 TICKET482_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET482_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-482-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6804,7 +6804,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET483_RELEASE_TAG="v1.0.6" \
 TICKET483_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET483_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-483-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6817,7 +6817,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET484_RELEASE_TAG="v1.0.6" \
 TICKET484_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET484_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-484-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6830,7 +6830,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET485_RELEASE_TAG="v1.0.6" \
 TICKET485_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET485_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-485-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6843,7 +6843,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET486_RELEASE_TAG="v1.0.6" \
 TICKET486_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET486_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-486-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6856,7 +6856,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET487_RELEASE_TAG="v1.0.6" \
 TICKET487_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET487_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-487-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6869,7 +6869,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET488_RELEASE_TAG="v1.0.6" \
 TICKET488_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET488_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-488-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6882,7 +6882,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET489_RELEASE_TAG="v1.0.6" \
 TICKET489_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET489_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-489-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6895,7 +6895,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET490_RELEASE_TAG="v1.0.6" \
 TICKET490_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET490_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-490-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6908,7 +6908,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET491_RELEASE_TAG="v1.0.6" \
 TICKET491_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET491_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-491-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6921,7 +6921,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET492_RELEASE_TAG="v1.0.6" \
 TICKET492_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET492_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-492-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6934,7 +6934,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET493_RELEASE_TAG="v1.0.6" \
 TICKET493_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET493_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-493-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6947,7 +6947,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET494_RELEASE_TAG="v1.0.6" \
 TICKET494_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET494_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-494-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6960,7 +6960,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET495_RELEASE_TAG="v1.0.6" \
 TICKET495_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET495_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-495-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6973,7 +6973,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET496_RELEASE_TAG="v1.0.6" \
 TICKET496_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET496_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-496-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6986,7 +6986,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET497_RELEASE_TAG="v1.0.6" \
 TICKET497_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET497_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-497-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -6999,7 +6999,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET498_RELEASE_TAG="v1.0.6" \
 TICKET498_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET498_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-498-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7012,7 +7012,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET499_RELEASE_TAG="v1.0.6" \
 TICKET499_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET499_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-499-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7025,7 +7025,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET500_RELEASE_TAG="v1.0.6" \
 TICKET500_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET500_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-500-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7038,7 +7038,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET501_RELEASE_TAG="v1.0.6" \
 TICKET501_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET501_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-501-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7051,7 +7051,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET502_RELEASE_TAG="v1.0.6" \
 TICKET502_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET502_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-502-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7064,7 +7064,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET503_RELEASE_TAG="v1.0.6" \
 TICKET503_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET503_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-503-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7077,7 +7077,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET504_RELEASE_TAG="v1.0.6" \
 TICKET504_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET504_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-504-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7090,7 +7090,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET505_RELEASE_TAG="v1.0.6" \
 TICKET505_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET505_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-505-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7103,7 +7103,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET506_RELEASE_TAG="v1.0.6" \
 TICKET506_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET506_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-506-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7116,7 +7116,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET507_RELEASE_TAG="v1.0.6" \
 TICKET507_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET507_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-507-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7129,7 +7129,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET508_RELEASE_TAG="v1.0.6" \
 TICKET508_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET508_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-508-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7142,7 +7142,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET509_RELEASE_TAG="v1.0.6" \
 TICKET509_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET509_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-509-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7155,7 +7155,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET510_RELEASE_TAG="v1.0.6" \
 TICKET510_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET510_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-510-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7168,7 +7168,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET511_RELEASE_TAG="v1.0.6" \
 TICKET511_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET511_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-511-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7181,7 +7181,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET512_RELEASE_TAG="v1.0.6" \
 TICKET512_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET512_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-512-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7194,7 +7194,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET513_RELEASE_TAG="v1.0.6" \
 TICKET513_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET513_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-513-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7207,7 +7207,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET514_RELEASE_TAG="v1.0.6" \
 TICKET514_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET514_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-514-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7220,7 +7220,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET515_RELEASE_TAG="v1.0.6" \
 TICKET515_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET515_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-515-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7233,7 +7233,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET516_RELEASE_TAG="v1.0.6" \
 TICKET516_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET516_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-516-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7246,7 +7246,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET517_RELEASE_TAG="v1.0.6" \
 TICKET517_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET517_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-517-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7259,7 +7259,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET518_RELEASE_TAG="v1.0.6" \
 TICKET518_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET518_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-518-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7272,7 +7272,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET519_RELEASE_TAG="v1.0.6" \
 TICKET519_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET519_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-519-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7285,7 +7285,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET520_RELEASE_TAG="v1.0.6" \
 TICKET520_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET520_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-520-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7298,7 +7298,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET521_RELEASE_TAG="v1.0.6" \
 TICKET521_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET521_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-521-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7311,7 +7311,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET522_RELEASE_TAG="v1.0.6" \
 TICKET522_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET522_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-522-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7324,7 +7324,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET523_RELEASE_TAG="v1.0.6" \
 TICKET523_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET523_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-523-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7337,7 +7337,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET524_RELEASE_TAG="v1.0.6" \
 TICKET524_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET524_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-524-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7350,7 +7350,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET525_RELEASE_TAG="v1.0.6" \
 TICKET525_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET525_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-525-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7363,7 +7363,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET526_RELEASE_TAG="v1.0.6" \
 TICKET526_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET526_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-526-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7376,7 +7376,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET527_RELEASE_TAG="v1.0.6" \
 TICKET527_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET527_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-527-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7389,7 +7389,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET528_RELEASE_TAG="v1.0.6" \
 TICKET528_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET528_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-528-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7402,7 +7402,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET529_RELEASE_TAG="v1.0.6" \
 TICKET529_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET529_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-529-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7415,7 +7415,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET530_RELEASE_TAG="v1.0.6" \
 TICKET530_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET530_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-530-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7428,7 +7428,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET531_RELEASE_TAG="v1.0.6" \
 TICKET531_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET531_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-531-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7441,7 +7441,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET532_RELEASE_TAG="v1.0.6" \
 TICKET532_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET532_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-532-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7454,7 +7454,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET533_RELEASE_TAG="v1.0.6" \
 TICKET533_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET533_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-533-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7467,7 +7467,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET534_RELEASE_TAG="v1.0.6" \
 TICKET534_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET534_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-534-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7480,7 +7480,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET535_RELEASE_TAG="v1.0.6" \
 TICKET535_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET535_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-535-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7493,7 +7493,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET536_RELEASE_TAG="v1.0.6" \
 TICKET536_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET536_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-536-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7506,7 +7506,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET537_RELEASE_TAG="v1.0.6" \
 TICKET537_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET537_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-537-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7519,7 +7519,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET538_RELEASE_TAG="v1.0.6" \
 TICKET538_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET538_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-538-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7532,7 +7532,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET539_RELEASE_TAG="v1.0.6" \
 TICKET539_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET539_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-539-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7545,7 +7545,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET540_RELEASE_TAG="v1.0.6" \
 TICKET540_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET540_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-540-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7558,7 +7558,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET541_RELEASE_TAG="v1.0.6" \
 TICKET541_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET541_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-541-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7571,7 +7571,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET542_RELEASE_TAG="v1.0.6" \
 TICKET542_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET542_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-542-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7584,7 +7584,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET543_RELEASE_TAG="v1.0.6" \
 TICKET543_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET543_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-543-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7597,7 +7597,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET544_RELEASE_TAG="v1.0.6" \
 TICKET544_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET544_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-544-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7610,7 +7610,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET545_RELEASE_TAG="v1.0.6" \
 TICKET545_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET545_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-545-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7623,7 +7623,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET546_RELEASE_TAG="v1.0.6" \
 TICKET546_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET546_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-546-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7636,7 +7636,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET547_RELEASE_TAG="v1.0.6" \
 TICKET547_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET547_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-547-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7649,7 +7649,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET548_RELEASE_TAG="v1.0.6" \
 TICKET548_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET548_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-548-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7662,7 +7662,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET549_RELEASE_TAG="v1.0.6" \
 TICKET549_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET549_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-549-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7675,7 +7675,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET550_RELEASE_TAG="v1.0.6" \
 TICKET550_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET550_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-550-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7688,7 +7688,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET551_RELEASE_TAG="v1.0.6" \
 TICKET551_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET551_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-551-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7701,7 +7701,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET552_RELEASE_TAG="v1.0.6" \
 TICKET552_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET552_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-552-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7714,7 +7714,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET553_RELEASE_TAG="v1.0.6" \
 TICKET553_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET553_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-553-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7727,7 +7727,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET554_RELEASE_TAG="v1.0.6" \
 TICKET554_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET554_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-554-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7740,7 +7740,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET555_RELEASE_TAG="v1.0.6" \
 TICKET555_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET555_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-555-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7753,7 +7753,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET556_RELEASE_TAG="v1.0.6" \
 TICKET556_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET556_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-556-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7766,7 +7766,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET557_RELEASE_TAG="v1.0.6" \
 TICKET557_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET557_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-557-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7779,7 +7779,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET558_RELEASE_TAG="v1.0.6" \
 TICKET558_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET558_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-558-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7792,7 +7792,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET559_RELEASE_TAG="v1.0.6" \
 TICKET559_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET559_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-559-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7805,7 +7805,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET560_RELEASE_TAG="v1.0.6" \
 TICKET560_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET560_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-560-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7818,7 +7818,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET561_RELEASE_TAG="v1.0.6" \
 TICKET561_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET561_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-561-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7831,7 +7831,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET562_RELEASE_TAG="v1.0.6" \
 TICKET562_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET562_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-562-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7844,7 +7844,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET563_RELEASE_TAG="v1.0.6" \
 TICKET563_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET563_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-563-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7857,7 +7857,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET564_RELEASE_TAG="v1.0.6" \
 TICKET564_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET564_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-564-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7870,7 +7870,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET565_RELEASE_TAG="v1.0.6" \
 TICKET565_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET565_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-565-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7883,7 +7883,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET566_RELEASE_TAG="v1.0.6" \
 TICKET566_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET566_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-566-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7896,7 +7896,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET567_RELEASE_TAG="v1.0.6" \
 TICKET567_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET567_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-567-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7909,7 +7909,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET568_RELEASE_TAG="v1.0.6" \
 TICKET568_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET568_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-568-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7922,7 +7922,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET569_RELEASE_TAG="v1.0.6" \
 TICKET569_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET569_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-569-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7935,7 +7935,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET570_RELEASE_TAG="v1.0.6" \
 TICKET570_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET570_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-570-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7948,7 +7948,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET571_RELEASE_TAG="v1.0.6" \
 TICKET571_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET571_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-571-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7961,7 +7961,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET572_RELEASE_TAG="v1.0.6" \
 TICKET572_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET572_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-572-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7974,7 +7974,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET573_RELEASE_TAG="v1.0.6" \
 TICKET573_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET573_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-573-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -7987,7 +7987,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET574_RELEASE_TAG="v1.0.6" \
 TICKET574_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET574_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-574-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8000,7 +8000,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET575_RELEASE_TAG="v1.0.6" \
 TICKET575_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET575_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-575-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8013,7 +8013,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET576_RELEASE_TAG="v1.0.6" \
 TICKET576_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET576_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-576-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8026,7 +8026,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET577_RELEASE_TAG="v1.0.6" \
 TICKET577_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET577_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-577-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8039,7 +8039,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET578_RELEASE_TAG="v1.0.6" \
 TICKET578_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET578_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-578-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8052,7 +8052,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET579_RELEASE_TAG="v1.0.6" \
 TICKET579_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET579_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-579-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8065,7 +8065,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET580_RELEASE_TAG="v1.0.6" \
 TICKET580_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET580_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-580-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8078,7 +8078,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET581_RELEASE_TAG="v1.0.6" \
 TICKET581_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET581_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-581-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8091,7 +8091,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET582_RELEASE_TAG="v1.0.6" \
 TICKET582_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET582_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-582-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8104,7 +8104,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET583_RELEASE_TAG="v1.0.6" \
 TICKET583_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET583_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-583-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8117,7 +8117,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET584_RELEASE_TAG="v1.0.6" \
 TICKET584_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET584_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-584-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8130,7 +8130,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET585_RELEASE_TAG="v1.0.6" \
 TICKET585_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET585_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-585-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8143,7 +8143,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET586_RELEASE_TAG="v1.0.6" \
 TICKET586_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET586_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-586-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8156,7 +8156,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET587_RELEASE_TAG="v1.0.6" \
 TICKET587_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET587_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-587-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8169,7 +8169,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET588_RELEASE_TAG="v1.0.6" \
 TICKET588_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET588_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-588-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8182,7 +8182,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET589_RELEASE_TAG="v1.0.6" \
 TICKET589_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET589_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-589-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8195,7 +8195,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET590_RELEASE_TAG="v1.0.6" \
 TICKET590_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET590_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-590-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8208,7 +8208,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET591_RELEASE_TAG="v1.0.6" \
 TICKET591_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET591_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-591-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8221,7 +8221,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET592_RELEASE_TAG="v1.0.6" \
 TICKET592_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET592_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-592-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8234,7 +8234,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET593_RELEASE_TAG="v1.0.6" \
 TICKET593_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET593_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-593-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8247,7 +8247,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET594_RELEASE_TAG="v1.0.6" \
 TICKET594_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET594_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-594-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8260,7 +8260,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET595_RELEASE_TAG="v1.0.6" \
 TICKET595_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET595_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-595-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8273,7 +8273,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET596_RELEASE_TAG="v1.0.6" \
 TICKET596_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET596_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-596-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8286,7 +8286,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET597_RELEASE_TAG="v1.0.6" \
 TICKET597_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET597_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-597-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8299,7 +8299,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET598_RELEASE_TAG="v1.0.6" \
 TICKET598_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET598_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-598-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8312,7 +8312,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET599_RELEASE_TAG="v1.0.6" \
 TICKET599_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET599_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-599-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8325,7 +8325,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET600_RELEASE_TAG="v1.0.6" \
 TICKET600_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET600_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-600-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8338,7 +8338,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET601_RELEASE_TAG="v1.0.6" \
 TICKET601_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET601_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-601-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8351,7 +8351,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET602_RELEASE_TAG="v1.0.6" \
 TICKET602_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET602_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-602-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8364,7 +8364,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET603_RELEASE_TAG="v1.0.6" \
 TICKET603_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET603_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-603-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8377,7 +8377,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET604_RELEASE_TAG="v1.0.6" \
 TICKET604_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET604_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-604-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8390,7 +8390,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET605_RELEASE_TAG="v1.0.6" \
 TICKET605_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET605_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-605-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8403,7 +8403,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET606_RELEASE_TAG="v1.0.6" \
 TICKET606_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET606_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-606-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8416,7 +8416,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET607_RELEASE_TAG="v1.0.6" \
 TICKET607_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET607_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-607-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8429,7 +8429,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET608_RELEASE_TAG="v1.0.6" \
 TICKET608_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET608_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-608-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8442,7 +8442,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET609_RELEASE_TAG="v1.0.6" \
 TICKET609_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET609_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-609-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8455,7 +8455,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET610_RELEASE_TAG="v1.0.6" \
 TICKET610_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET610_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-610-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8468,7 +8468,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET611_RELEASE_TAG="v1.0.6" \
 TICKET611_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET611_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-611-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8481,7 +8481,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET612_RELEASE_TAG="v1.0.6" \
 TICKET612_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET612_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-612-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8494,7 +8494,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET613_RELEASE_TAG="v1.0.6" \
 TICKET613_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET613_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-613-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8507,7 +8507,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET614_RELEASE_TAG="v1.0.6" \
 TICKET614_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET614_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-614-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8520,7 +8520,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET615_RELEASE_TAG="v1.0.6" \
 TICKET615_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET615_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-615-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8533,7 +8533,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET616_RELEASE_TAG="v1.0.6" \
 TICKET616_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET616_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-616-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8546,7 +8546,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET617_RELEASE_TAG="v1.0.6" \
 TICKET617_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET617_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-617-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8559,7 +8559,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET618_RELEASE_TAG="v1.0.6" \
 TICKET618_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET618_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-618-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8572,7 +8572,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET619_RELEASE_TAG="v1.0.6" \
 TICKET619_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET619_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-619-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8585,7 +8585,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET620_RELEASE_TAG="v1.0.6" \
 TICKET620_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET620_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-620-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8598,7 +8598,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET621_RELEASE_TAG="v1.0.6" \
 TICKET621_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET621_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-621-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8611,7 +8611,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET622_RELEASE_TAG="v1.0.6" \
 TICKET622_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET622_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-622-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8624,7 +8624,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET623_RELEASE_TAG="v1.0.6" \
 TICKET623_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET623_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-623-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8637,7 +8637,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET624_RELEASE_TAG="v1.0.6" \
 TICKET624_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET624_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-624-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8650,7 +8650,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET625_RELEASE_TAG="v1.0.6" \
 TICKET625_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET625_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-625-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8663,7 +8663,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET626_RELEASE_TAG="v1.0.6" \
 TICKET626_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET626_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-626-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8676,7 +8676,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET627_RELEASE_TAG="v1.0.6" \
 TICKET627_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET627_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-627-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8689,7 +8689,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET628_RELEASE_TAG="v1.0.6" \
 TICKET628_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET628_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-628-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8702,7 +8702,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET629_RELEASE_TAG="v1.0.6" \
 TICKET629_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET629_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-629-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8715,7 +8715,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET630_RELEASE_TAG="v1.0.6" \
 TICKET630_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET630_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-630-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8728,7 +8728,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET631_RELEASE_TAG="v1.0.6" \
 TICKET631_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET631_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-631-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8741,7 +8741,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET632_RELEASE_TAG="v1.0.6" \
 TICKET632_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET632_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-632-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8754,7 +8754,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET633_RELEASE_TAG="v1.0.6" \
 TICKET633_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET633_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-633-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8767,7 +8767,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET634_RELEASE_TAG="v1.0.6" \
 TICKET634_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET634_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-634-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8780,7 +8780,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET635_RELEASE_TAG="v1.0.6" \
 TICKET635_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET635_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-635-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8793,7 +8793,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET636_RELEASE_TAG="v1.0.6" \
 TICKET636_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET636_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-636-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8806,7 +8806,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET637_RELEASE_TAG="v1.0.6" \
 TICKET637_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET637_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-637-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8819,7 +8819,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET638_RELEASE_TAG="v1.0.6" \
 TICKET638_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET638_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-638-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8832,7 +8832,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET639_RELEASE_TAG="v1.0.6" \
 TICKET639_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET639_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-639-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8845,7 +8845,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET640_RELEASE_TAG="v1.0.6" \
 TICKET640_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET640_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-640-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8858,7 +8858,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET641_RELEASE_TAG="v1.0.6" \
 TICKET641_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET641_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-641-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8871,7 +8871,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET642_RELEASE_TAG="v1.0.6" \
 TICKET642_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET642_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-642-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8884,7 +8884,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET643_RELEASE_TAG="v1.0.6" \
 TICKET643_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET643_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-643-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8897,7 +8897,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET644_RELEASE_TAG="v1.0.6" \
 TICKET644_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET644_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-644-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8910,7 +8910,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET645_RELEASE_TAG="v1.0.6" \
 TICKET645_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET645_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-645-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8923,7 +8923,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET646_RELEASE_TAG="v1.0.6" \
 TICKET646_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET646_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-646-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8936,7 +8936,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET647_RELEASE_TAG="v1.0.6" \
 TICKET647_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET647_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-647-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8949,7 +8949,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET648_RELEASE_TAG="v1.0.6" \
 TICKET648_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET648_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-648-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8962,7 +8962,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET649_RELEASE_TAG="v1.0.6" \
 TICKET649_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET649_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-649-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8975,7 +8975,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET650_RELEASE_TAG="v1.0.6" \
 TICKET650_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET650_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-650-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -8988,7 +8988,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET651_RELEASE_TAG="v1.0.6" \
 TICKET651_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET651_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-651-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9001,7 +9001,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET652_RELEASE_TAG="v1.0.6" \
 TICKET652_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET652_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-652-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9014,7 +9014,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET653_RELEASE_TAG="v1.0.6" \
 TICKET653_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET653_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-653-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9027,7 +9027,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET654_RELEASE_TAG="v1.0.6" \
 TICKET654_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET654_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-654-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9040,7 +9040,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET655_RELEASE_TAG="v1.0.6" \
 TICKET655_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET655_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-655-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9053,7 +9053,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET656_RELEASE_TAG="v1.0.6" \
 TICKET656_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET656_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-656-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9066,7 +9066,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET657_RELEASE_TAG="v1.0.6" \
 TICKET657_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET657_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-657-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9079,7 +9079,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET658_RELEASE_TAG="v1.0.6" \
 TICKET658_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET658_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-658-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9092,7 +9092,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET659_RELEASE_TAG="v1.0.6" \
 TICKET659_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET659_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-659-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9105,7 +9105,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET660_RELEASE_TAG="v1.0.6" \
 TICKET660_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET660_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-660-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9118,7 +9118,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET661_RELEASE_TAG="v1.0.6" \
 TICKET661_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET661_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-661-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9131,7 +9131,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET662_RELEASE_TAG="v1.0.6" \
 TICKET662_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET662_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-662-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9144,7 +9144,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET663_RELEASE_TAG="v1.0.6" \
 TICKET663_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET663_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-663-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9157,7 +9157,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET664_RELEASE_TAG="v1.0.6" \
 TICKET664_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET664_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-664-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9170,7 +9170,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET665_RELEASE_TAG="v1.0.6" \
 TICKET665_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET665_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-665-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9183,7 +9183,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET666_RELEASE_TAG="v1.0.6" \
 TICKET666_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET666_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-666-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9196,7 +9196,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET667_RELEASE_TAG="v1.0.6" \
 TICKET667_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET667_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-667-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9209,7 +9209,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET668_RELEASE_TAG="v1.0.6" \
 TICKET668_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET668_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-668-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9222,7 +9222,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET669_RELEASE_TAG="v1.0.6" \
 TICKET669_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET669_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-669-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9235,7 +9235,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET670_RELEASE_TAG="v1.0.6" \
 TICKET670_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET670_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-670-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9248,7 +9248,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET671_RELEASE_TAG="v1.0.6" \
 TICKET671_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET671_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-671-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9261,7 +9261,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET672_RELEASE_TAG="v1.0.6" \
 TICKET672_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET672_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-672-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9274,7 +9274,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET673_RELEASE_TAG="v1.0.6" \
 TICKET673_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET673_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-673-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9287,7 +9287,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET674_RELEASE_TAG="v1.0.6" \
 TICKET674_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET674_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-674-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9300,7 +9300,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET675_RELEASE_TAG="v1.0.6" \
 TICKET675_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET675_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-675-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9313,7 +9313,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET676_RELEASE_TAG="v1.0.6" \
 TICKET676_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET676_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-676-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9326,7 +9326,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET677_RELEASE_TAG="v1.0.6" \
 TICKET677_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET677_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-677-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9339,7 +9339,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET678_RELEASE_TAG="v1.0.6" \
 TICKET678_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET678_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-678-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9352,7 +9352,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET679_RELEASE_TAG="v1.0.6" \
 TICKET679_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET679_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-679-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9365,7 +9365,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET680_RELEASE_TAG="v1.0.6" \
 TICKET680_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET680_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-680-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9378,7 +9378,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET681_RELEASE_TAG="v1.0.6" \
 TICKET681_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET681_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-681-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9391,7 +9391,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET682_RELEASE_TAG="v1.0.6" \
 TICKET682_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET682_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-682-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9404,7 +9404,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET683_RELEASE_TAG="v1.0.6" \
 TICKET683_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET683_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-683-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9417,7 +9417,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET684_RELEASE_TAG="v1.0.6" \
 TICKET684_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET684_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-684-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9430,7 +9430,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET685_RELEASE_TAG="v1.0.6" \
 TICKET685_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET685_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-685-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9443,7 +9443,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET686_RELEASE_TAG="v1.0.6" \
 TICKET686_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET686_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-686-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9456,7 +9456,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET687_RELEASE_TAG="v1.0.6" \
 TICKET687_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET687_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-687-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9469,7 +9469,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET688_RELEASE_TAG="v1.0.6" \
 TICKET688_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET688_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-688-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9482,7 +9482,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET689_RELEASE_TAG="v1.0.6" \
 TICKET689_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET689_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-689-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9495,7 +9495,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET690_RELEASE_TAG="v1.0.6" \
 TICKET690_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET690_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-690-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9508,7 +9508,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET691_RELEASE_TAG="v1.0.6" \
 TICKET691_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET691_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-691-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9521,7 +9521,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET692_RELEASE_TAG="v1.0.6" \
 TICKET692_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET692_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-692-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9534,7 +9534,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET693_RELEASE_TAG="v1.0.6" \
 TICKET693_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET693_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-693-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9547,7 +9547,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET694_RELEASE_TAG="v1.0.6" \
 TICKET694_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET694_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-694-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9560,7 +9560,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET695_RELEASE_TAG="v1.0.6" \
 TICKET695_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET695_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-695-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9573,7 +9573,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET696_RELEASE_TAG="v1.0.6" \
 TICKET696_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET696_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-696-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9586,7 +9586,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET697_RELEASE_TAG="v1.0.6" \
 TICKET697_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET697_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-697-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9599,7 +9599,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET698_RELEASE_TAG="v1.0.6" \
 TICKET698_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET698_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-698-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9612,7 +9612,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET699_RELEASE_TAG="v1.0.6" \
 TICKET699_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET699_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-699-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9625,7 +9625,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET700_RELEASE_TAG="v1.0.6" \
 TICKET700_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET700_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-700-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9638,7 +9638,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET701_RELEASE_TAG="v1.0.6" \
 TICKET701_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET701_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-701-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9651,7 +9651,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET702_RELEASE_TAG="v1.0.6" \
 TICKET702_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET702_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-702-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9664,7 +9664,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET703_RELEASE_TAG="v1.0.6" \
 TICKET703_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET703_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-703-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9677,7 +9677,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET704_RELEASE_TAG="v1.0.6" \
 TICKET704_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET704_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-704-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9690,7 +9690,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET705_RELEASE_TAG="v1.0.6" \
 TICKET705_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET705_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-705-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9703,7 +9703,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET706_RELEASE_TAG="v1.0.6" \
 TICKET706_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET706_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-706-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9716,7 +9716,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET707_RELEASE_TAG="v1.0.6" \
 TICKET707_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET707_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-707-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9729,7 +9729,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET708_RELEASE_TAG="v1.0.6" \
 TICKET708_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET708_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-708-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9742,7 +9742,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET709_RELEASE_TAG="v1.0.6" \
 TICKET709_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET709_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-709-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9755,7 +9755,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET710_RELEASE_TAG="v1.0.6" \
 TICKET710_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET710_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-710-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9768,7 +9768,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET711_RELEASE_TAG="v1.0.6" \
 TICKET711_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET711_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-711-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9781,7 +9781,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET712_RELEASE_TAG="v1.0.6" \
 TICKET712_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET712_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-712-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9794,7 +9794,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET713_RELEASE_TAG="v1.0.6" \
 TICKET713_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET713_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-713-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9807,7 +9807,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET714_RELEASE_TAG="v1.0.6" \
 TICKET714_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET714_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-714-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9820,7 +9820,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET715_RELEASE_TAG="v1.0.6" \
 TICKET715_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET715_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-715-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9833,7 +9833,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET716_RELEASE_TAG="v1.0.6" \
 TICKET716_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET716_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-716-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9846,7 +9846,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET717_RELEASE_TAG="v1.0.6" \
 TICKET717_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET717_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-717-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9859,7 +9859,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET718_RELEASE_TAG="v1.0.6" \
 TICKET718_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET718_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-718-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9872,7 +9872,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET719_RELEASE_TAG="v1.0.6" \
 TICKET719_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET719_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-719-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9885,7 +9885,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET720_RELEASE_TAG="v1.0.6" \
 TICKET720_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET720_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-720-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9898,7 +9898,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET721_RELEASE_TAG="v1.0.6" \
 TICKET721_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET721_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-721-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9911,7 +9911,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET722_RELEASE_TAG="v1.0.6" \
 TICKET722_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET722_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-722-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9924,7 +9924,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET723_RELEASE_TAG="v1.0.6" \
 TICKET723_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET723_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-723-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9937,7 +9937,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET724_RELEASE_TAG="v1.0.6" \
 TICKET724_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET724_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-724-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9950,7 +9950,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET725_RELEASE_TAG="v1.0.6" \
 TICKET725_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET725_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-725-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9963,7 +9963,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET726_RELEASE_TAG="v1.0.6" \
 TICKET726_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET726_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-726-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9976,7 +9976,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET727_RELEASE_TAG="v1.0.6" \
 TICKET727_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET727_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-727-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -9989,7 +9989,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET728_RELEASE_TAG="v1.0.6" \
 TICKET728_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET728_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-728-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10002,7 +10002,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET729_RELEASE_TAG="v1.0.6" \
 TICKET729_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET729_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-729-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10015,7 +10015,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET730_RELEASE_TAG="v1.0.6" \
 TICKET730_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET730_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-730-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10028,7 +10028,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET731_RELEASE_TAG="v1.0.6" \
 TICKET731_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET731_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-731-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10041,7 +10041,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET732_RELEASE_TAG="v1.0.6" \
 TICKET732_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET732_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-732-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10054,7 +10054,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET733_RELEASE_TAG="v1.0.6" \
 TICKET733_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET733_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-733-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10067,7 +10067,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET734_RELEASE_TAG="v1.0.6" \
 TICKET734_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET734_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-734-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10080,7 +10080,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET735_RELEASE_TAG="v1.0.6" \
 TICKET735_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET735_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-735-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10093,7 +10093,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET736_RELEASE_TAG="v1.0.6" \
 TICKET736_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET736_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-736-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10106,7 +10106,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET737_RELEASE_TAG="v1.0.6" \
 TICKET737_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET737_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-737-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10119,7 +10119,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET738_RELEASE_TAG="v1.0.6" \
 TICKET738_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET738_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-738-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10132,7 +10132,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET739_RELEASE_TAG="v1.0.6" \
 TICKET739_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET739_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-739-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10145,7 +10145,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET740_RELEASE_TAG="v1.0.6" \
 TICKET740_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET740_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-740-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10158,7 +10158,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET741_RELEASE_TAG="v1.0.6" \
 TICKET741_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET741_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-741-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10171,7 +10171,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET743_RELEASE_TAG="v1.0.6" \
 TICKET743_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET743_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-743-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10184,7 +10184,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET744_RELEASE_TAG="v1.0.6" \
 TICKET744_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET744_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-744-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10197,7 +10197,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET745_RELEASE_TAG="v1.0.6" \
 TICKET745_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET745_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-745-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10211,7 +10211,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET746_RELEASE_TAG="v1.0.6" \
 TICKET746_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET746_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-746-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10223,7 +10223,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET747_RELEASE_TAG="v1.0.6" \
 TICKET747_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET747_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-747-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10235,7 +10235,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET748_RELEASE_TAG="v1.0.6" \
 TICKET748_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET748_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-748-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10247,7 +10247,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET749_RELEASE_TAG="v1.0.6" \
 TICKET749_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET749_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-749-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10259,7 +10259,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET750_RELEASE_TAG="v1.0.6" \
 TICKET750_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET750_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-750-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10271,7 +10271,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET751_RELEASE_TAG="v1.0.6" \
 TICKET751_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET751_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-751-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10283,7 +10283,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET752_RELEASE_TAG="v1.0.6" \
 TICKET752_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET752_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-752-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10295,7 +10295,7 @@ PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 TICKET753_RELEASE_TAG="v1.0.6" \
 TICKET753_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET753_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-753-production-readiness-evidence-continuity-wrapup.sh
 ```
 
@@ -10356,7 +10356,7 @@ curl -sS "https://<your-prod-domain>/api/v1/cron/jobs" \
 ```bash
 bash ./scripts/smoke-prod.sh
 # optional custom target URL
-bash ./scripts/smoke-prod.sh https://esg-rdt-master-pi.vercel.app https://example.com
+bash ./scripts/smoke-prod.sh https://esg-rdt-master-kimikimichineses-projects.vercel.app https://example.com
 ```
 
 The smoke script validates:

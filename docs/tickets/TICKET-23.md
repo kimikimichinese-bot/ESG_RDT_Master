@@ -32,6 +32,6 @@ releases and ticket docs evolution.
 TICKET23_RELEASE_TAG="v1.0.6" \
 TICKET23_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET23_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-23-production-readiness-docs-hygiene-continuity.sh
 ```

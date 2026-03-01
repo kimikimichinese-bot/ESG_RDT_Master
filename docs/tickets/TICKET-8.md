@@ -22,6 +22,6 @@ Provide a lightweight one-command check for visible production drift before/afte
 
 ```bash
 TICKET8_EXPECTED_COMMIT="v1.0.5^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-8-production-drift.sh
 ```

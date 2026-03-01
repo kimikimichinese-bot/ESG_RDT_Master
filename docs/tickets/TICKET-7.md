@@ -24,6 +24,6 @@ Create a deterministic, one-command bundle for post-merge release evidence that 
 
 ```bash
 TICKET7_EXPECTED_COMMIT="v1.0.5^{}" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-7-release-evidence-pack.sh
 ```

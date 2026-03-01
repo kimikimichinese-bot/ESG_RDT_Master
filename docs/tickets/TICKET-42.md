@@ -23,6 +23,6 @@ Add a deterministic one-command lineage validation to ensure production-readines
 TICKET42_RELEASE_TAG="v1.0.6" \
 TICKET42_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET42_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-42-production-readiness-readme-lineage.sh
 ```

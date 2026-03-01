@@ -23,6 +23,6 @@ Add a deterministic one-command continuity hardening check to validate productio
 TICKET41_RELEASE_TAG="v1.0.6" \
 TICKET41_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET41_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-41-production-readiness-continuity-hardening.sh
 ```

@@ -23,6 +23,6 @@ Add a deterministic one-command continuity check focused on production readiness
 TICKET31_RELEASE_TAG="v1.0.6" \
 TICKET31_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET31_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-31-production-readiness-rollover-check.sh
 ```

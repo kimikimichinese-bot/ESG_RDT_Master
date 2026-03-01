@@ -22,6 +22,6 @@ Add a single-command local audit bundle to capture post-release evidence in a co
 
 ```bash
 TICKET5_TAG="v1.0.4" \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-5-audit-bundle.sh
 ```

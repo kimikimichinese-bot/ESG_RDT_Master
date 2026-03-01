@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
+readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-kimikimichineses-projects.vercel.app}"
 readonly WORKFLOW_NAME="${TICKET7_WORKFLOW:-production-readiness}"
 readonly EXPECTED_COMMIT_INPUT="${TICKET7_EXPECTED_COMMIT:-$(git rev-parse --short=8 origin/master)}"
 readonly OUTFILE="${TICKET7_OUTFILE:-/tmp/ticket-7-release-bundle.md}"

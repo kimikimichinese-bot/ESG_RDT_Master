@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-pi.vercel.app}"
+readonly PROD_ALIAS="${PROD_ALIAS:-https://esg-rdt-master-kimikimichineses-projects.vercel.app}"
 readonly PROD_WORKFLOW="${PROD_WORKFLOW:-production-readiness}"
 readonly TICKET5_TAG="${TICKET5_TAG:-v1.0.4}"
 readonly TICKET5_REF="${TICKET5_REF:-}"

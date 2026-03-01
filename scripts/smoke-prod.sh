@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BASE_URL="${1:-https://esg-rdt-master-pi.vercel.app}"
+BASE_URL="${1:-https://esg-rdt-master-kimikimichineses-projects.vercel.app}"
 COOKIE_JAR="$(mktemp)"
 TS="$(date +%s)"
 

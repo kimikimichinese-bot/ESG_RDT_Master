@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"
+readonly PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app"
 readonly WORKFLOW_NAME="production-readiness"
 readonly RUN_MIGRATIONS="${RUN_MIGRATIONS:-false}"
 readonly RUN_PROD_DEPLOY="${RUN_PROD_DEPLOY:-false}"

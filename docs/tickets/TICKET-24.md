@@ -24,6 +24,6 @@ Add a deterministic one-command handoff check that validates production readines
 TICKET24_RELEASE_TAG="v1.0.6" \
 TICKET24_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET24_LOG_DEPTH=3 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-24-production-readiness-ops-handoff.sh
 ```

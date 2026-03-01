@@ -23,6 +23,6 @@ Add one-command readiness continuity check focused on log-depth continuity betwe
 TICKET48_RELEASE_TAG="v1.0.6" \
 TICKET48_EXPECTED_COMMIT="v1.0.6^{}" \
 TICKET48_LOG_DEPTH=4 \
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-48-production-readiness-log-depth-continuity-check.sh
 ```

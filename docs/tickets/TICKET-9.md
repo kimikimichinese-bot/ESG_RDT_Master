@@ -22,7 +22,7 @@ Add a single deterministic command for pre-merge and post-merge production ready
 ## Execution Command
 
 ```bash
-PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
+PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app" \
 ./scripts/ticket-9-production-readiness-automation.sh
 ```
 

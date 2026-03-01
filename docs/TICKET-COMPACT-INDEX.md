@@ -9,7 +9,7 @@ To avoid a repetitive list in one place, this compact index groups tickets by op
   - `TICKET<N>_RELEASE_TAG="v1.0.6"`
   - `TICKET<N>_EXPECTED_COMMIT="v1.0.6^{}"`
   - `TICKET<N>_LOG_DEPTH=4`
-  - `PROD_ALIAS="https://esg-rdt-master-pi.vercel.app"`
+  - `PROD_ALIAS="https://esg-rdt-master-kimikimichineses-projects.vercel.app"`
   - `./scripts/ticket-<N>-production-readiness-evidence-continuity-wrapup.sh`
 
 Range covered in this repo:

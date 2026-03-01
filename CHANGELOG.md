@@ -15,7 +15,7 @@
 - Release commit: `183ccfe`.
 - Source PR: `#19` (Ticket #6 production handoff command).
 - Production readiness run: `22116524288` (`production-readiness`) → success.
-- Verified on production alias (`esg-rdt-master-pi.vercel.app`):
+- Verified on production alias (`esg-rdt-master-kimikimichineses-projects.vercel.app`):
   - `GET /api/ready` -> `status=ready`, `checks.web=ok`
   - `GET /api/health` -> `status=ok`, `db=ok`, `version=183ccfe3`
 
@@ -48,7 +48,7 @@ cat /tmp/ticket-6-handoff.md
 - Source PR: `#14` (Ticket #3 readiness docs + runbook), plus `scripts/ticket-3-closeout.sh` direct on `master`.
 - Production readiness check:
   - `22115427224` (`production-readiness`) → success
-- Verified on production alias (`esg-rdt-master-pi.vercel.app`):
+- Verified on production alias (`esg-rdt-master-kimikimichineses-projects.vercel.app`):
   - `GET /api/ready`
   - `GET /api/health` with `version=d9b3e85c` and `db=ok`.
 
@@ -81,7 +81,7 @@ git show --stat --oneline d9b3e85
   - `22114981926` (push) → success
   - `22114983535` (workflow_dispatch) → success
 - Latest production deployment alias check:
-  - alias: `https://esg-rdt-master-pi.vercel.app`
+  - alias: `https://esg-rdt-master-kimikimichineses-projects.vercel.app`
   - deployment: `https://esg-rdt-master-intvwrwi3-kimikimichineses-projects.vercel.app`
 - Verified on production alias:
   - `GET /api/ready` => `{"status":"ready","checks":{"web":"ok"}}`
@@ -115,7 +115,7 @@ git show --stat --oneline 7ac4ac1
 - Release commit: `c37ddc6` (`v1.0.2` tag points here, annotated).
 - Production-ready deploy verification run: `22114771265` (`production-readiness` success, job `Neon/Postgres + env readiness` success).
 - Latest known production alias/deploy:
-  - alias: `https://esg-rdt-master-pi.vercel.app`
+  - alias: `https://esg-rdt-master-kimikimichineses-projects.vercel.app`
   - deployment: `https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app`
 - Verified `/api/ready` and `/api/health` on production alias.
 
@@ -138,7 +138,7 @@ gh run view 22114771265 --json conclusion,status,headSha,startedAt,updatedAt,url
 
 ### Added
 - Added production uptime and rollout documentation in `docs-production-checks`:
-  - Alias rollout timeline and alias ownership note for `esg-rdt-master-pi.vercel.app`.
+  - Alias rollout timeline and alias ownership note for `esg-rdt-master-kimikimichineses-projects.vercel.app`.
   - One-command production verification runbook in README.
   - Explicit required checks and branch protection runbook updates.
 
@@ -148,7 +148,7 @@ gh run view 22114771265 --json conclusion,status,headSha,startedAt,updatedAt,url
 
 ### Production status
 - Release tag pushed: `v1.0.1`.
-- Latest production deployment alias: `https://esg-rdt-master-pi.vercel.app`.
+- Latest production deployment alias: `https://esg-rdt-master-kimikimichineses-projects.vercel.app`.
 - Verified successful production readines run and green verification gates:
   - `production-readiness` workflow pass.
   - Vercel deployment healthy and endpoint checks passing.
