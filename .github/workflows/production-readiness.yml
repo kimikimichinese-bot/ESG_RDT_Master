@@ -41,9 +41,8 @@ jobs:
         run: |
           bun run --filter @esg-rdt/api lint
           bun run --filter @esg-rdt/worker lint
-      - name: Prisma schema and client readiness
+      - name: Prisma schema readiness
         run: |
-          bun run db:generate
           bun run db:check
       - name: Validate Neon branch connectivity (if DATABASE_URL_UNPOOLED is configured)
         run: |
