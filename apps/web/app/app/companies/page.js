@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
 import { useCompanyScope } from "../_components/use-company-scope";
@@ -25,12 +25,6 @@ export default function CompaniesPage() {
     () => tenant.role === "TenantAdmin" || tenant.role === "Manager",
     [tenant.role],
   );
-
-  useEffect(() => {
-    if (!tenant.loading && tenant.tenantId) {
-      void companyScope.refresh();
-    }
-  }, [tenant.loading, tenant.tenantId, companyScope]);
 
   const openCreate = () => {
     setEditing(null);
