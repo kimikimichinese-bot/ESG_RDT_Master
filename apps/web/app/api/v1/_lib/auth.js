@@ -152,7 +152,42 @@ export const readSessionFromCookieStore = (cookieStore) => {
 
 export const getUserCount = async (sql) => {
   const rows = await sql`SELECT COUNT(*)::int AS count FROM users`;
-  return Number(rows?.[0]?.count ?? 0);
+  const count = Number(rows?.[0]?.count);
+  if (!Number.isInteger(count) || count < 0) {
+    throw new Error("Invalid users count payload");
+  }
+  return count;
+};
+
+export const getBootstrapCounts = async (sql) => {
+  const rows = await sql`
+    SELECT
+      (SELECT COUNT(*)::int FROM users) AS users_count,
+      (SELECT COUNT(*)::int FROM tenants) AS tenants_count,
+      (SELECT COUNT(*)::int FROM memberships) AS memberships_count
+  `;
+
+  const row = rows?.[0];
+  const usersCount = Number(row?.users_count);
+  const tenantsCount = Number(row?.tenants_count);
+  const membershipsCount = Number(row?.memberships_count);
+
+  if (
+    !Number.isInteger(usersCount) ||
+    usersCount < 0 ||
+    !Number.isInteger(tenantsCount) ||
+    tenantsCount < 0 ||
+    !Number.isInteger(membershipsCount) ||
+    membershipsCount < 0
+  ) {
+    throw new Error("Invalid bootstrap count payload");
+  }
+
+  return {
+    usersCount,
+    tenantsCount,
+    membershipsCount,
+  };
 };
 
 const normalizeMembership = (row) => ({
@@ -202,37 +237,87 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
   await ensureEnterpriseSchema();
   const sql = getSql();
 
-  const existingUsers = await getUserCount(sql);
-  if (existingUsers > 0) {
-    return { error: "Setup already completed", status: 409 };
-  }
-
-  const tenantId = randomUUID();
-  const userId = randomUUID();
-  const passwordHash = hashPassword(password);
-
   const cleanedTenantName = cleanString(tenantName) || "Default Tenant";
   const cleanedName = cleanString(name) || "Tenant Admin";
   const cleanedEmail = cleanString(email).toLowerCase();
+  const cleanedPassword = cleanString(password);
 
   if (!cleanedEmail.includes("@")) {
     return { error: "Valid email is required", status: 400 };
   }
 
-  await sql`
-    INSERT INTO tenants (id, name)
-    VALUES (${tenantId}, ${cleanedTenantName})
+  if (cleanedPassword.length < 8) {
+    return { error: "Password must be at least 8 characters", status: 400 };
+  }
+
+  const existingUserRows = await sql`
+    SELECT id
+    FROM users
+    WHERE email = ${cleanedEmail}
+    LIMIT 1
   `;
 
-  await sql`
-    INSERT INTO users (id, email, name, password_hash)
-    VALUES (${userId}, ${cleanedEmail}, ${cleanedName}, ${passwordHash})
+  if (existingUserRows?.[0]) {
+    return {
+      error: "User already exists, go to login",
+      status: 409,
+      code: "USER_EXISTS",
+    };
+  }
+
+  const counts = await getBootstrapCounts(sql);
+  if (counts.usersCount > 0) {
+    return {
+      error: "Setup already completed",
+      status: 409,
+      code: "SETUP_COMPLETED",
+    };
+  }
+
+  const passwordHash = hashPassword(cleanedPassword);
+  const userId = randomUUID();
+
+  const tenantByNameRows = await sql`
+    SELECT id
+    FROM tenants
+    WHERE LOWER(name) = LOWER(${cleanedTenantName})
+    ORDER BY created_at ASC
+    LIMIT 1
   `;
 
-  await sql`
-    INSERT INTO memberships (user_id, tenant_id, role)
-    VALUES (${userId}, ${tenantId}, 'TenantAdmin')
-  `;
+  const existingTenantId = tenantByNameRows?.[0]?.id || null;
+  const tenantId = existingTenantId || randomUUID();
+
+  try {
+    const queries = [];
+    if (!existingTenantId) {
+      queries.push(sql`
+        INSERT INTO tenants (id, name)
+        VALUES (${tenantId}, ${cleanedTenantName})
+      `);
+    }
+    queries.push(sql`
+      INSERT INTO users (id, email, name, password_hash)
+      VALUES (${userId}, ${cleanedEmail}, ${cleanedName}, ${passwordHash})
+    `);
+    queries.push(sql`
+      INSERT INTO memberships (user_id, tenant_id, role)
+      VALUES (${userId}, ${tenantId}, 'TenantAdmin')
+      ON CONFLICT (user_id, tenant_id) DO UPDATE
+      SET role = EXCLUDED.role
+    `);
+
+    await sql.transaction(queries);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "23505") {
+      return {
+        error: "User already exists, go to login",
+        status: 409,
+        code: "USER_EXISTS",
+      };
+    }
+    throw error;
+  }
 
   return {
     userId,
@@ -246,7 +331,7 @@ export const authenticateWithPassword = async ({ email, password }) => {
 
   const cleanedEmail = cleanString(email).toLowerCase();
   if (!cleanedEmail || !password) {
-    return { error: "Email and password are required", status: 400 };
+    return { error: "Email and password are required", status: 400, code: "MISSING_CREDENTIALS" };
   }
 
   const rows = await sql`
@@ -258,11 +343,11 @@ export const authenticateWithPassword = async ({ email, password }) => {
 
   const user = rows?.[0];
   if (!user) {
-    return { error: "Invalid credentials", status: 401 };
+    return { error: "Invalid credentials", status: 401, code: "INVALID_CREDENTIALS" };
   }
 
   if (!verifyPassword(password, user.password_hash)) {
-    return { error: "Invalid credentials", status: 401 };
+    return { error: "Invalid credentials", status: 401, code: "INVALID_CREDENTIALS" };
   }
 
   const memberships = await sql`
@@ -273,7 +358,7 @@ export const authenticateWithPassword = async ({ email, password }) => {
   `;
 
   if (!memberships.length) {
-    return { error: "User has no tenant membership", status: 403 };
+    return { error: "User has no tenant membership", status: 403, code: "NO_MEMBERSHIP" };
   }
 
   return {

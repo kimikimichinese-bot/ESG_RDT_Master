@@ -1,13 +1,20 @@
 import { ensureEnterpriseSchema, getSql } from "./db.js";
-import { getMembership, getUserCount, getUserWithMemberships, readSessionFromCookieStore } from "./auth.js";
+import { getBootstrapCounts, getMembership, getUserWithMemberships, readSessionFromCookieStore } from "./auth.js";
 
-export const getBootstrapStatus = async () => {
+export const getBootstrapMetrics = async () => {
   await ensureEnterpriseSchema();
   const sql = getSql();
-  const userCount = await getUserCount(sql);
+  return getBootstrapCounts(sql);
+};
+
+export const getBootstrapStatus = async () => {
+  const { usersCount, tenantsCount, membershipsCount } = await getBootstrapMetrics();
   return {
-    userCount,
-    needsSetup: userCount === 0,
+    userCount: usersCount,
+    usersCount,
+    tenantsCount,
+    membershipsCount,
+    needsSetup: usersCount === 0,
   };
 };
 

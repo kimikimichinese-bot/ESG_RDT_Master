@@ -69,6 +69,19 @@ HELP_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/help")"
 assert_status "$HELP_STATUS" "200" "/help"
 TOOL_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/tools/url-analyzer")"
 assert_status "$TOOL_STATUS" "200" "/tools/url-analyzer"
+LOGIN_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/login")"
+assert_status "$LOGIN_STATUS" "200" "/login"
+SETUP_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/setup")"
+assert_status "$SETUP_STATUS" "200" "/setup"
+
+request_json "GET" "/api/v1/auth/bootstrap"
+assert_status "$REQUEST_STATUS" "200" "/api/v1/auth/bootstrap"
+if ! printf '%s' "$REQUEST_PAYLOAD" | jq -e '.ok == true and (.usersCount|type=="number") and (.tenantsCount|type=="number") and (.membershipsCount|type=="number")' >/dev/null; then
+  echo "FAIL: /api/v1/auth/bootstrap payload invalid"
+  echo "$REQUEST_PAYLOAD"
+  exit 1
+fi
+echo "PASS: /api/v1/auth/bootstrap payload ok"
 
 echo
 
