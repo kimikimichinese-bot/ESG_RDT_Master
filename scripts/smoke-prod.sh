@@ -158,3 +158,52 @@ if [[ "${HELP_STATUS}" != "200" ]]; then
   echo "FAIL: /help must return 200"
   exit 1
 fi
+
+echo
+echo "== Home marker =="
+HOME_HTML="$(curl -sS "${BASE_URL}/")"
+if grep -Eq "ESG Assessment|ESG RDT" <<<"${HOME_HTML}"; then
+  echo "home marker check -> PASS"
+else
+  echo "FAIL: home page missing ESG marker"
+  exit 1
+fi
+
+echo
+echo "== URL analyzer route =="
+TOOL_STATUS="$(curl -sS -o /dev/null -w "%{http_code}" "${BASE_URL}/tools/url-analyzer")"
+echo "/tools/url-analyzer -> ${TOOL_STATUS}"
+if [[ "${TOOL_STATUS}" != "200" ]]; then
+  echo "FAIL: /tools/url-analyzer must return 200"
+  exit 1
+fi
+
+echo
+echo "== Projects API flow =="
+PROJECT_CREATE_PAYLOAD="$(curl -sS -X POST "${BASE_URL}/api/v1/projects" \
+  -H 'content-type: application/json' \
+  -d '{"name":"Smoke ESG Assessment"}')"
+echo "${PROJECT_CREATE_PAYLOAD}"
+PROJECT_ID="$(get_json_field "${PROJECT_CREATE_PAYLOAD}" '.project.id // empty')"
+if [[ -z "${PROJECT_ID}" || "${PROJECT_ID}" == "null" ]]; then
+  echo "FAIL: project create did not return project.id"
+  exit 1
+fi
+echo "created project id: ${PROJECT_ID}"
+
+ANSWERS_UPSERT_PAYLOAD="$(curl -sS -X PUT "${BASE_URL}/api/v1/projects/${PROJECT_ID}/answers" \
+  -H 'content-type: application/json' \
+  -d '{"answers":[{"parameterKey":"e.profile.reporting_year","value":"2026"},{"parameterKey":"e.scope1.total_tco2e","value":42.7},{"parameterKey":"g.policies.anti_corruption","value":true}]}')"
+echo "${ANSWERS_UPSERT_PAYLOAD}"
+UPSERT_TOTAL="$(get_json_field "${ANSWERS_UPSERT_PAYLOAD}" '.totalAnswers // empty')"
+if [[ -z "${UPSERT_TOTAL}" || "${UPSERT_TOTAL}" == "null" ]]; then
+  echo "FAIL: answers upsert did not return totalAnswers"
+  exit 1
+fi
+
+REPORT_STATUS="$(curl -sS -o /dev/null -w "%{http_code}" "${BASE_URL}/api/v1/projects/${PROJECT_ID}/report")"
+echo "/api/v1/projects/${PROJECT_ID}/report -> ${REPORT_STATUS}"
+if [[ "${REPORT_STATUS}" != "200" ]]; then
+  echo "FAIL: project report endpoint must return 200"
+  exit 1
+fi
