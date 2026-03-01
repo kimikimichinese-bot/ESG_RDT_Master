@@ -13,8 +13,14 @@ export default function LoginPage() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    setBusy(true);
     setError("");
+
+    if (!email.trim() || !password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    setBusy(true);
 
     try {
       const response = await fetch("/api/v1/auth/login", {
@@ -27,7 +33,17 @@ export default function LoginPage() {
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || `HTTP ${response.status}`);
+        if (response.status === 401 || payload?.code === "INVALID_CREDENTIALS") {
+          throw new Error("Invalid email or password.");
+        }
+
+        if (response.status === 409 && payload?.needsSetup === true) {
+          throw new Error("No users found. Run first setup.");
+        }
+
+        const baseMessage = payload?.error || payload?.message || `HTTP ${response.status}`;
+        const requestId = typeof payload?.requestId === "string" ? payload.requestId : "";
+        throw new Error(requestId ? `${baseMessage} (requestId: ${requestId})` : baseMessage);
       }
 
       router.replace("/app");
@@ -46,7 +62,7 @@ export default function LoginPage() {
           <p className="enterprise-auth-subtitle">Accedi alla piattaforma ESG con il tuo account tenant.</p>
         </header>
 
-        <form className="enterprise-form-grid" onSubmit={onSubmit}>
+        <form className="enterprise-form-grid" onSubmit={onSubmit} noValidate>
           <label className="enterprise-label" htmlFor="login-email">
             Email
           </label>

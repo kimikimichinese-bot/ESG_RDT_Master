@@ -15,8 +15,19 @@ export default function SetupPage() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    setBusy(true);
     setError("");
+
+    if (!tenantName.trim() || !name.trim() || !email.trim() || !password) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (password.trim().length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setBusy(true);
 
     try {
       const response = await fetch("/api/v1/auth/setup", {
@@ -29,7 +40,9 @@ export default function SetupPage() {
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || `HTTP ${response.status}`);
+        const baseMessage = payload?.error || payload?.message || `HTTP ${response.status}`;
+        const requestId = typeof payload?.requestId === "string" ? payload.requestId : "";
+        throw new Error(requestId ? `${baseMessage} (requestId: ${requestId})` : baseMessage);
       }
 
       router.replace("/app");
@@ -50,7 +63,7 @@ export default function SetupPage() {
           </p>
         </header>
 
-        <form className="enterprise-form-grid" onSubmit={onSubmit}>
+        <form className="enterprise-form-grid" onSubmit={onSubmit} noValidate>
           <label className="enterprise-label" htmlFor="setup-tenant-name">
             Tenant name
           </label>
