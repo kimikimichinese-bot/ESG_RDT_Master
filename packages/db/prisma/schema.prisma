@@ -294,7 +294,7 @@ model WorkerRuntimeState {
   lastHeartbeatAt DateTime
   processedJobs  Int               @default(0)
   activeJobId    String?           @unique
-  activeJob      WorkerJob?        @relation(fields: [activeJobId], references: [id], onDelete: SetNull)
+  activeJob      WorkerJob?        @relation("ActiveWorkerJob", fields: [activeJobId], references: [id], onDelete: SetNull)
   version        String
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
