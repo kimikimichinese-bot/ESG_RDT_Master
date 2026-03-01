@@ -51,7 +51,7 @@ export default function NewProjectPage() {
             <p className="esg-subtitle">Crea un nuovo progetto ESG RDT e avvia il wizard completo.</p>
           </div>
           <div className="esg-link-row">
-            <Link className="esg-link-chip" href="/">
+            <Link className="esg-link-chip" href="/app/assessments">
               Back to assessments
             </Link>
           </div>
@@ -78,7 +78,7 @@ export default function NewProjectPage() {
               <button className="esg-button" type="submit" disabled={busy}>
                 {busy ? "Creating..." : "Create assessment"}
               </button>
-              <Link className="esg-button-secondary" href="/">
+              <Link className="esg-button-secondary" href="/app/assessments">
                 Cancel
               </Link>
             </div>

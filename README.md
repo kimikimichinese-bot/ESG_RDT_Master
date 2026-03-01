@@ -3,10 +3,49 @@
 
 **Status:** Project Starter (Expanded + Implementable)  
 **Date:** 2026-02-17  
-**Primary Stack:** GitHub • Vercel • Neon (Postgres) • Prisma • Next.js (Turborepo)  
+**Primary Stack:** GitHub • Vercel • Neon (Postgres) • Next.js (Turborepo, SQL-first runtime)  
 **Optional Stack:** Upstash Redis • Vercel Blob • Arelle (XBRL validation)
 
 ---
+
+## Enterprise P0 Implementation (Current)
+
+This repository now includes a production-oriented enterprise surface with:
+
+- Auth bootstrap flow: `/` redirects to `/setup` when no users exist, otherwise `/login`, then `/app`.
+- Signed cookie session (`AUTH_SECRET`) with active tenant switching (`/api/v1/auth/me`).
+- Multi-tenant + RBAC model (`TenantAdmin`, `Manager`, `Personnel`, `Auditor`) enforced in route handlers.
+- Full tenant-scoped CRUD for `sites`, `people`, `activities`, `evidence`, and tenant memberships.
+- Append-only audit log on write operations (`POST`/`PUT`/`DELETE`).
+- Evidence Vault metadata + optional blob upload flow using `BLOB_READ_WRITE_TOKEN`.
+- Assessments retained at existing endpoints (`/api/v1/projects*`, `/projects/*`) and scoped by `tenant_id`.
+
+### Required Environment Variables
+
+- `DATABASE_URL` (Neon Postgres)
+- `AUTH_SECRET` (session signing secret)
+- `BLOB_READ_WRITE_TOKEN` (optional; if missing, file upload is disabled but evidence metadata CRUD remains enabled)
+
+### First-Time Setup
+
+1. Open `/` in a fresh environment.
+2. If there are no users, complete `/setup` (tenant + admin account).
+3. Session is created automatically and redirected to `/app`.
+4. If users already exist, login from `/login`.
+
+### RBAC Summary
+
+- `TenantAdmin`: full tenant access (including tenant settings + members).
+- `Manager`: full operational access (`sites`, `people`, `activities`, `evidence`), no tenant admin settings.
+- `Personnel`: write access on `activities`, read on other tenant data.
+- `Auditor`: read-only access.
+
+### Tenant Isolation Rules
+
+- New business tables include `tenant_id`.
+- Indexing includes `(tenant_id, created_at)` for timeline/list tables.
+- All new enterprise APIs scope data by tenant membership.
+- Assessments tables include `tenant_id` with safe backfill for legacy rows.
 
 ## How to use this document
 

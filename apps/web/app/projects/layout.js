@@ -1,12 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getBootstrapStatus, getServerSessionState } from "./api/v1/_lib/server-auth.js";
+import { getBootstrapStatus, getServerSessionState } from "../api/v1/_lib/server-auth.js";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function ProjectsLayout({ children }) {
   const bootstrap = await getBootstrapStatus();
-
   if (bootstrap.needsSetup) {
     redirect("/setup");
   }
@@ -16,5 +15,5 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  redirect("/app");
+  return children;
 }

@@ -448,7 +448,7 @@ export default function ProjectWizardPage() {
             <p className="esg-subtitle">Compila tutti i parametri ESG richiesti e salva in Neon in tempo reale.</p>
           </div>
           <div className="esg-link-row">
-            <Link className="esg-link-chip" href="/">
+            <Link className="esg-link-chip" href="/app/assessments">
               Back to assessments
             </Link>
             {projectId ? (
