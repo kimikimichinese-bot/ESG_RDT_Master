@@ -6,7 +6,7 @@
   --text: #0f172a;
   --accent: #2f6fed;
 
-  font-family: "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
   line-height: 1.45;
   font-weight: 400;
   color: var(--text);

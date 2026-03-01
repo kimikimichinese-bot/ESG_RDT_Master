@@ -78,7 +78,7 @@ export default function ProjectReportPage() {
             <p className="esg-subtitle">Riepilogo completezza ESG con gap dei campi obbligatori.</p>
           </div>
           <div className="esg-link-row">
-            <Link className="esg-link-chip" href="/">
+            <Link className="esg-link-chip" href="/app/assessments">
               Back to assessments
             </Link>
             {projectId ? (

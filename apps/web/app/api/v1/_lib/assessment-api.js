@@ -1,14 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { ensureAssessmentSchema, getSql } from "./db.js";
-
-const json = (payload, status = 200) =>
-  new Response(JSON.stringify(payload), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store",
-    },
-  });
+import { json, parseJsonBody } from "./http.js";
+import { requireAuthContext } from "./enterprise-api.js";
+import { canAccessResource } from "./rbac.js";
+import { writeAuditLog } from "./audit.js";
 
 const parseJsonColumn = (value) => {
   if (value == null) {
@@ -60,6 +55,8 @@ const isMeaningfulValue = (value) => {
 
 const normalizeProject = (row) => ({
   id: row.id,
+  tenantId: row.tenant_id,
+  siteId: row.site_id,
   name: row.name,
   createdAt: toIso(row.created_at),
   updatedAt: toIso(row.updated_at),
@@ -79,30 +76,47 @@ const normalizeParameter = (row) => ({
 
 const normalizeAnswer = (row) => ({
   projectId: row.project_id,
+  tenantId: row.tenant_id,
   parameterKey: row.parameter_key,
   value: parseJsonColumn(row.value),
   updatedAt: toIso(row.updated_at),
 });
 
-const parseRequestBody = async (request) => {
-  const contentType = request.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    return {};
+const getTenantContextOrResponse = async (request) => {
+  const auth = await requireAuthContext(request);
+  if (auth.response) {
+    return { response: auth.response };
   }
 
-  try {
-    const payload = await request.json();
-    return isPlainObject(payload) ? payload : {};
-  } catch (_error) {
-    return {};
+  const { context } = auth;
+  const membership = context.memberships.find((item) => item.tenantId === context.activeTenantId) || null;
+  if (!membership) {
+    return {
+      response: json(
+        {
+          error: "No active tenant membership",
+        },
+        403,
+      ),
+    };
   }
+
+  return {
+    context: {
+      ...context,
+      role: membership.role,
+      tenantId: context.activeTenantId,
+    },
+  };
 };
 
-const getProjectById = async (sql, projectId) => {
+const canMutateAssessments = (role) => canAccessResource(role, "assessments", "POST");
+
+const getProjectById = async (sql, tenantId, projectId) => {
   const rows = await sql`
-    SELECT id, name, created_at, updated_at
+    SELECT id, tenant_id, site_id, name, created_at, updated_at
     FROM projects
-    WHERE id = ${projectId}
+    WHERE id = ${projectId} AND tenant_id = ${tenantId}
     LIMIT 1
   `;
   return rows?.[0] ?? null;
@@ -117,11 +131,11 @@ const getParameters = async (sql) => {
   return rows.map((row) => normalizeParameter(row));
 };
 
-const getAnswersByProjectId = async (sql, projectId) => {
+const getAnswersByProjectId = async (sql, tenantId, projectId) => {
   const rows = await sql`
-    SELECT project_id, parameter_key, value, updated_at
+    SELECT project_id, tenant_id, parameter_key, value, updated_at
     FROM answers
-    WHERE project_id = ${projectId}
+    WHERE project_id = ${projectId} AND tenant_id = ${tenantId}
     ORDER BY parameter_key ASC
   `;
 
@@ -144,24 +158,49 @@ const normalizeAnswerEntries = (payloadAnswers) => {
   return [];
 };
 
-export const listProjects = async () => {
+const parseNullableSiteId = async (sql, tenantId, siteId) => {
+  if (!siteId || typeof siteId !== "string") {
+    return null;
+  }
+
+  const rows = await sql`
+    SELECT id
+    FROM sites
+    WHERE id = ${siteId} AND tenant_id = ${tenantId}
+    LIMIT 1
+  `;
+
+  return rows?.[0]?.id || null;
+};
+
+export const listProjects = async (request) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId } = auth.context;
     const sql = getSql();
 
     const rows = await sql`
       SELECT
         p.id,
+        p.tenant_id,
+        p.site_id,
         p.name,
         p.created_at,
         p.updated_at,
         COALESCE(a.answer_count, 0)::int AS answer_count
       FROM projects p
       LEFT JOIN (
-        SELECT project_id, COUNT(*)::int AS answer_count, MAX(updated_at) AS last_answer_at
+        SELECT project_id, tenant_id, COUNT(*)::int AS answer_count, MAX(updated_at) AS last_answer_at
         FROM answers
-        GROUP BY project_id
-      ) a ON a.project_id = p.id
+        WHERE tenant_id = ${tenantId}
+        GROUP BY project_id, tenant_id
+      ) a ON a.project_id = p.id AND a.tenant_id = p.tenant_id
+      WHERE p.tenant_id = ${tenantId}
       ORDER BY GREATEST(p.updated_at, COALESCE(a.last_answer_at, p.updated_at)) DESC
     `;
 
@@ -180,19 +219,39 @@ export const listProjects = async () => {
 export const createProject = async (request) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId, role, user } = auth.context;
+    if (!canMutateAssessments(role)) {
+      return json({ error: "Forbidden by role policy" }, 403);
+    }
+
     const sql = getSql();
-    const payload = await parseRequestBody(request);
+    const payload = await parseJsonBody(request);
     const rawName = typeof payload.name === "string" ? payload.name.trim() : "";
 
     const projectId = randomUUID();
     const defaultDate = new Date().toISOString().slice(0, 10);
     const name = rawName || `Assessment ${defaultDate}`;
+    const siteId = await parseNullableSiteId(sql, tenantId, payload.siteId);
 
     const rows = await sql`
-      INSERT INTO projects (id, name)
-      VALUES (${projectId}, ${name})
-      RETURNING id, name, created_at, updated_at
+      INSERT INTO projects (id, tenant_id, site_id, name)
+      VALUES (${projectId}, ${tenantId}, ${siteId}, ${name})
+      RETURNING id, tenant_id, site_id, name, created_at, updated_at
     `;
+
+    await writeAuditLog(sql, {
+      tenantId,
+      actorUserId: user.id,
+      action: "project.create",
+      entityType: "project",
+      entityId: projectId,
+      payload: { name, siteId },
+    });
 
     return json({ project: normalizeProject({ ...rows[0], answer_count: 0 }) }, 201);
   } catch (error) {
@@ -206,19 +265,25 @@ export const createProject = async (request) => {
   }
 };
 
-export const getProjectDetail = async (_request, projectId) => {
+export const getProjectDetail = async (request, projectId) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId } = auth.context;
     const sql = getSql();
 
-    const projectRow = await getProjectById(sql, projectId);
+    const projectRow = await getProjectById(sql, tenantId, projectId);
     if (!projectRow) {
       return json({ error: "Project not found" }, 404);
     }
 
     const [parameters, answers] = await Promise.all([
       getParameters(sql),
-      getAnswersByProjectId(sql, projectId),
+      getAnswersByProjectId(sql, tenantId, projectId),
     ]);
 
     const answerMap = Object.fromEntries(answers.map((item) => [item.parameterKey, item.value]));
@@ -243,24 +308,45 @@ export const getProjectDetail = async (_request, projectId) => {
 export const updateProject = async (request, projectId) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId, role, user } = auth.context;
+    if (!canMutateAssessments(role)) {
+      return json({ error: "Forbidden by role policy" }, 403);
+    }
+
     const sql = getSql();
-    const payload = await parseRequestBody(request);
+    const payload = await parseJsonBody(request);
     const name = typeof payload.name === "string" ? payload.name.trim() : "";
 
     if (!name) {
       return json({ error: "Project name is required" }, 400);
     }
 
+    const siteId = await parseNullableSiteId(sql, tenantId, payload.siteId);
+
     const rows = await sql`
       UPDATE projects
-      SET name = ${name}, updated_at = NOW()
-      WHERE id = ${projectId}
-      RETURNING id, name, created_at, updated_at
+      SET name = ${name}, site_id = ${siteId}, updated_at = NOW()
+      WHERE id = ${projectId} AND tenant_id = ${tenantId}
+      RETURNING id, tenant_id, site_id, name, created_at, updated_at
     `;
 
     if (!rows?.[0]) {
       return json({ error: "Project not found" }, 404);
     }
+
+    await writeAuditLog(sql, {
+      tenantId,
+      actorUserId: user.id,
+      action: "project.update",
+      entityType: "project",
+      entityId: projectId,
+      payload: { name, siteId },
+    });
 
     return json({ project: normalizeProject({ ...rows[0], answer_count: 0 }) });
   } catch (error) {
@@ -274,17 +360,23 @@ export const updateProject = async (request, projectId) => {
   }
 };
 
-export const getProjectAnswers = async (_request, projectId) => {
+export const getProjectAnswers = async (request, projectId) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId } = auth.context;
     const sql = getSql();
 
-    const projectRow = await getProjectById(sql, projectId);
+    const projectRow = await getProjectById(sql, tenantId, projectId);
     if (!projectRow) {
       return json({ error: "Project not found" }, 404);
     }
 
-    const answers = await getAnswersByProjectId(sql, projectId);
+    const answers = await getAnswersByProjectId(sql, tenantId, projectId);
     const answerMap = Object.fromEntries(answers.map((item) => [item.parameterKey, item.value]));
 
     return json({ projectId, answers, answerMap, total: answers.length });
@@ -302,14 +394,24 @@ export const getProjectAnswers = async (_request, projectId) => {
 export const upsertProjectAnswers = async (request, projectId) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId, role, user } = auth.context;
+    if (!canMutateAssessments(role)) {
+      return json({ error: "Forbidden by role policy" }, 403);
+    }
+
     const sql = getSql();
 
-    const projectRow = await getProjectById(sql, projectId);
+    const projectRow = await getProjectById(sql, tenantId, projectId);
     if (!projectRow) {
       return json({ error: "Project not found" }, 404);
     }
 
-    const payload = await parseRequestBody(request);
+    const payload = await parseJsonBody(request);
     const entries = normalizeAnswerEntries(payload.answers);
 
     if (entries.length === 0) {
@@ -339,9 +441,10 @@ export const upsertProjectAnswers = async (request, projectId) => {
     for (const entry of entries) {
       if (isMeaningfulValue(entry.value)) {
         await sql`
-          INSERT INTO answers (project_id, parameter_key, value, updated_at)
-          VALUES (${projectId}, ${entry.parameterKey}, ${JSON.stringify(entry.value)}, NOW())
+          INSERT INTO answers (project_id, tenant_id, parameter_key, value, updated_at)
+          VALUES (${projectId}, ${tenantId}, ${entry.parameterKey}, ${JSON.stringify(entry.value)}, NOW())
           ON CONFLICT (project_id, parameter_key) DO UPDATE SET
+            tenant_id = EXCLUDED.tenant_id,
             value = EXCLUDED.value,
             updated_at = NOW()
         `;
@@ -349,7 +452,9 @@ export const upsertProjectAnswers = async (request, projectId) => {
       } else {
         await sql`
           DELETE FROM answers
-          WHERE project_id = ${projectId} AND parameter_key = ${entry.parameterKey}
+          WHERE project_id = ${projectId}
+            AND tenant_id = ${tenantId}
+            AND parameter_key = ${entry.parameterKey}
         `;
         clearedCount += 1;
       }
@@ -359,9 +464,23 @@ export const upsertProjectAnswers = async (request, projectId) => {
       UPDATE projects
       SET updated_at = NOW()
       WHERE id = ${projectId}
+        AND tenant_id = ${tenantId}
     `;
 
-    const answers = await getAnswersByProjectId(sql, projectId);
+    await writeAuditLog(sql, {
+      tenantId,
+      actorUserId: user.id,
+      action: "project.answers.upsert",
+      entityType: "project",
+      entityId: projectId,
+      payload: {
+        savedCount,
+        clearedCount,
+        keys: entries.map((item) => item.parameterKey),
+      },
+    });
+
+    const answers = await getAnswersByProjectId(sql, tenantId, projectId);
 
     return json({
       projectId,
@@ -382,19 +501,25 @@ export const upsertProjectAnswers = async (request, projectId) => {
   }
 };
 
-export const getProjectReport = async (_request, projectId) => {
+export const getProjectReport = async (request, projectId) => {
   try {
     await ensureAssessmentSchema();
+    const auth = await getTenantContextOrResponse(request);
+    if (auth.response) {
+      return auth.response;
+    }
+
+    const { tenantId } = auth.context;
     const sql = getSql();
 
-    const projectRow = await getProjectById(sql, projectId);
+    const projectRow = await getProjectById(sql, tenantId, projectId);
     if (!projectRow) {
       return json({ error: "Project not found" }, 404);
     }
 
     const [parameters, answers] = await Promise.all([
       getParameters(sql),
-      getAnswersByProjectId(sql, projectId),
+      getAnswersByProjectId(sql, tenantId, projectId),
     ]);
 
     const answerMap = Object.fromEntries(answers.map((item) => [item.parameterKey, item.value]));
