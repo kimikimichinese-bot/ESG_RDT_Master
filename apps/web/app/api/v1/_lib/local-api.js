@@ -10,6 +10,7 @@ const MAX_JOBS_PER_TICK = Number.parseInt(process.env.MAX_JOBS_PER_TICK ?? "3", 
 const FETCH_TIMEOUT_MS = Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "8000", 10) > 0
   ? Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "8000", 10)
   : 8000;
+const INLINE_DEADLINE_MS = 12_000;
 
 const safeDate = () => new Date().toISOString();
 const requestId = () => randomUUID();
@@ -133,13 +134,7 @@ const jobProgress = (status) => {
   if (status === "running") {
     return 50;
   }
-  if (status === "succeeded") {
-    return 100;
-  }
-  if (status === "failed") {
-    return 100;
-  }
-  return 0;
+  return 100;
 };
 
 const jobMessage = (row) => {
@@ -206,6 +201,177 @@ const latestJobRow = async () => {
   const sql = getSql();
   const rows = await sql`SELECT * FROM jobs ORDER BY created_at DESC LIMIT 1`;
   return rows?.[0] ?? null;
+};
+
+const queryJobRowById = async (sql, jobId) => {
+  const rows = await sql`SELECT * FROM jobs WHERE id = ${jobId} LIMIT 1`;
+  return rows?.[0] ?? null;
+};
+
+const markSucceeded = async (sql, id, output) => {
+  await sql`
+    UPDATE jobs
+    SET
+      status = 'succeeded',
+      output = ${JSON.stringify(output)}::jsonb,
+      error = NULL,
+      finished_at = NOW(),
+      updated_at = NOW()
+    WHERE id = ${id}
+  `;
+};
+
+const markFailed = async (sql, id, errorMessage) => {
+  await sql`
+    UPDATE jobs
+    SET
+      status = 'failed',
+      error = ${String(errorMessage).slice(0, 4000)},
+      finished_at = NOW(),
+      updated_at = NOW()
+    WHERE id = ${id}
+  `;
+};
+
+const decodeHtml = (value) =>
+  value
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+const extractHtmlMetadata = (html) => {
+  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const descMatchA = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+  const descMatchB = html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
+  const title = titleMatch ? decodeHtml(titleMatch[1].replace(/\s+/g, " ").trim()) : null;
+  const description = descMatchA?.[1] ?? descMatchB?.[1] ?? null;
+  return {
+    title: title || null,
+    description: description ? decodeHtml(description.trim()) : null,
+  };
+};
+
+const parseAnalyzeUrl = (input) => {
+  const payload = parseJsonColumn(input);
+  const urlValue = payload && typeof payload.url === "string" ? payload.url.trim() : "";
+  if (!urlValue) {
+    throw new Error("analyze_url job requires payload.url");
+  }
+  const parsed = new URL(urlValue);
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Only http/https URLs are supported");
+  }
+  return parsed.toString();
+};
+
+const fetchWithTimeout = async (fetchImpl, targetUrl, timeoutMs) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
+  try {
+    return await fetchImpl(targetUrl, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "user-agent": "ESG-RDT-Master/1.0 (+Vercel Worker)",
+      },
+      cache: "no-store",
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+export const processJob = async ({ job, sql, fetchImpl = fetch, inlineDeadlineMs = FETCH_TIMEOUT_MS }) => {
+  if (job.job_type === "status") {
+    return {
+      ok: true,
+      timestamp: safeDate(),
+      version: getBuildVersion(),
+    };
+  }
+
+  if (job.job_type === "analyze_url") {
+    const targetUrl = parseAnalyzeUrl(job.input);
+    const timeoutMs = Math.max(1000, Math.min(FETCH_TIMEOUT_MS, inlineDeadlineMs));
+    const response = await fetchWithTimeout(fetchImpl, targetUrl, timeoutMs);
+    const html = await response.text();
+    const metadata = extractHtmlMetadata(html);
+    return {
+      url: targetUrl,
+      finalUrl: response.url,
+      httpStatus: response.status,
+      title: metadata.title,
+      description: metadata.description,
+      fetchedAt: safeDate(),
+    };
+  }
+
+  throw new Error(`Unsupported jobType: ${job.job_type}`);
+};
+
+const claimNextQueuedJob = async (sql) => {
+  const rows = await sql`
+    WITH next_job AS (
+      SELECT id
+      FROM jobs
+      WHERE status = 'queued'
+      ORDER BY created_at ASC
+      LIMIT 1
+      FOR UPDATE SKIP LOCKED
+    ),
+    claimed AS (
+      UPDATE jobs j
+      SET
+        status = 'running',
+        started_at = COALESCE(j.started_at, NOW()),
+        updated_at = NOW()
+      FROM next_job
+      WHERE j.id = next_job.id
+      RETURNING j.*
+    )
+    SELECT * FROM claimed
+  `;
+  return rows?.[0] ?? null;
+};
+
+const runClaimedJob = async (sql, claimedJob, options = {}) => {
+  try {
+    const output = await processJob({ job: claimedJob, sql, fetchImpl: options.fetchImpl, inlineDeadlineMs: options.inlineDeadlineMs });
+    await markSucceeded(sql, claimedJob.id, output);
+    return { id: claimedJob.id, status: "succeeded", output };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "job execution failed";
+    await markFailed(sql, claimedJob.id, message);
+    return { id: claimedJob.id, status: "failed", error: message };
+  }
+};
+
+export const processOneJobById = async (jobId, { inlineDeadlineMs = INLINE_DEADLINE_MS, fetchImpl = fetch } = {}) => {
+  await ensureSchema();
+  const sql = getSql();
+
+  const claimedRows = await sql`
+    UPDATE jobs
+    SET
+      status = 'running',
+      started_at = COALESCE(started_at, NOW()),
+      updated_at = NOW()
+    WHERE id = ${jobId} AND status = 'queued'
+    RETURNING *
+  `;
+  const claimed = claimedRows?.[0] ?? null;
+
+  if (!claimed) {
+    const existing = await queryJobRowById(sql, jobId);
+    return existing ? normalizeJob(existing) : null;
+  }
+
+  await runClaimedJob(sql, claimed, { inlineDeadlineMs, fetchImpl });
+  const finalJob = await queryJobRowById(sql, jobId);
+  return finalJob ? normalizeJob(finalJob) : null;
 };
 
 export const handleV1Health = async (request) => {
@@ -406,10 +572,18 @@ export const triggerJob = async (request) => {
     RETURNING *
   `;
   const created = rows[0];
+  const createdJob = normalizeJob(created);
 
+  const inlineAttempt = processOneJobById(id, { inlineDeadlineMs: INLINE_DEADLINE_MS }).catch(() => null);
+  const inlineResult = await Promise.race([
+    inlineAttempt,
+    new Promise((resolve) => setTimeout(() => resolve(null), INLINE_DEADLINE_MS)),
+  ]);
+
+  const finalJob = inlineResult || createdJob;
   return json(
     {
-      ...normalizeJob(created),
+      ...finalJob,
       workerState: workerState(),
       workerReady: true,
       service: SERVICE_NAME,
@@ -442,8 +616,7 @@ export const getJobById = async (request, jobId) => {
 
   await ensureSchema();
   const sql = getSql();
-  const rows = await sql`SELECT * FROM jobs WHERE id = ${jobId} LIMIT 1`;
-  const row = rows[0];
+  const row = await queryJobRowById(sql, jobId);
   if (!row) {
     return json(
       {
@@ -459,160 +632,16 @@ export const getJobById = async (request, jobId) => {
   return json(buildJobsEnvelope([normalizeJob(row)]), 200);
 };
 
-const decodeHtml = (value) =>
-  value
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-
-const extractHtmlMetadata = (html) => {
-  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const descMatchA = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
-  const descMatchB = html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
-  const title = titleMatch ? decodeHtml(titleMatch[1].replace(/\s+/g, " ").trim()) : null;
-  const description = descMatchA?.[1] ?? descMatchB?.[1] ?? null;
-  return {
-    title: title || null,
-    description: description ? decodeHtml(description.trim()) : null,
-  };
-};
-
-const parseAnalyzeUrl = (input) => {
-  const payload = parseJsonColumn(input);
-  const urlValue = payload && typeof payload.url === "string" ? payload.url.trim() : "";
-  if (!urlValue) {
-    throw new Error("analyze_url job requires payload.url");
-  }
-  const parsed = new URL(urlValue);
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new Error("Only http/https URLs are supported");
-  }
-  return parsed.toString();
-};
-
-const claimNextQueuedJob = async () => {
-  await ensureSchema();
-  const sql = getSql();
-  const rows = await sql`
-    WITH next_job AS (
-      SELECT id
-      FROM jobs
-      WHERE status = 'queued'
-      ORDER BY created_at ASC
-      LIMIT 1
-      FOR UPDATE SKIP LOCKED
-    ),
-    claimed AS (
-      UPDATE jobs j
-      SET
-        status = 'running',
-        started_at = COALESCE(j.started_at, NOW()),
-        updated_at = NOW()
-      FROM next_job
-      WHERE j.id = next_job.id
-      RETURNING j.*
-    )
-    SELECT * FROM claimed
-  `;
-  return rows[0] ?? null;
-};
-
-const markSucceeded = async (id, output) => {
-  const sql = getSql();
-  await sql`
-    UPDATE jobs
-    SET
-      status = 'succeeded',
-      output = ${JSON.stringify(output)}::jsonb,
-      error = NULL,
-      finished_at = NOW(),
-      updated_at = NOW()
-    WHERE id = ${id}
-  `;
-};
-
-const markFailed = async (id, errorMessage) => {
-  const sql = getSql();
-  await sql`
-    UPDATE jobs
-    SET
-      status = 'failed',
-      error = ${String(errorMessage).slice(0, 4000)},
-      finished_at = NOW(),
-      updated_at = NOW()
-    WHERE id = ${id}
-  `;
-};
-
-const runStatusJob = () => ({
-  ok: true,
-  timestamp: safeDate(),
-  version: getBuildVersion(),
-});
-
-const fetchWithTimeout = async (targetUrl, timeoutMs) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
-  try {
-    return await fetch(targetUrl, {
-      method: "GET",
-      redirect: "follow",
-      signal: controller.signal,
-      headers: {
-        "user-agent": "ESG-RDT-Master/1.0 (+Vercel Cron Worker)",
-      },
-      cache: "no-store",
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
-};
-
-const runAnalyzeUrlJob = async (jobRow) => {
-  const url = parseAnalyzeUrl(jobRow.input);
-  const response = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-  const html = await response.text();
-  const metadata = extractHtmlMetadata(html);
-  return {
-    url,
-    finalUrl: response.url,
-    httpStatus: response.status,
-    title: metadata.title,
-    description: metadata.description,
-    fetchedAt: safeDate(),
-  };
-};
-
-const processOneClaimedJob = async (jobRow) => {
-  try {
-    let output = null;
-    if (jobRow.job_type === "status") {
-      output = runStatusJob();
-    } else if (jobRow.job_type === "analyze_url") {
-      output = await runAnalyzeUrlJob(jobRow);
-    } else {
-      throw new Error(`Unsupported jobType: ${jobRow.job_type}`);
-    }
-    await markSucceeded(jobRow.id, output);
-    return { id: jobRow.id, status: "succeeded", output };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "job execution failed";
-    await markFailed(jobRow.id, message);
-    return { id: jobRow.id, status: "failed", error: message };
-  }
-};
-
 export const processQueuedJobsTick = async () => {
   await ensureSchema();
+  const sql = getSql();
   const processed = [];
   for (let i = 0; i < MAX_JOBS_PER_TICK; i += 1) {
-    const claimed = await claimNextQueuedJob();
+    const claimed = await claimNextQueuedJob(sql);
     if (!claimed) {
       break;
     }
-    const result = await processOneClaimedJob(claimed);
+    const result = await runClaimedJob(sql, claimed, { inlineDeadlineMs: FETCH_TIMEOUT_MS });
     processed.push(result);
   }
 
