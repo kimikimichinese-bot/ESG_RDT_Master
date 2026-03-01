@@ -705,6 +705,7 @@ Use this for each production-ready push on `master`:
 ### Uptime & alias rollout note (kimikimichinese-bot)
 
 - Primary production alias: `esg-rdt-master-pi.vercel.app`
+- Use the canonical alias https://esg-rdt-master-pi.vercel.app for stable sessions.
 - Latest known production deployment: `https://esg-rdt-master-l9bysy27j-kimikimichineses-projects.vercel.app`
 - Alias update pattern used during rollout: push → deploy → alias points to latest production-ready deployment on Vercel.
 - Quick rollout checks:
