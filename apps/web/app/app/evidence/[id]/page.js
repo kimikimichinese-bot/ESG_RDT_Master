@@ -78,6 +78,16 @@ export default function EvidenceDetailPage() {
             <p className="enterprise-muted">Size: {item.sizeBytes}</p>
             <p className="enterprise-muted">SHA256: {item.sha256 || "-"}</p>
             <p className="enterprise-muted">Blob URL: {item.blobUrl || "-"}</p>
+            {item.blobUrl ? (
+              <a
+                className="enterprise-button-secondary"
+                href={item.blobUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Open file in new tab
+              </a>
+            ) : null}
           </section>
 
           <section className="enterprise-card">

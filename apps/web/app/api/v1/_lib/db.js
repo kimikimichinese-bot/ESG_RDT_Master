@@ -126,6 +126,16 @@ export const ensureEnterpriseSchema = async () => {
       `;
 
       await sql`
+        CREATE TABLE IF NOT EXISTS people_sites (
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+          site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, person_id, site_id)
+        )
+      `;
+
+      await sql`
         CREATE TABLE IF NOT EXISTS evidence (
           id UUID PRIMARY KEY,
           tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -175,6 +185,8 @@ export const ensureEnterpriseSchema = async () => {
       await sql`CREATE INDEX IF NOT EXISTS idx_memberships_user_created_at ON memberships (user_id, created_at DESC)`;
       await sql`CREATE INDEX IF NOT EXISTS idx_sites_tenant_created_at ON sites (tenant_id, created_at DESC)`;
       await sql`CREATE INDEX IF NOT EXISTS idx_people_tenant_created_at ON people (tenant_id, created_at DESC)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_people_sites_tenant_site ON people_sites (tenant_id, site_id)`;
+      await sql`CREATE INDEX IF NOT EXISTS idx_people_sites_tenant_person ON people_sites (tenant_id, person_id)`;
       await sql`CREATE INDEX IF NOT EXISTS idx_activities_tenant_created_at ON activities (tenant_id, created_at DESC)`;
       await sql`CREATE INDEX IF NOT EXISTS idx_evidence_tenant_created_at ON evidence (tenant_id, created_at DESC)`;
       await sql`CREATE INDEX IF NOT EXISTS idx_audit_log_tenant_created_at ON audit_log (tenant_id, created_at DESC)`;
@@ -205,6 +217,14 @@ export const ensureEnterpriseSchema = async () => {
         INSERT INTO tenants (id, name)
         VALUES (${LEGACY_TENANT_ID}, 'Legacy Tenant')
         ON CONFLICT (id) DO NOTHING
+      `;
+
+      await sql`
+        INSERT INTO people_sites (tenant_id, person_id, site_id)
+        SELECT p.tenant_id, p.id, p.site_id
+        FROM people p
+        WHERE p.site_id IS NOT NULL
+        ON CONFLICT (tenant_id, person_id, site_id) DO NOTHING
       `;
 
       globalThis[ENTERPRISE_SCHEMA_READY_KEY] = true;

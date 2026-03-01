@@ -16,12 +16,16 @@ SMOKE_PERSON_NAME="${SMOKE_PERSON_NAME:-Operator ${TS}}"
 SMOKE_ACTIVITY_TYPE="${SMOKE_ACTIVITY_TYPE:-energy_kwh}"
 SMOKE_ACTIVITY_UNIT="${SMOKE_ACTIVITY_UNIT:-kWh}"
 SMOKE_EVIDENCE_NAME="${SMOKE_EVIDENCE_NAME:-invoice-${TS}.pdf}"
+SMOKE_UPLOAD_FILE=""
 
 REQUEST_STATUS=""
 REQUEST_PAYLOAD=""
 
 cleanup() {
   rm -f "${COOKIE_JAR}"
+  if [[ -n "${SMOKE_UPLOAD_FILE}" && -f "${SMOKE_UPLOAD_FILE}" ]]; then
+    rm -f "${SMOKE_UPLOAD_FILE}"
+  fi
 }
 trap cleanup EXIT
 
@@ -45,6 +49,19 @@ request_json() {
     REQUEST_STATUS="$(curl -sS -o "$tmp" -w '%{http_code}' -X "$method" "${BASE_URL}${path}" -b "$COOKIE_JAR" -c "$COOKIE_JAR")"
   fi
 
+  REQUEST_PAYLOAD="$(cat "$tmp")"
+  rm -f "$tmp"
+}
+
+request_multipart() {
+  local method="$1"
+  local path="$2"
+  shift 2
+
+  local tmp
+  tmp="$(mktemp)"
+
+  REQUEST_STATUS="$(curl -sS -o "$tmp" -w '%{http_code}' -X "$method" "${BASE_URL}${path}" -b "$COOKIE_JAR" -c "$COOKIE_JAR" "$@")"
   REQUEST_PAYLOAD="$(cat "$tmp")"
   rm -f "$tmp"
 }
@@ -149,11 +166,24 @@ if [[ -z "$PERSON_ID" || "$PERSON_ID" == "null" ]]; then
 fi
 echo "Person id: ${PERSON_ID}"
 
-request_json "POST" "/api/v1/tenants/${TENANT_ID}/evidence" "{\"filename\":\"${SMOKE_EVIDENCE_NAME}\",\"contentType\":\"application/pdf\",\"sizeBytes\":12345,\"siteId\":\"${SITE_ID}\",\"sha256\":\"smoke-sha\",\"blobUrl\":\"\"}"
-assert_status "$REQUEST_STATUS" "201" "create evidence metadata"
+SMOKE_UPLOAD_FILE="$(mktemp "/tmp/esg-smoke-${TS}-XXXXXX.pdf")"
+cat > "${SMOKE_UPLOAD_FILE}" <<PDF
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog >>
+endobj
+trailer
+<< /Root 1 0 R >>
+%%EOF
+PDF
+
+request_multipart "POST" "/api/v1/tenants/${TENANT_ID}/evidence/upload" \
+  -F "siteId=${SITE_ID}" \
+  -F "file=@${SMOKE_UPLOAD_FILE};type=application/pdf;filename=${SMOKE_EVIDENCE_NAME}"
+assert_status "$REQUEST_STATUS" "201" "upload evidence"
 EVIDENCE_ID="$(json_field "$REQUEST_PAYLOAD" '.evidence.id // empty')"
 if [[ -z "$EVIDENCE_ID" || "$EVIDENCE_ID" == "null" ]]; then
-  echo "FAIL: create evidence missing id"
+  echo "FAIL: upload evidence missing id"
   echo "$REQUEST_PAYLOAD"
   exit 1
 fi

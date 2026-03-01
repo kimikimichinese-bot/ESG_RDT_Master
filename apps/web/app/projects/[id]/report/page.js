@@ -126,6 +126,16 @@ export default function ProjectReportPage() {
                   <strong>Generated</strong>
                   <p style={{ margin: "6px 0 0" }}>{formatDateTime(report.generatedAt)}</p>
                 </article>
+                <article className="esg-report-tile">
+                  <strong>Years delta</strong>
+                  <p style={{ margin: "6px 0 0" }}>
+                    {typeof report.yearsDelta === "number" ? report.yearsDelta : "-"}
+                  </p>
+                </article>
+                <article className="esg-report-tile">
+                  <strong>Validity</strong>
+                  <p style={{ margin: "6px 0 0" }}>{report.validity?.isValid ? "Valid" : "Invalid"}</p>
+                </article>
               </div>
 
               <section className="esg-card" style={{ padding: 12 }}>
@@ -158,6 +168,28 @@ export default function ProjectReportPage() {
                   <p className="esg-status" style={{ marginBottom: 0 }}>
                     Tutti i campi obbligatori risultano compilati.
                   </p>
+                )}
+              </section>
+
+              <section className="esg-card" style={{ padding: 12 }}>
+                <h3 style={{ marginTop: 0 }}>Validation summary</h3>
+                {report.validity?.isValid ? (
+                  <p className="esg-status" style={{ marginBottom: 0 }}>
+                    No validation errors.
+                  </p>
+                ) : (
+                  <>
+                    <p className="esg-status esg-status-error" style={{ marginBottom: 8 }}>
+                      {report.validity?.errorCount || 0} validation error(s)
+                    </p>
+                    <ul className="esg-missing-list">
+                      {(Array.isArray(report.validity?.errors) ? report.validity.errors : []).map((error, index) => (
+                        <li key={`${error.key || "validation"}-${index}`}>
+                          <strong>{error.label || error.key || "Field"}</strong> - {error.message || "Invalid value"}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
               </section>
             </div>

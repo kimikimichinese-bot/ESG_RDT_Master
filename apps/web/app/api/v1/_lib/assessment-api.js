@@ -4,6 +4,7 @@ import { json, parseJsonBody } from "./http.js";
 import { requireAuthContext } from "./enterprise-api.js";
 import { canAccessResource } from "./rbac.js";
 import { writeAuditLog } from "./audit.js";
+import { validateAssessmentAnswers } from "../../../../lib/assessment-validation.js";
 
 const parseJsonColumn = (value) => {
   if (value == null) {
@@ -418,8 +419,8 @@ export const upsertProjectAnswers = async (request, projectId) => {
       return json({ error: "Request body must include answers" }, 400);
     }
 
-    const parameterRows = await sql`SELECT key FROM parameters`;
-    const validParameterKeys = new Set(parameterRows.map((row) => row.key));
+    const parameters = await getParameters(sql);
+    const validParameterKeys = new Set(parameters.map((row) => row.key));
 
     const invalidKeys = entries
       .map((entry) => entry.parameterKey)
@@ -430,6 +431,32 @@ export const upsertProjectAnswers = async (request, projectId) => {
         {
           error: "Unknown parameter keys",
           invalidKeys,
+        },
+        400,
+      );
+    }
+
+    const existingAnswers = await getAnswersByProjectId(sql, tenantId, projectId);
+    const nextAnswerMap = Object.fromEntries(existingAnswers.map((item) => [item.parameterKey, item.value]));
+    for (const entry of entries) {
+      if (isMeaningfulValue(entry.value)) {
+        nextAnswerMap[entry.parameterKey] = entry.value;
+      } else {
+        delete nextAnswerMap[entry.parameterKey];
+      }
+    }
+
+    const validation = validateAssessmentAnswers({
+      parameters,
+      answerMap: nextAnswerMap,
+    });
+
+    if (!validation.isValid) {
+      return json(
+        {
+          error: "Assessment validation failed",
+          details: validation.errors,
+          errorsByKey: validation.errorsByKey,
         },
         400,
       );
@@ -563,10 +590,23 @@ export const getProjectReport = async (request, projectId) => {
       };
     });
 
+    const validation = validateAssessmentAnswers({
+      parameters,
+      answerMap,
+    });
+
     return json({
       project: normalizeProject({ ...projectRow, answer_count: answers.length }),
       generatedAt: new Date().toISOString(),
       completenessPercent,
+      yearsDelta: validation.yearsDelta,
+      validity: {
+        isValid: validation.isValid,
+        errorCount: validation.errors.length,
+        errors: validation.errors,
+        errorsByKey: validation.errorsByKey,
+        flags: validation.flags,
+      },
       totals: {
         parameters: parameters.length,
         answered: answeredKeys.size,

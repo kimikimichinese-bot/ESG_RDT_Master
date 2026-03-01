@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { YEAR_VALIDATION_KEYS, normalizeYearValue, validateAssessmentAnswers } from "../../../lib/assessment-validation.js";
 
 const CATEGORY_ORDER = ["E", "S", "G"];
 
@@ -75,11 +76,30 @@ const isMeaningfulValue = (value) => {
 };
 
 const normalizeOptions = (options) => {
-  if (!Array.isArray(options)) {
+  const rawOptions =
+    options && typeof options === "object" && !Array.isArray(options) && Array.isArray(options.values)
+      ? options.values
+      : options;
+
+  if (
+    options &&
+    typeof options === "object" &&
+    !Array.isArray(options) &&
+    !Array.isArray(options.values) &&
+    options.validation &&
+    Array.isArray(options.validation.allowedYears)
+  ) {
+    return options.validation.allowedYears.map((year) => {
+      const asString = String(year);
+      return { value: asString, label: asString };
+    });
+  }
+
+  if (!Array.isArray(rawOptions)) {
     return [];
   }
 
-  return options
+  return rawOptions
     .map((option) => {
       if (typeof option === "string") {
         return { value: option, label: option };
@@ -151,6 +171,7 @@ function ParameterField({ parameter, value, onChange }) {
   }
 
   if (parameter.type === "select") {
+    const selectValue = typeof value === "string" || typeof value === "number" ? String(value) : "";
     return (
       <div className="esg-field">
         <label htmlFor={fieldId}>
@@ -161,7 +182,7 @@ function ParameterField({ parameter, value, onChange }) {
         <select
           id={fieldId}
           className="esg-select"
-          value={typeof value === "string" ? value : ""}
+          value={selectValue}
           onChange={(event) => onChange(parameter.key, event.target.value || null)}
         >
           <option value="">Select...</option>
@@ -265,6 +286,7 @@ export default function ProjectWizardPage() {
   const [saveState, setSaveState] = useState("idle");
   const [saveError, setSaveError] = useState("");
   const [savedAt, setSavedAt] = useState("");
+  const [serverValidationErrors, setServerValidationErrors] = useState({});
 
   const loadProject = useCallback(async () => {
     if (!projectId) {
@@ -287,6 +309,7 @@ export default function ProjectWizardPage() {
       setParameters(Array.isArray(payload.parameters) ? payload.parameters : []);
       setAnswerMap(payload.answerMap && typeof payload.answerMap === "object" ? payload.answerMap : {});
       setQueuedPatch({});
+      setServerValidationErrors({});
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load assessment");
     } finally {
@@ -321,11 +344,15 @@ export default function ProjectWizardPage() {
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (payload?.errorsByKey && typeof payload.errorsByKey === "object") {
+            setServerValidationErrors(payload.errorsByKey);
+          }
           throw new Error(payload?.message || payload?.error || `HTTP ${response.status}`);
         }
 
         setSaveState("saved");
         setSavedAt(new Date().toISOString());
+        setServerValidationErrors({});
       } catch (savePatchError) {
         setQueuedPatch((current) => ({ ...patch, ...current }));
         setSaveState("error");
@@ -335,9 +362,45 @@ export default function ProjectWizardPage() {
     [projectId],
   );
 
+  const assessmentValidation = useMemo(
+    () =>
+      validateAssessmentAnswers({
+        parameters,
+        answerMap,
+      }),
+    [parameters, answerMap],
+  );
+
+  const mergedValidationErrors = useMemo(() => {
+    const merged = {};
+    const addEntries = (source) => {
+      if (!source || typeof source !== "object") {
+        return;
+      }
+      for (const [key, messages] of Object.entries(source)) {
+        if (!Array.isArray(messages) || messages.length === 0) {
+          continue;
+        }
+        if (!merged[key]) {
+          merged[key] = [];
+        }
+        merged[key].push(...messages.filter((item) => typeof item === "string" && item.trim().length > 0));
+      }
+    };
+
+    addEntries(assessmentValidation.errorsByKey);
+    addEntries(serverValidationErrors);
+    return merged;
+  }, [assessmentValidation.errorsByKey, serverValidationErrors]);
+
+  const hasBlockingValidationErrors = useMemo(() => {
+    const keys = [YEAR_VALIDATION_KEYS.reportingYear, YEAR_VALIDATION_KEYS.baseYear];
+    return keys.some((key) => Array.isArray(mergedValidationErrors[key]) && mergedValidationErrors[key].length > 0);
+  }, [mergedValidationErrors]);
+
   useEffect(() => {
     const keys = Object.keys(queuedPatch);
-    if (keys.length === 0) {
+    if (keys.length === 0 || hasBlockingValidationErrors) {
       return undefined;
     }
 
@@ -354,13 +417,55 @@ export default function ProjectWizardPage() {
     }, 900);
 
     return () => clearTimeout(timer);
-  }, [queuedPatch, savePatch]);
+  }, [queuedPatch, savePatch, hasBlockingValidationErrors]);
 
-  const onAnswerChange = useCallback((parameterKey, value) => {
-    setAnswerMap((current) => ({ ...current, [parameterKey]: value }));
-    setQueuedPatch((current) => ({ ...current, [parameterKey]: value }));
-    setSaveState("queued");
-  }, []);
+  const flushQueuedPatch = useCallback(async () => {
+    const keys = Object.keys(queuedPatch);
+    if (keys.length === 0 || hasBlockingValidationErrors) {
+      return;
+    }
+
+    const snapshot = { ...queuedPatch };
+    setQueuedPatch((current) => {
+      const next = { ...current };
+      for (const key of Object.keys(snapshot)) {
+        delete next[key];
+      }
+      return next;
+    });
+    await savePatch(snapshot);
+  }, [hasBlockingValidationErrors, queuedPatch, savePatch]);
+
+  const onAnswerChange = useCallback(
+    (parameterKey, value) => {
+      const patch = {
+        [parameterKey]:
+          parameterKey === YEAR_VALIDATION_KEYS.reportingYear || parameterKey === YEAR_VALIDATION_KEYS.baseYear
+            ? normalizeYearValue(value)
+            : value,
+      };
+
+      if (parameterKey === YEAR_VALIDATION_KEYS.reportingYear) {
+        const reportingYear = normalizeYearValue(patch[parameterKey]);
+        const currentBaseYear = normalizeYearValue(answerMap[YEAR_VALIDATION_KEYS.baseYear]);
+        if (reportingYear != null && (currentBaseYear == null || currentBaseYear > reportingYear)) {
+          patch[YEAR_VALIDATION_KEYS.baseYear] = reportingYear;
+        }
+      }
+
+      setAnswerMap((current) => ({ ...current, ...patch }));
+      setQueuedPatch((current) => ({ ...current, ...patch }));
+      setServerValidationErrors((current) => {
+        const next = { ...current };
+        for (const key of Object.keys(patch)) {
+          delete next[key];
+        }
+        return next;
+      });
+      setSaveState("queued");
+    },
+    [answerMap],
+  );
 
   const categoryGroups = useMemo(() => {
     const grouped = {
@@ -420,6 +525,9 @@ export default function ProjectWizardPage() {
   }, [answerMap, parameters]);
 
   const saveStatusText = useMemo(() => {
+    if (hasBlockingValidationErrors) {
+      return "Autosave paused: fix year validation errors before saving.";
+    }
     if (saveState === "saving") {
       return "Autosave: saving...";
     }
@@ -437,7 +545,11 @@ export default function ProjectWizardPage() {
     }
 
     return "Autosave: idle";
-  }, [queuedPatch, saveError, saveState, savedAt]);
+  }, [hasBlockingValidationErrors, queuedPatch, saveError, saveState, savedAt]);
+
+  const activeCategoryIndex = CATEGORY_ORDER.indexOf(activeCategory);
+  const canGoPrev = activeCategoryIndex > 0;
+  const canGoNext = activeCategoryIndex >= 0 && activeCategoryIndex < CATEGORY_ORDER.length - 1;
 
   return (
     <main className="esg-shell">
@@ -476,7 +588,25 @@ export default function ProjectWizardPage() {
                     Required answered: {requiredAnsweredCount}/{requiredParameters.length}
                   </p>
                 </div>
-                <div className={saveState === "error" ? "esg-status esg-status-error" : "esg-status"}>{saveStatusText}</div>
+                <div className="esg-inline-actions">
+                  <button
+                    type="button"
+                    className="esg-button-secondary"
+                    onClick={() => void flushQueuedPatch()}
+                    disabled={Object.keys(queuedPatch).length === 0 || saveState === "saving" || hasBlockingValidationErrors}
+                  >
+                    Save now
+                  </button>
+                  <button
+                    type="button"
+                    className="esg-button-secondary"
+                    onClick={() => setActiveCategory(CATEGORY_ORDER[activeCategoryIndex + 1])}
+                    disabled={!canGoNext || hasBlockingValidationErrors}
+                  >
+                    Next section
+                  </button>
+                  <div className={saveState === "error" ? "esg-status esg-status-error" : "esg-status"}>{saveStatusText}</div>
+                </div>
               </div>
 
               <div className="esg-progress-wrap">
@@ -520,14 +650,21 @@ export default function ProjectWizardPage() {
                         {section.items.length} parameter(s)
                       </p>
                       <div className="esg-grid">
-                        {section.items.map((parameter) => (
-                          <ParameterField
-                            key={parameter.key}
-                            parameter={parameter}
-                            value={answerMap[parameter.key]}
-                            onChange={onAnswerChange}
-                          />
-                        ))}
+                        {section.items.map((parameter) => {
+                          const fieldError = Array.isArray(mergedValidationErrors[parameter.key])
+                            ? mergedValidationErrors[parameter.key][0]
+                            : "";
+                          return (
+                            <div key={parameter.key}>
+                              <ParameterField parameter={parameter} value={answerMap[parameter.key]} onChange={onAnswerChange} />
+                              {fieldError ? (
+                                <p className="esg-status esg-status-error" style={{ marginTop: 8, marginBottom: 0 }}>
+                                  {fieldError}
+                                </p>
+                              ) : null}
+                            </div>
+                          );
+                        })}
                       </div>
                     </section>
                   ))}
@@ -535,6 +672,25 @@ export default function ProjectWizardPage() {
               ) : (
                 <div className="esg-empty">No parameters configured in this section.</div>
               )}
+
+              <div className="esg-inline-actions" style={{ marginTop: 12 }}>
+                <button
+                  type="button"
+                  className="esg-button-secondary"
+                  onClick={() => setActiveCategory(CATEGORY_ORDER[activeCategoryIndex - 1])}
+                  disabled={!canGoPrev}
+                >
+                  Previous section
+                </button>
+                <button
+                  type="button"
+                  className="esg-button-secondary"
+                  onClick={() => setActiveCategory(CATEGORY_ORDER[activeCategoryIndex + 1])}
+                  disabled={!canGoNext || hasBlockingValidationErrors}
+                >
+                  Next section
+                </button>
+              </div>
             </section>
           </>
         ) : null}

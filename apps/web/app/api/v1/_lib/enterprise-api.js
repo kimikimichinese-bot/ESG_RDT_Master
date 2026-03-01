@@ -72,7 +72,50 @@ export const normalizeSite = (row) => ({
 export const normalizePerson = (row) => ({
   id: row.id,
   tenantId: row.tenant_id,
-  siteId: row.site_id,
+  siteId: (() => {
+    const parsedSiteIds = (() => {
+      if (Array.isArray(row.site_ids)) {
+        return row.site_ids.filter((item) => typeof item === "string" && item.length > 0);
+      }
+      if (typeof row.site_ids === "string") {
+        if (row.site_ids.startsWith("{") && row.site_ids.endsWith("}")) {
+          return row.site_ids
+            .slice(1, -1)
+            .split(",")
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+        }
+        return row.site_ids.trim() ? [row.site_ids.trim()] : [];
+      }
+      return [];
+    })();
+    return row.site_id || parsedSiteIds[0] || null;
+  })(),
+  siteIds: (() => {
+    const ids = [];
+    if (Array.isArray(row.site_ids)) {
+      for (const item of row.site_ids) {
+        if (typeof item === "string" && item.length > 0) {
+          ids.push(item);
+        }
+      }
+    } else if (typeof row.site_ids === "string") {
+      if (row.site_ids.startsWith("{") && row.site_ids.endsWith("}")) {
+        for (const item of row.site_ids.slice(1, -1).split(",")) {
+          const normalized = item.trim();
+          if (normalized) {
+            ids.push(normalized);
+          }
+        }
+      } else if (row.site_ids.trim()) {
+        ids.push(row.site_ids.trim());
+      }
+    }
+    if (typeof row.site_id === "string" && row.site_id.length > 0 && !ids.includes(row.site_id)) {
+      ids.unshift(row.site_id);
+    }
+    return ids;
+  })(),
   fullName: row.full_name,
   email: row.email,
   title: row.title,
