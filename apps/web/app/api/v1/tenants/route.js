@@ -3,6 +3,7 @@ import { requireAuthContext } from "../_lib/enterprise-api.js";
 import { errorJson, parseJsonBody, json } from "../_lib/http.js";
 import { normalizeTenant } from "../_lib/enterprise-api.js";
 import { writeAuditLog } from "../_lib/audit.js";
+import { ensureDefaultEmissionFactorsForTenant, ensureHoldingCompanyForTenant } from "../_lib/db.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,6 +61,8 @@ export async function POST(request) {
     INSERT INTO memberships (user_id, tenant_id, role)
     VALUES (${context.user.id}, ${tenantId}, 'TenantAdmin')
   `;
+  await ensureHoldingCompanyForTenant(context.sql, tenantId, name);
+  await ensureDefaultEmissionFactorsForTenant(context.sql, tenantId);
 
   await writeAuditLog(context.sql, {
     tenantId,

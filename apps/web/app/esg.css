@@ -423,6 +423,11 @@
   color: #324d59;
 }
 
+.enterprise-required {
+  color: #9d2e22;
+  margin-left: 4px;
+}
+
 .enterprise-content {
   margin-top: 14px;
 }
@@ -546,6 +551,47 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.enterprise-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.enterprise-checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: #2b4956;
+}
+
+.enterprise-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.76rem;
+  border: 1px solid #97b8c5;
+  background: #f4fbfe;
+  color: #23495a;
+}
+
+.enterprise-pill-warning {
+  border-color: #d8a14a;
+  background: #fff5df;
+  color: #704b0f;
+}
+
+.enterprise-pill-success {
+  border-color: #5da07c;
+  background: #ecfaef;
+  color: #1f603c;
+}
+
+.enterprise-table-wide {
+  min-width: 980px;
 }
 
 .enterprise-button-primary,

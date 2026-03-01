@@ -49,6 +49,9 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const { limit } = parsePagination(request, { limit: 200, max: 500 });
+  const url = new URL(request.url);
+  const companyId = cleanString(url.searchParams.get("companyId"));
+  const siteId = cleanString(url.searchParams.get("siteId"));
 
   const rows = await context.sql`
     SELECT
@@ -66,6 +69,16 @@ export async function GET(request, { params }) {
       updated_at
     FROM activities
     WHERE tenant_id = ${tenantId}
+      AND (${siteId} = '' OR site_id = ${siteId})
+      AND (
+        ${companyId} = ''
+        OR site_id IN (
+          SELECT s.id
+          FROM sites s
+          WHERE s.tenant_id = ${tenantId}
+            AND s.company_id = ${companyId}
+        )
+      )
     ORDER BY created_at DESC
     LIMIT ${limit}
   `;

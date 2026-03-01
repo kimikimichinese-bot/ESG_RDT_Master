@@ -3,11 +3,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
+import { useCompanyScope } from "../_components/use-company-scope";
 
-const emptyForm = { name: "", country: "", address: "" };
+const emptyForm = {
+  companyId: "",
+  name: "",
+  country: "",
+  address: "",
+  waterStressed: false,
+};
 
 export default function SitesPage() {
   const tenant = useTenantSession();
+  const companyScope = useCompanyScope(tenant.tenantId);
   const [sites, setSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,11 +23,18 @@ export default function SitesPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [companyFilter, setCompanyFilter] = useState("");
 
   const canWrite = useMemo(
     () => tenant.role === "TenantAdmin" || tenant.role === "Manager",
     [tenant.role],
   );
+
+  useEffect(() => {
+    if (companyScope.activeCompanyId) {
+      setCompanyFilter(companyScope.activeCompanyId);
+    }
+  }, [companyScope.activeCompanyId]);
 
   const loadSites = useCallback(async () => {
     if (!tenant.tenantId) {
@@ -30,7 +45,8 @@ export default function SitesPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites`, {
+      const query = companyFilter ? `?companyId=${encodeURIComponent(companyFilter)}` : "";
+      const response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites${query}`, {
         cache: "no-store",
       });
       const payload = await response.json().catch(() => ({}));
@@ -44,7 +60,7 @@ export default function SitesPage() {
     } finally {
       setLoading(false);
     }
-  }, [tenant.tenantId]);
+  }, [companyFilter, tenant.tenantId]);
 
   useEffect(() => {
     if (!tenant.loading && tenant.tenantId) {
@@ -52,15 +68,32 @@ export default function SitesPage() {
     }
   }, [tenant.loading, tenant.tenantId, loadSites]);
 
+  const companyNameById = useMemo(() => {
+    const map = new Map();
+    for (const company of companyScope.companies) {
+      map.set(company.id, company.name);
+    }
+    return map;
+  }, [companyScope.companies]);
+
   const openCreate = () => {
     setEditing(null);
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+      companyId: companyScope.activeCompanyId || companyScope.holdingCompany?.id || "",
+    });
     setModalOpen(true);
   };
 
   const openEdit = (site) => {
     setEditing(site);
-    setForm({ name: site.name || "", country: site.country || "", address: site.address || "" });
+    setForm({
+      companyId: site.companyId || "",
+      name: site.name || "",
+      country: site.country || "",
+      address: site.address || "",
+      waterStressed: Boolean(site.waterStressed),
+    });
     setModalOpen(true);
   };
 
@@ -112,7 +145,7 @@ export default function SitesPage() {
       return;
     }
 
-    const confirmed = window.confirm(`Delete site \"${site.name}\"?`);
+    const confirmed = window.confirm(`Delete site "${site.name}"?`);
     if (!confirmed) {
       return;
     }
@@ -138,9 +171,29 @@ export default function SitesPage() {
       <div className="enterprise-toolbar">
         <div>
           <h2 className="enterprise-section-title">Sites</h2>
-          <p className="enterprise-muted">Multi-site registry for the active tenant.</p>
+          <p className="enterprise-muted">Multi-site registry mapped to tenant companies.</p>
         </div>
         <div className="enterprise-inline-actions">
+          <label className="enterprise-inline-field" htmlFor="sites-company-filter">
+            Company filter
+          </label>
+          <select
+            id="sites-company-filter"
+            className="enterprise-input"
+            value={companyFilter}
+            onChange={(event) => {
+              setCompanyFilter(event.target.value);
+              companyScope.setActiveCompanyId(event.target.value || "");
+            }}
+          >
+            <option value="">All companies</option>
+            {companyScope.companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+                {company.isHolding ? " (Holding)" : ""}
+              </option>
+            ))}
+          </select>
           <button className="enterprise-button-secondary" type="button" onClick={() => void loadSites()}>
             Refresh
           </button>
@@ -153,10 +206,11 @@ export default function SitesPage() {
       </div>
 
       {tenant.error ? <p className="enterprise-status enterprise-status-error">{tenant.error}</p> : null}
+      {companyScope.error ? <p className="enterprise-status enterprise-status-error">{companyScope.error}</p> : null}
       {error ? <p className="enterprise-status enterprise-status-error">{error}</p> : null}
       {loading ? <p className="enterprise-status">Loading sites...</p> : null}
 
-      {!loading && sites.length === 0 ? <div className="enterprise-empty">No sites found for this tenant.</div> : null}
+      {!loading && sites.length === 0 ? <div className="enterprise-empty">No sites found for this selection.</div> : null}
 
       {!loading && sites.length > 0 ? (
         <div className="enterprise-table-wrap">
@@ -164,7 +218,9 @@ export default function SitesPage() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Company</th>
                 <th>Country</th>
+                <th>Water stressed</th>
                 <th>Address</th>
                 <th>Actions</th>
               </tr>
@@ -173,7 +229,9 @@ export default function SitesPage() {
               {sites.map((site) => (
                 <tr key={site.id}>
                   <td>{site.name}</td>
+                  <td>{companyNameById.get(site.companyId) || "Unknown"}</td>
                   <td>{site.country || "-"}</td>
+                  <td>{site.waterStressed ? "Yes" : "No"}</td>
                   <td>{site.address || "-"}</td>
                   <td>
                     <div className="enterprise-inline-actions">
@@ -201,6 +259,24 @@ export default function SitesPage() {
       {modalOpen ? (
         <Modal title={editing ? "Edit site" : "Create site"} onClose={closeModal}>
           <form className="enterprise-form-grid" onSubmit={onSubmit}>
+            <label className="enterprise-label" htmlFor="site-company">
+              Company
+            </label>
+            <select
+              id="site-company"
+              className="enterprise-input"
+              value={form.companyId}
+              onChange={(event) => setForm((current) => ({ ...current, companyId: event.target.value }))}
+              required
+            >
+              <option value="">Select company</option>
+              {companyScope.companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+
             <label className="enterprise-label" htmlFor="site-name">
               Name
             </label>
@@ -223,6 +299,19 @@ export default function SitesPage() {
               value={form.country}
               onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))}
             />
+
+            <label className="enterprise-label" htmlFor="site-water-stressed">
+              Water stressed area
+            </label>
+            <label className="enterprise-checkbox-row" htmlFor="site-water-stressed">
+              <input
+                id="site-water-stressed"
+                type="checkbox"
+                checked={form.waterStressed}
+                onChange={(event) => setForm((current) => ({ ...current, waterStressed: event.target.checked }))}
+              />
+              <span>Site operates in a water-stressed basin</span>
+            </label>
 
             <label className="enterprise-label" htmlFor="site-address">
               Address

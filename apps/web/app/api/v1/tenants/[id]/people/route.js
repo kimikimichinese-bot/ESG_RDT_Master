@@ -56,13 +56,19 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const { limit } = parsePagination(request, { limit: 200, max: 500 });
+  const url = new URL(request.url);
+  const companyId = cleanString(url.searchParams.get("companyId"));
+  const siteId = cleanString(url.searchParams.get("siteId"));
 
   const rows = await context.sql`
     WITH base_people AS (
-      SELECT id, tenant_id, site_id, full_name, email, title, created_at, updated_at
-      FROM people
-      WHERE tenant_id = ${tenantId}
-      ORDER BY created_at DESC
+      SELECT p.id, p.tenant_id, p.site_id, p.full_name, p.email, p.title, p.created_at, p.updated_at
+      FROM people p
+      LEFT JOIN sites s ON s.id = p.site_id
+      WHERE p.tenant_id = ${tenantId}
+        AND (${siteId} = '' OR p.site_id = ${siteId})
+        AND (${companyId} = '' OR s.company_id = ${companyId})
+      ORDER BY p.created_at DESC
       LIMIT ${limit}
     )
     SELECT
