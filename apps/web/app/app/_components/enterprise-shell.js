@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useCompanyScope } from "./use-company-scope";
 
 const NAV_ITEMS = [
   { href: "/app", label: "Dashboard" },
+  { href: "/app/companies", label: "Companies" },
   { href: "/app/sites", label: "Sites" },
+  { href: "/app/environment", label: "Environment Data" },
+  { href: "/app/social", label: "Social Data" },
+  { href: "/app/factors", label: "Factors" },
+  { href: "/app/emissions", label: "Emissions" },
   { href: "/app/personnel", label: "Personnel" },
   { href: "/app/activities", label: "Activities" },
   { href: "/app/evidence", label: "Evidence" },
@@ -38,6 +44,7 @@ export default function EnterpriseShell({
   const [loadingMe, setLoadingMe] = useState(false);
   const [switchingTenant, setSwitchingTenant] = useState(false);
   const [message, setMessage] = useState("");
+  const companyScope = useCompanyScope(activeTenantId);
 
   const activeMembership = useMemo(
     () => memberships.find((item) => item.tenantId === activeTenantId) || null,
@@ -178,6 +185,23 @@ export default function EnterpriseShell({
                 </option>
               ))}
             </select>
+            <label className="enterprise-inline-field" htmlFor="company-switcher">
+              Company
+            </label>
+            <select
+              id="company-switcher"
+              className="enterprise-input"
+              value={companyScope.activeCompanyId}
+              onChange={(event) => companyScope.setActiveCompanyId(event.target.value)}
+              disabled={companyScope.loading || switchingTenant || loadingMe}
+            >
+              {companyScope.companies.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                  {item.isHolding ? " (Holding)" : ""}
+                </option>
+              ))}
+            </select>
             <button className="enterprise-button-secondary" type="button" onClick={onLogout}>
               Logout
             </button>
@@ -185,6 +209,7 @@ export default function EnterpriseShell({
         </header>
 
         {message ? <p className="enterprise-status enterprise-status-error">{message}</p> : null}
+        {companyScope.error ? <p className="enterprise-status enterprise-status-error">{companyScope.error}</p> : null}
 
         <main className="enterprise-content">{children}</main>
       </section>

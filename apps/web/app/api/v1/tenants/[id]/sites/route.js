@@ -7,6 +7,23 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const parseBoolean = (value) => value === true || String(value).trim().toLowerCase() === "true";
+
+const resolveCompanyId = async (sql, tenantId, companyId) => {
+  const cleaned = cleanString(companyId);
+  if (!cleaned) {
+    return null;
+  }
+
+  const rows = await sql`
+    SELECT id
+    FROM companies
+    WHERE tenant_id = ${tenantId} AND id = ${cleaned}
+    LIMIT 1
+  `;
+  return rows?.[0]?.id || null;
+};
+
 export async function GET(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "sites");
@@ -16,11 +33,14 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const { limit } = parsePagination(request, { limit: 200, max: 500 });
+  const url = new URL(request.url);
+  const companyId = cleanString(url.searchParams.get("companyId"));
 
   const rows = await context.sql`
-    SELECT id, tenant_id, name, country, address, created_at, updated_at
+    SELECT id, tenant_id, company_id, name, country, address, water_stressed, created_at, updated_at
     FROM sites
     WHERE tenant_id = ${tenantId}
+      AND (${companyId} = '' OR company_id = ${companyId})
     ORDER BY created_at DESC
     LIMIT ${limit}
   `;
@@ -43,19 +63,26 @@ export async function POST(request, { params }) {
     return errorJson("Site name is required", 400);
   }
 
+  const companyId = await resolveCompanyId(context.sql, tenantId, payload.companyId);
+  if (!companyId) {
+    return errorJson("Valid companyId is required", 400);
+  }
+
   const siteId = randomUUID();
 
   try {
     const rows = await context.sql`
-      INSERT INTO sites (id, tenant_id, name, country, address)
+      INSERT INTO sites (id, tenant_id, company_id, name, country, address, water_stressed)
       VALUES (
         ${siteId},
         ${tenantId},
+        ${companyId},
         ${name},
-        ${cleanString(payload.country)},
-        ${cleanString(payload.address)}
+        ${cleanString(payload.country) || null},
+        ${cleanString(payload.address)},
+        ${parseBoolean(payload.waterStressed)}
       )
-      RETURNING id, tenant_id, name, country, address, created_at, updated_at
+      RETURNING id, tenant_id, company_id, name, country, address, water_stressed, created_at, updated_at
     `;
 
     await writeAuditLog(context.sql, {
@@ -66,7 +93,9 @@ export async function POST(request, { params }) {
       entityId: siteId,
       payload: {
         name,
-        country: cleanString(payload.country),
+        companyId,
+        country: cleanString(payload.country) || null,
+        waterStressed: parseBoolean(payload.waterStressed),
       },
     });
 

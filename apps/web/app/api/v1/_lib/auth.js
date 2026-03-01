@@ -1,5 +1,5 @@
 import { createHmac, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
-import { ensureEnterpriseSchema, getSql } from "./db.js";
+import { ensureDefaultEmissionFactorsForTenant, ensureEnterpriseSchema, ensureHoldingCompanyForTenant, getSql } from "./db.js";
 import { cleanString } from "./http.js";
 
 const SESSION_COOKIE_NAME = "esg_session";
@@ -308,6 +308,8 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
     `);
 
     await sql.transaction(queries);
+    await ensureHoldingCompanyForTenant(sql, tenantId, cleanedTenantName);
+    await ensureDefaultEmissionFactorsForTenant(sql, tenantId);
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {
       return {

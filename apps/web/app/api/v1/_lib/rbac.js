@@ -32,7 +32,15 @@ export const canAccessResource = (role, resource, method) => {
     return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.PERSONNEL;
   }
 
-  if (resource === "sites" || resource === "people" || resource === "evidence") {
+  if (resource === "metrics") {
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.PERSONNEL;
+  }
+
+  if (resource === "social" || resource === "factors") {
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
+  }
+
+  if (resource === "sites" || resource === "companies" || resource === "people" || resource === "evidence") {
     return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 

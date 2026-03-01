@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../_components/modal";
+import { useCompanyScope } from "../_components/use-company-scope";
 import { useTenantSession } from "../_components/use-tenant-session";
 
 const emptyForm = {
@@ -17,9 +18,11 @@ const emptyForm = {
 
 export default function ActivitiesPage() {
   const tenant = useTenantSession();
+  const companyScope = useCompanyScope(tenant.tenantId);
   const [activities, setActivities] = useState([]);
   const [sites, setSites] = useState([]);
   const [evidence, setEvidence] = useState([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -28,6 +31,12 @@ export default function ActivitiesPage() {
   const [saving, setSaving] = useState(false);
 
   const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+
+  useEffect(() => {
+    if (companyScope.activeCompanyId) {
+      setSelectedCompanyId(companyScope.activeCompanyId);
+    }
+  }, [companyScope.activeCompanyId]);
 
   const loadData = useCallback(async () => {
     if (!tenant.tenantId) {
@@ -38,10 +47,11 @@ export default function ActivitiesPage() {
     setError("");
 
     try {
+      const companyQuery = selectedCompanyId ? `?companyId=${encodeURIComponent(selectedCompanyId)}` : "";
       const [activitiesRes, sitesRes, evidenceRes] = await Promise.all([
-        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/activities`, { cache: "no-store" }),
-        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites`, { cache: "no-store" }),
-        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence`, { cache: "no-store" }),
+        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/activities${companyQuery}`, { cache: "no-store" }),
+        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites${companyQuery}`, { cache: "no-store" }),
+        fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence${companyQuery}`, { cache: "no-store" }),
       ]);
 
       const [activitiesPayload, sitesPayload, evidencePayload] = await Promise.all([
@@ -65,7 +75,7 @@ export default function ActivitiesPage() {
     } finally {
       setLoading(false);
     }
-  }, [tenant.tenantId]);
+  }, [selectedCompanyId, tenant.tenantId]);
 
   useEffect(() => {
     if (!tenant.loading && tenant.tenantId) {
@@ -194,6 +204,26 @@ export default function ActivitiesPage() {
           <p className="enterprise-muted">Operational records with period, quantity and optional evidence link.</p>
         </div>
         <div className="enterprise-inline-actions">
+          <label className="enterprise-inline-field" htmlFor="activities-company-filter">
+            Company
+          </label>
+          <select
+            id="activities-company-filter"
+            className="enterprise-input"
+            value={selectedCompanyId}
+            onChange={(event) => {
+              setSelectedCompanyId(event.target.value);
+              companyScope.setActiveCompanyId(event.target.value);
+            }}
+          >
+            <option value="">All companies</option>
+            {companyScope.companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name}
+                {company.isHolding ? " (Holding)" : ""}
+              </option>
+            ))}
+          </select>
           <button className="enterprise-button-secondary" type="button" onClick={() => void loadData()}>
             Refresh
           </button>
@@ -206,6 +236,7 @@ export default function ActivitiesPage() {
       </div>
 
       {tenant.error ? <p className="enterprise-status enterprise-status-error">{tenant.error}</p> : null}
+      {companyScope.error ? <p className="enterprise-status enterprise-status-error">{companyScope.error}</p> : null}
       {error ? <p className="enterprise-status enterprise-status-error">{error}</p> : null}
       {loading ? <p className="enterprise-status">Loading activities...</p> : null}
 

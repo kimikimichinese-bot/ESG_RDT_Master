@@ -146,7 +146,20 @@ echo "Active tenant: ${TENANT_ID}"
 echo
 
 echo "== CRUD smoke (site/person/activity/evidence metadata) =="
-request_json "POST" "/api/v1/tenants/${TENANT_ID}/sites" "{\"name\":\"${SMOKE_SITE_NAME}\",\"country\":\"IT\",\"address\":\"Via Smoke 1\"}"
+request_json "GET" "/api/v1/tenants/${TENANT_ID}/companies"
+assert_status "$REQUEST_STATUS" "200" "list companies"
+COMPANY_ID="$(json_field "$REQUEST_PAYLOAD" '.companies[] | select(.isHolding == true) | .id' | head -n1)"
+if [[ -z "$COMPANY_ID" || "$COMPANY_ID" == "null" ]]; then
+  COMPANY_ID="$(json_field "$REQUEST_PAYLOAD" '.companies[0].id // empty')"
+fi
+if [[ -z "$COMPANY_ID" || "$COMPANY_ID" == "null" ]]; then
+  echo "FAIL: no company available for site creation"
+  echo "$REQUEST_PAYLOAD"
+  exit 1
+fi
+echo "Company id: ${COMPANY_ID}"
+
+request_json "POST" "/api/v1/tenants/${TENANT_ID}/sites" "{\"companyId\":\"${COMPANY_ID}\",\"name\":\"${SMOKE_SITE_NAME}\",\"country\":\"IT\",\"address\":\"Via Smoke 1\",\"waterStressed\":false}"
 assert_status "$REQUEST_STATUS" "201" "create site"
 SITE_ID="$(json_field "$REQUEST_PAYLOAD" '.site.id // empty')"
 if [[ -z "$SITE_ID" || "$SITE_ID" == "null" ]]; then

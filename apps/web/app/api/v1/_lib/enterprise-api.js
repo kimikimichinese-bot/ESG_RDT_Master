@@ -62,9 +62,22 @@ export const normalizeTenant = (row) => ({
 export const normalizeSite = (row) => ({
   id: row.id,
   tenantId: row.tenant_id,
+  companyId: row.company_id || null,
   name: row.name,
-  country: row.country,
+  country: row.country || null,
   address: row.address,
+  waterStressed: Boolean(row.water_stressed),
+  createdAt: toIso(row.created_at),
+  updatedAt: toIso(row.updated_at),
+});
+
+export const normalizeCompany = (row) => ({
+  id: row.id,
+  tenantId: row.tenant_id,
+  name: row.name,
+  legalName: row.legal_name,
+  country: row.country,
+  isHolding: Boolean(row.is_holding),
   createdAt: toIso(row.created_at),
   updatedAt: toIso(row.updated_at),
 });
