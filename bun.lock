@@ -58,7 +58,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@esg-rdt/shared": "workspace:*",
-        "@prisma/client": "^5.20.0",
+        "@neondatabase/serverless": "^0.10.4",
       },
       "devDependencies": {
         "prisma": "^5.20.0",

@@ -17,8 +17,8 @@
     "seed": "echo \"Seed placeholder for demo tenant.\""
   },
   "dependencies": {
-    "@esg-rdt/shared": "workspace:*",
-    "@prisma/client": "^5.20.0"
+    "@neondatabase/serverless": "^0.10.4",
+    "@esg-rdt/shared": "workspace:*"
   },
   "devDependencies": {
     "prisma": "^5.20.0"
