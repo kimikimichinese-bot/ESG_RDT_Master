@@ -10259,3 +10259,72 @@ TICKET753_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-753-production-readiness-evidence-continuity-wrapup.sh
 ```
+
+## Persistent jobs on Vercel + Neon (production-ready)
+
+This repo now supports persistent job processing in production using Neon Postgres and a Vercel Cron worker.
+
+### Required environment variables
+
+- `DATABASE_URL`: Neon Postgres connection string (required for API persistence and queue processing).
+- `CRON_SECRET`: shared secret used by `/api/v1/cron/jobs` (`Authorization: Bearer <CRON_SECRET>`).
+- `NEXT_PUBLIC_API_URL` (optional): external API base. If not set, frontend uses same-origin `/api/...`.
+- `API_BASE_URL` (optional): compatibility fallback for existing diagnostics/proxy paths.
+
+### Vercel setup
+
+Set env vars in all environments:
+
+```bash
+vercel env add DATABASE_URL production
+vercel env add DATABASE_URL preview
+vercel env add DATABASE_URL development
+
+vercel env add CRON_SECRET production
+vercel env add CRON_SECRET preview
+vercel env add CRON_SECRET development
+```
+
+Cron schedule is configured in `vercel.json`:
+
+- path: `/api/v1/cron/jobs`
+- schedule: every minute (`* * * * *`)
+
+### Local verification
+
+Run app and test APIs with same-origin:
+
+```bash
+bun run dev:web
+curl -sS http://127.0.0.1:3000/api/v1/health
+curl -sS -X POST http://127.0.0.1:3000/api/v1/jobs/trigger
+curl -sS -X POST http://127.0.0.1:3000/api/v1/jobs/trigger \
+  -H 'content-type: application/json' \
+  -d '{"jobType":"analyze_url","payload":{"url":"https://example.com"}}'
+```
+
+### Manual cron verification
+
+Use CRON auth header:
+
+```bash
+curl -sS "https://<your-prod-domain>/api/v1/cron/jobs" \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+### Production smoke test helper
+
+```bash
+bash ./scripts/smoke-prod.sh
+# optional custom target URL
+bash ./scripts/smoke-prod.sh https://esg-rdt-master-pi.vercel.app https://example.com
+```
+
+The smoke script validates:
+
+- `/api/v1/health`, `/api/v1/status`, `/api/v1/jobs`
+- trigger with JSON body (`analyze_url`)
+- trigger without body (must return created job)
+- optional manual cron tick when `CRON_SECRET` is exported locally
+
+Note: on Vercel Hobby, Cron frequency is limited; this project uses one automatic daily tick (`0 0 * * *`) and supports manual authenticated ticks via `/api/v1/cron/jobs` for immediate processing when needed.

@@ -1,7 +1,9 @@
-import { handleJobTrigger } from "../../_lib/local-api.js";
+import { triggerJob } from "../../_lib/local-api.js";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(request) {
-  return handleJobTrigger(request);
+  return triggerJob(request);
 }

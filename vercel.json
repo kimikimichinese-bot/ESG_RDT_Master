@@ -3,5 +3,11 @@
   "framework": "nextjs",
   "installCommand": "bun install",
   "buildCommand": "bun run workspace:build",
-  "outputDirectory": "apps/web/.next"
+  "outputDirectory": "apps/web/.next",
+  "crons": [
+    {
+      "path": "/api/v1/cron/jobs",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }
