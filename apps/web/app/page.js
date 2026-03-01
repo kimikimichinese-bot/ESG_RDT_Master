@@ -45,6 +45,17 @@ export default function HomePage() {
   const [rawJson, setRawJson] = useState(null);
 
   const output = useMemo(() => (job && job.result && typeof job.result === "object" ? job.result : null), [job]);
+  const failedInfo = useMemo(() => {
+    if (!job || job.status !== "failed") {
+      return null;
+    }
+    const errorKind = output && typeof output.errorKind === "string" ? output.errorKind : "job_failed";
+    const message =
+      output && typeof output.message === "string" && output.message.trim()
+        ? output.message
+        : job.lastError || "Job failed";
+    return { errorKind, message };
+  }, [job, output]);
 
   const pollJob = async (jobId) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
@@ -169,9 +180,23 @@ export default function HomePage() {
         </section>
       ) : null}
 
+      {failedInfo ? (
+        <section style={{ marginTop: 20, padding: 12, border: "1px solid #d11", borderRadius: 8, background: "#fff5f5" }}>
+          <h2 style={{ marginTop: 0 }}>Job failed</h2>
+          <p><strong>Error kind:</strong> {failedInfo.errorKind}</p>
+          <p><strong>Message:</strong> {failedInfo.message}</p>
+          <p>Try another URL or verify that the target is publicly reachable.</p>
+        </section>
+      ) : null}
+
       {output ? (
         <section style={{ marginTop: 20, padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
           <h2 style={{ marginTop: 0 }}>Result</h2>
+          {job?.status === "succeeded" && output.ok === false ? (
+            <p style={{ color: "#8a6d00", fontWeight: 600 }}>
+              Remote URL responded with a non-2xx status. The fetch completed successfully.
+            </p>
+          ) : null}
           <p><strong>HTTP status:</strong> {String(output.httpStatus ?? "")}</p>
           <p><strong>Final URL:</strong> {output.finalUrl ?? ""}</p>
           <p><strong>Title:</strong> {output.title ?? ""}</p>

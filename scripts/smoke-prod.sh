@@ -3,7 +3,7 @@
 set -euo pipefail
 
 BASE_URL="${1:-https://esg-rdt-master-pi.vercel.app}"
-TEST_URL="${2:-https://example.com}"
+TEST_URL="${2:-${SMOKE_URL:-https://www.wikipedia.org}}"
 
 get_json_field() {
   local json_payload="$1"
@@ -42,6 +42,40 @@ wait_job_terminal() {
   return 1
 }
 
+assert_analyze_success() {
+  local payload="$1"
+  local status
+  status="$(get_json_field "$payload" '.status // .jobs[0].status // empty')"
+  local http_status
+  http_status="$(get_json_field "$payload" '.result.httpStatus // .jobs[0].result.httpStatus // empty')"
+  local final_url
+  final_url="$(get_json_field "$payload" '.result.finalUrl // .jobs[0].result.finalUrl // empty')"
+  local error_kind
+  error_kind="$(get_json_field "$payload" '.result.errorKind // .jobs[0].result.errorKind // empty')"
+
+  if [[ "$status" != "succeeded" ]]; then
+    echo "FAIL: analyze_url did not succeed (status=${status:-unknown})"
+    return 1
+  fi
+
+  if [[ -z "$http_status" || "$http_status" == "null" ]]; then
+    echo "FAIL: analyze_url succeeded but output.httpStatus is missing"
+    return 1
+  fi
+
+  if [[ -z "$final_url" || "$final_url" == "null" ]]; then
+    echo "FAIL: analyze_url succeeded but output.finalUrl is missing"
+    return 1
+  fi
+
+  if [[ -n "$error_kind" && "$error_kind" != "null" ]]; then
+    echo "FAIL: analyze_url returned structured errorKind=${error_kind}"
+    return 1
+  fi
+
+  echo "analyze_url smoke success (httpStatus=${http_status}, finalUrl=${final_url})"
+}
+
 echo "== Base: ${BASE_URL}"
 echo "== URL under test: ${TEST_URL}"
 echo
@@ -64,12 +98,14 @@ if [[ -z "${JOB_WITH_BODY_ID:-}" ]]; then
 fi
 
 TRIGGER_STATUS="$(get_json_field "$JOB_WITH_BODY" '.status // empty')"
+ANALYZE_FINAL_PAYLOAD="$JOB_WITH_BODY"
 if [[ "$TRIGGER_STATUS" == "succeeded" || "$TRIGGER_STATUS" == "failed" ]]; then
   echo "analyze_url trigger completed inline with status=${TRIGGER_STATUS}"
 else
   echo "analyze_url trigger returned ${TRIGGER_STATUS:-unknown}, polling..."
   if JOB_FINAL="$(wait_job_terminal "$JOB_WITH_BODY_ID" 20)"; then
     echo "$JOB_FINAL"
+    ANALYZE_FINAL_PAYLOAD="$JOB_FINAL"
   else
     echo "still queued/running after 20s"
     if [[ -n "${CRON_SECRET:-}" ]]; then
@@ -81,12 +117,15 @@ else
     fi
     if JOB_FINAL="$(wait_job_terminal "$JOB_WITH_BODY_ID" 10)"; then
       echo "$JOB_FINAL"
+      ANALYZE_FINAL_PAYLOAD="$JOB_FINAL"
     else
       echo "FAIL: analyze_url job did not reach terminal state within 30s"
       exit 1
     fi
   fi
 fi
+
+assert_analyze_success "$ANALYZE_FINAL_PAYLOAD"
 
 echo "/api/v1/jobs/${JOB_WITH_BODY_ID} -> $(curl -sS -o /dev/null -w "%{http_code}" "${BASE_URL}/api/v1/jobs/${JOB_WITH_BODY_ID}")"
 echo

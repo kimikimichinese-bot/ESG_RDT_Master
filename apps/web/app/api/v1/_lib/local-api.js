@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { setDefaultResultOrder } from "node:dns";
+import { lookup as dnsLookup } from "node:dns/promises";
+import { isIP } from "node:net";
 import { ensureSchema, getSql } from "./db.js";
 
 const SERVICE_NAME = "esg-rdt-master-api";
@@ -7,13 +10,36 @@ const JOB_API_TOKEN = (process.env.JOB_API_TOKEN ?? "").trim();
 const MAX_JOBS_PER_TICK = Number.parseInt(process.env.MAX_JOBS_PER_TICK ?? "3", 10) > 0
   ? Number.parseInt(process.env.MAX_JOBS_PER_TICK ?? "3", 10)
   : 3;
-const FETCH_TIMEOUT_MS = Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "8000", 10) > 0
-  ? Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "8000", 10)
-  : 8000;
+const FETCH_TIMEOUT_MS = Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "10000", 10) > 0
+  ? Number.parseInt(process.env.ANALYZE_URL_TIMEOUT_MS ?? "10000", 10)
+  : 10000;
+const ANALYZE_RETRY_DELAYS_MS = [0, 250, 900];
+const ANALYZE_MAX_BYTES = Number.parseInt(process.env.ANALYZE_URL_MAX_BYTES ?? `${512 * 1024}`, 10) > 0
+  ? Number.parseInt(process.env.ANALYZE_URL_MAX_BYTES ?? `${512 * 1024}`, 10)
+  : 512 * 1024;
+const ANALYZE_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 ESG-RDT-Analyzer/1.0";
+const RETRYABLE_HTTP_STATUS = new Set([502, 503, 504]);
 const INLINE_DEADLINE_MS = 12_000;
+let dnsResultOrderConfigured = false;
+
+const configureDnsResultOrder = () => {
+  if (dnsResultOrderConfigured) {
+    return;
+  }
+  dnsResultOrderConfigured = true;
+  try {
+    setDefaultResultOrder("ipv4first");
+  } catch (_error) {
+    // Non-fatal in environments where this call is unsupported.
+  }
+};
+
+configureDnsResultOrder();
 
 const safeDate = () => new Date().toISOString();
 const requestId = () => randomUUID();
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const parseTenantId = (request) => {
   const value = request.headers.get("x-tenant-id");
   if (!value || !value.trim()) {
@@ -127,6 +153,189 @@ const parseJsonColumn = (value) => {
   return null;
 };
 
+const makeJobError = (errorKind, message, extras = {}) => {
+  const error = new Error(message);
+  error.errorKind = errorKind;
+  if (typeof extras.attemptCount === "number") {
+    error.attemptCount = extras.attemptCount;
+  }
+  if (typeof extras.code === "string") {
+    error.code = extras.code;
+  }
+  if (typeof extras.url === "string") {
+    error.url = extras.url;
+  }
+  return error;
+};
+
+const isObjectLike = (value) => value && typeof value === "object";
+
+const readErrorCode = (error) => {
+  if (!isObjectLike(error)) {
+    return null;
+  }
+  if (typeof error.code === "string" && error.code.trim()) {
+    return error.code;
+  }
+  if (isObjectLike(error.cause) && typeof error.cause.code === "string" && error.cause.code.trim()) {
+    return error.cause.code;
+  }
+  return null;
+};
+
+const mapFetchError = (error, attemptCount) => {
+  if (isObjectLike(error) && typeof error.errorKind === "string") {
+    return makeJobError(error.errorKind, error.message || "job failed", {
+      attemptCount: typeof error.attemptCount === "number" ? error.attemptCount : attemptCount,
+      code: typeof error.code === "string" ? error.code : readErrorCode(error),
+      url: typeof error.url === "string" ? error.url : undefined,
+    });
+  }
+
+  const message = error instanceof Error ? error.message : "Network request failed";
+  const code = readErrorCode(error);
+  const lowered = String(message).toLowerCase();
+  const isAbort = (isObjectLike(error) && error.name === "AbortError") || lowered.includes("timeout") || lowered.includes("aborted");
+
+  if (isAbort) {
+    return makeJobError("timeout", "Request timed out while fetching URL", { attemptCount, code });
+  }
+
+  if (code === "ENOTFOUND" || code === "EAI_AGAIN" || code === "EAI_FAIL" || code === "ENODATA") {
+    return makeJobError("dns", "DNS resolution failed for target host", { attemptCount, code });
+  }
+
+  return makeJobError("network", message || "Network request failed", { attemptCount, code });
+};
+
+const isLocalHostname = (hostname) => {
+  const normalized = hostname.trim().toLowerCase();
+  return (
+    normalized === "localhost" ||
+    normalized === "localhost." ||
+    normalized === "127.0.0.1" ||
+    normalized === "::1" ||
+    normalized.endsWith(".local")
+  );
+};
+
+const isPrivateIPv4 = (address) => {
+  const parts = address.split(".").map((part) => Number.parseInt(part, 10));
+  if (parts.length !== 4 || parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)) {
+    return false;
+  }
+  const [a, b] = parts;
+  if (a === 10 || a === 127 || a === 0) {
+    return true;
+  }
+  if (a === 169 && b === 254) {
+    return true;
+  }
+  if (a === 172 && b >= 16 && b <= 31) {
+    return true;
+  }
+  if (a === 192 && b === 168) {
+    return true;
+  }
+  if (a === 100 && b >= 64 && b <= 127) {
+    return true;
+  }
+  if (a === 198 && (b === 18 || b === 19)) {
+    return true;
+  }
+  return false;
+};
+
+const isPrivateIPv6 = (address) => {
+  const normalized = address.trim().toLowerCase();
+  if (normalized === "::1" || normalized === "::") {
+    return true;
+  }
+  if (normalized.startsWith("fc") || normalized.startsWith("fd")) {
+    return true;
+  }
+  if (
+    normalized.startsWith("fe8") ||
+    normalized.startsWith("fe9") ||
+    normalized.startsWith("fea") ||
+    normalized.startsWith("feb")
+  ) {
+    return true;
+  }
+  if (normalized.startsWith("::ffff:")) {
+    const mapped = normalized.slice(7);
+    if (isIP(mapped) === 4) {
+      return isPrivateIPv4(mapped);
+    }
+  }
+  return false;
+};
+
+const isBlockedIpAddress = (address) => {
+  const ipVersion = isIP(address);
+  if (ipVersion === 4) {
+    return isPrivateIPv4(address);
+  }
+  if (ipVersion === 6) {
+    return isPrivateIPv6(address);
+  }
+  return false;
+};
+
+const validateTargetUrl = async (rawUrl) => {
+  let parsed = null;
+  try {
+    parsed = new URL(rawUrl);
+  } catch (_error) {
+    throw makeJobError("invalid_url", "Invalid URL format");
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw makeJobError("invalid_url", "Only http/https URLs are supported");
+  }
+
+  if (parsed.username || parsed.password) {
+    throw makeJobError("blocked", "URL credentials are not allowed");
+  }
+
+  const hostname = parsed.hostname.trim().toLowerCase();
+  if (!hostname) {
+    throw makeJobError("invalid_url", "Missing URL hostname");
+  }
+
+  if (isLocalHostname(hostname)) {
+    throw makeJobError("blocked", "url_blocked_private_network");
+  }
+
+  if (isIP(hostname) > 0 && isBlockedIpAddress(hostname)) {
+    throw makeJobError("blocked", "url_blocked_private_network");
+  }
+
+  let resolved = [];
+  try {
+    resolved = await dnsLookup(hostname, { all: true, verbatim: false });
+  } catch (error) {
+    const mapped = mapFetchError(error, 0);
+    throw makeJobError(mapped.errorKind, mapped.message, {
+      attemptCount: 0,
+      code: mapped.code,
+      url: parsed.toString(),
+    });
+  }
+
+  if (!Array.isArray(resolved) || resolved.length === 0) {
+    throw makeJobError("dns", "DNS lookup returned no records", { attemptCount: 0, url: parsed.toString() });
+  }
+
+  for (const item of resolved) {
+    if (item?.address && isBlockedIpAddress(item.address)) {
+      throw makeJobError("blocked", "url_blocked_private_network", { attemptCount: 0, url: parsed.toString() });
+    }
+  }
+
+  return parsed.toString();
+};
+
 const jobProgress = (status) => {
   if (status === "queued") {
     return 0;
@@ -221,11 +430,12 @@ const markSucceeded = async (sql, id, output) => {
   `;
 };
 
-const markFailed = async (sql, id, errorMessage) => {
+const markFailed = async (sql, id, errorMessage, output = null) => {
   await sql`
     UPDATE jobs
     SET
       status = 'failed',
+      output = ${output ? JSON.stringify(output) : null}::jsonb,
       error = ${String(errorMessage).slice(0, 4000)},
       finished_at = NOW(),
       updated_at = NOW()
@@ -257,31 +467,148 @@ const parseAnalyzeUrl = (input) => {
   const payload = parseJsonColumn(input);
   const urlValue = payload && typeof payload.url === "string" ? payload.url.trim() : "";
   if (!urlValue) {
-    throw new Error("analyze_url job requires payload.url");
+    throw makeJobError("invalid_url", "analyze_url job requires payload.url");
   }
-  const parsed = new URL(urlValue);
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new Error("Only http/https URLs are supported");
-  }
-  return parsed.toString();
+  return urlValue;
 };
 
 const fetchWithTimeout = async (fetchImpl, targetUrl, timeoutMs) => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetchImpl(targetUrl, {
       method: "GET",
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        "user-agent": "ESG-RDT-Master/1.0 (+Vercel Worker)",
+        "user-agent": ANALYZE_USER_AGENT,
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "cache-control": "no-cache",
       },
       cache: "no-store",
     });
   } finally {
     clearTimeout(timeout);
   }
+};
+
+const readTextLimited = async (response, maxBytes) => {
+  if (!response.body || typeof response.body.getReader !== "function") {
+    const text = await response.text();
+    const encodedLength = Buffer.byteLength(text, "utf8");
+    if (encodedLength <= maxBytes) {
+      return { text, truncated: false, bytesRead: encodedLength };
+    }
+    const slice = Buffer.from(text, "utf8").subarray(0, maxBytes).toString("utf8");
+    return { text: slice, truncated: true, bytesRead: maxBytes };
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const chunks = [];
+  let bytesRead = 0;
+  let truncated = false;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    if (!value) {
+      continue;
+    }
+
+    const nextSize = bytesRead + value.byteLength;
+    if (nextSize > maxBytes) {
+      const keep = Math.max(0, maxBytes - bytesRead);
+      if (keep > 0) {
+        chunks.push(decoder.decode(value.subarray(0, keep), { stream: true }));
+        bytesRead += keep;
+      }
+      truncated = true;
+      try {
+        await reader.cancel();
+      } catch (_error) {
+        // Ignore cancellation errors.
+      }
+      break;
+    }
+
+    chunks.push(decoder.decode(value, { stream: true }));
+    bytesRead += value.byteLength;
+  }
+
+  chunks.push(decoder.decode());
+  return {
+    text: chunks.join(""),
+    truncated,
+    bytesRead,
+  };
+};
+
+const shouldRetryErrorKind = (errorKind) =>
+  errorKind === "timeout" || errorKind === "dns" || errorKind === "network";
+
+const fetchUrlAnalysis = async (targetUrl, { fetchImpl = fetch, timeoutMs = FETCH_TIMEOUT_MS }) => {
+  const normalizedUrl = await validateTargetUrl(targetUrl);
+  let lastError = null;
+
+  for (let i = 0; i < ANALYZE_RETRY_DELAYS_MS.length; i += 1) {
+    const delayMs = ANALYZE_RETRY_DELAYS_MS[i];
+    const attemptCount = i + 1;
+
+    if (delayMs > 0) {
+      await sleep(delayMs);
+    }
+
+    let response = null;
+    try {
+      response = await fetchWithTimeout(fetchImpl, normalizedUrl, timeoutMs);
+    } catch (error) {
+      const mapped = mapFetchError(error, attemptCount);
+      lastError = mapped;
+      if (i < ANALYZE_RETRY_DELAYS_MS.length - 1 && shouldRetryErrorKind(mapped.errorKind)) {
+        continue;
+      }
+      throw mapped;
+    }
+
+    if (RETRYABLE_HTTP_STATUS.has(response.status) && i < ANALYZE_RETRY_DELAYS_MS.length - 1) {
+      continue;
+    }
+
+    const contentType = response.headers.get("content-type") || null;
+    const isHtml = Boolean(contentType && contentType.toLowerCase().includes("text/html"));
+    let title = null;
+    let description = null;
+    let truncated = false;
+
+    if (isHtml) {
+      const bodyData = await readTextLimited(response, ANALYZE_MAX_BYTES);
+      const metadata = extractHtmlMetadata(bodyData.text);
+      title = metadata.title;
+      description = metadata.description;
+      truncated = bodyData.truncated;
+    }
+
+    return {
+      ok: response.ok,
+      url: normalizedUrl,
+      finalUrl: response.url || normalizedUrl,
+      httpStatus: response.status,
+      contentType,
+      title,
+      description,
+      fetchedAt: safeDate(),
+      truncated,
+      attemptCount,
+    };
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+  throw makeJobError("network", "Network request failed", { attemptCount: ANALYZE_RETRY_DELAYS_MS.length });
 };
 
 export const processJob = async ({ job, sql, fetchImpl = fetch, inlineDeadlineMs = FETCH_TIMEOUT_MS }) => {
@@ -296,17 +623,7 @@ export const processJob = async ({ job, sql, fetchImpl = fetch, inlineDeadlineMs
   if (job.job_type === "analyze_url") {
     const targetUrl = parseAnalyzeUrl(job.input);
     const timeoutMs = Math.max(1000, Math.min(FETCH_TIMEOUT_MS, inlineDeadlineMs));
-    const response = await fetchWithTimeout(fetchImpl, targetUrl, timeoutMs);
-    const html = await response.text();
-    const metadata = extractHtmlMetadata(html);
-    return {
-      url: targetUrl,
-      finalUrl: response.url,
-      httpStatus: response.status,
-      title: metadata.title,
-      description: metadata.description,
-      fetchedAt: safeDate(),
-    };
+    return fetchUrlAnalysis(targetUrl, { fetchImpl, timeoutMs });
   }
 
   throw new Error(`Unsupported jobType: ${job.job_type}`);
@@ -337,15 +654,25 @@ const claimNextQueuedJob = async (sql) => {
   return rows?.[0] ?? null;
 };
 
+const toFailureOutput = (error) => {
+  const mapped = mapFetchError(error, typeof error?.attemptCount === "number" ? error.attemptCount : 1);
+  return {
+    ok: false,
+    errorKind: mapped.errorKind || "network",
+    message: mapped.message || "Job failed",
+    attemptCount: typeof mapped.attemptCount === "number" ? mapped.attemptCount : 1,
+  };
+};
+
 const runClaimedJob = async (sql, claimedJob, options = {}) => {
   try {
     const output = await processJob({ job: claimedJob, sql, fetchImpl: options.fetchImpl, inlineDeadlineMs: options.inlineDeadlineMs });
     await markSucceeded(sql, claimedJob.id, output);
     return { id: claimedJob.id, status: "succeeded", output };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "job execution failed";
-    await markFailed(sql, claimedJob.id, message);
-    return { id: claimedJob.id, status: "failed", error: message };
+    const failureOutput = toFailureOutput(error);
+    await markFailed(sql, claimedJob.id, failureOutput.message, failureOutput);
+    return { id: claimedJob.id, status: "failed", error: failureOutput.message, output: failureOutput };
   }
 };
 
