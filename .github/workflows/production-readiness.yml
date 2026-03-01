@@ -66,8 +66,11 @@ jobs:
           DATABASE_URL="$DATABASE_URL_UNPOOLED" bun run db:migrate:deploy
 
       - name: Document missing JOB_API_TOKEN
-        if: ${{ secrets.JOB_API_TOKEN == '' }}
         run: |
+          if [ -n "${JOB_API_TOKEN:-}" ]; then
+            echo "[PASS] JOB_API_TOKEN is configured."
+            exit 0
+          fi
           echo "[WARN] JOB_API_TOKEN is not configured; /v1/jobs auth and rate-limit assertions were skipped."
 
   full-functional-evidence:
