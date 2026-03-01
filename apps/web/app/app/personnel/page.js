@@ -4,7 +4,29 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
 
-const emptyForm = { fullName: "", email: "", title: "", siteId: "" };
+const emptyForm = { fullName: "", email: "", title: "", siteIds: [] };
+
+const extractErrorMessage = (payload, fallback) => {
+  if (payload && typeof payload === "object") {
+    if (typeof payload.error === "string" && payload.error.trim()) {
+      return payload.error;
+    }
+    if (typeof payload.message === "string" && payload.message.trim()) {
+      return payload.message;
+    }
+  }
+  return fallback;
+};
+
+const normalizeSiteIds = (person) => {
+  if (Array.isArray(person?.siteIds)) {
+    return person.siteIds.filter((item, index, source) => typeof item === "string" && item && source.indexOf(item) === index);
+  }
+  if (typeof person?.siteId === "string" && person.siteId) {
+    return [person.siteId];
+  }
+  return [];
+};
 
 export default function PersonnelPage() {
   const tenant = useTenantSession();
@@ -41,8 +63,11 @@ export default function PersonnelPage() {
         sitesRes.json().catch(() => ({})),
       ]);
 
-      if (!peopleRes.ok || !sitesRes.ok) {
-        throw new Error("Failed to load personnel data");
+      if (!peopleRes.ok) {
+        throw new Error(extractErrorMessage(peoplePayload, `HTTP ${peopleRes.status}`));
+      }
+      if (!sitesRes.ok) {
+        throw new Error(extractErrorMessage(sitesPayload, `HTTP ${sitesRes.status}`));
       }
 
       setPeople(Array.isArray(peoplePayload.people) ? peoplePayload.people : []);
@@ -82,7 +107,7 @@ export default function PersonnelPage() {
       fullName: person.fullName || "",
       email: person.email || "",
       title: person.title || "",
-      siteId: person.siteId || "",
+      siteIds: normalizeSiteIds(person),
     });
     setModalOpen(true);
   };
@@ -91,6 +116,15 @@ export default function PersonnelPage() {
     setModalOpen(false);
     setEditing(null);
     setForm(emptyForm);
+  };
+
+  const toggleSite = (siteId) => {
+    setForm((current) => {
+      if (current.siteIds.includes(siteId)) {
+        return { ...current, siteIds: current.siteIds.filter((item) => item !== siteId) };
+      }
+      return { ...current, siteIds: [...current.siteIds, siteId] };
+    });
   };
 
   const onSubmit = async (event) => {
@@ -118,7 +152,7 @@ export default function PersonnelPage() {
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload?.error || `HTTP ${response.status}`);
+        throw new Error(extractErrorMessage(payload, `HTTP ${response.status}`));
       }
 
       closeModal();
@@ -151,7 +185,7 @@ export default function PersonnelPage() {
       );
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload?.error || `HTTP ${response.status}`);
+        throw new Error(extractErrorMessage(payload, `HTTP ${response.status}`));
       }
       await loadData();
     } catch (deleteError) {
@@ -159,12 +193,25 @@ export default function PersonnelPage() {
     }
   };
 
+  const renderSites = (person) => {
+    const ids = normalizeSiteIds(person);
+    if (ids.length === 0) {
+      return "-";
+    }
+    return ids.map((siteId) => siteMap.get(siteId) || "Unknown site").join(", ");
+  };
+
+  const selectedSiteSummary =
+    form.siteIds.length === 0
+      ? "No site"
+      : form.siteIds.map((siteId) => siteMap.get(siteId) || "Unknown site").join(", ");
+
   return (
     <section className="enterprise-grid">
       <div className="enterprise-toolbar">
         <div>
           <h2 className="enterprise-section-title">Personnel</h2>
-          <p className="enterprise-muted">Tenant workforce, roles and optional site assignment.</p>
+          <p className="enterprise-muted">Tenant workforce, roles and multi-site assignment.</p>
         </div>
         <div className="enterprise-inline-actions">
           <button className="enterprise-button-secondary" type="button" onClick={() => void loadData()}>
@@ -192,7 +239,7 @@ export default function PersonnelPage() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Title</th>
-                <th>Site</th>
+                <th>Sites</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -202,7 +249,7 @@ export default function PersonnelPage() {
                   <td>{person.fullName}</td>
                   <td>{person.email || "-"}</td>
                   <td>{person.title || "-"}</td>
-                  <td>{person.siteId ? siteMap.get(person.siteId) || "Unknown site" : "-"}</td>
+                  <td>{renderSites(person)}</td>
                   <td>
                     <div className="enterprise-inline-actions">
                       {canWrite ? (
@@ -263,22 +310,30 @@ export default function PersonnelPage() {
               onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
             />
 
-            <label className="enterprise-label" htmlFor="person-site">
-              Site
-            </label>
-            <select
-              id="person-site"
-              className="enterprise-input"
-              value={form.siteId}
-              onChange={(event) => setForm((current) => ({ ...current, siteId: event.target.value }))}
-            >
-              <option value="">No site</option>
+            <label className="enterprise-label">Sites</label>
+            <div className="enterprise-grid" style={{ gap: 8 }}>
+              <label style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={form.siteIds.length === 0}
+                  onChange={() => setForm((current) => ({ ...current, siteIds: [] }))}
+                />
+                <span>No site</span>
+              </label>
               {sites.map((site) => (
-                <option key={site.id} value={site.id}>
-                  {site.name}
-                </option>
+                <label key={site.id} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={form.siteIds.includes(site.id)}
+                    onChange={() => toggleSite(site.id)}
+                  />
+                  <span>{site.name}</span>
+                </label>
               ))}
-            </select>
+              <p className="enterprise-muted" style={{ margin: 0 }}>
+                Selected: {selectedSiteSummary}
+              </p>
+            </div>
 
             <div className="enterprise-inline-actions">
               <button className="enterprise-button-primary" type="submit" disabled={saving}>

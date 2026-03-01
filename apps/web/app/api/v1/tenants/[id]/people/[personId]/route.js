@@ -6,18 +6,44 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const parseSiteId = async (sql, tenantId, siteId) => {
-  if (!siteId || typeof siteId !== "string") {
-    return null;
+const parseRequestedSiteIds = (payload) => {
+  if (Array.isArray(payload.siteIds)) {
+    return payload.siteIds
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0)
+      .filter((item, index, source) => source.indexOf(item) === index);
   }
 
-  const rows = await sql`
-    SELECT id
-    FROM sites
-    WHERE id = ${siteId} AND tenant_id = ${tenantId}
-    LIMIT 1
-  `;
-  return rows?.[0]?.id || null;
+  const legacySiteId = cleanString(payload.siteId);
+  return legacySiteId ? [legacySiteId] : [];
+};
+
+const resolveSiteIds = async (sql, tenantId, payload) => {
+  const requestedSiteIds = parseRequestedSiteIds(payload);
+  if (requestedSiteIds.length === 0) {
+    return { siteIds: [], invalidSiteIds: [] };
+  }
+
+  const resolved = [];
+  const invalid = [];
+  for (const siteId of requestedSiteIds) {
+    const rows = await sql`
+      SELECT id
+      FROM sites
+      WHERE id = ${siteId} AND tenant_id = ${tenantId}
+      LIMIT 1
+    `;
+    if (rows?.[0]?.id) {
+      resolved.push(rows[0].id);
+    } else {
+      invalid.push(siteId);
+    }
+  }
+
+  return {
+    siteIds: resolved,
+    invalidSiteIds: invalid,
+  };
 };
 
 export async function GET(request, { params }) {
@@ -30,9 +56,25 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const rows = await context.sql`
-    SELECT id, tenant_id, site_id, full_name, email, title, created_at, updated_at
-    FROM people
-    WHERE tenant_id = ${tenantId} AND id = ${personId}
+    SELECT
+      p.id,
+      p.tenant_id,
+      p.site_id,
+      p.full_name,
+      p.email,
+      p.title,
+      p.created_at,
+      p.updated_at,
+      COALESCE(
+        ARRAY_AGG(ps.site_id ORDER BY ps.site_id) FILTER (WHERE ps.site_id IS NOT NULL),
+        ARRAY[]::uuid[]
+      ) AS site_ids
+    FROM people p
+    LEFT JOIN people_sites ps
+      ON ps.tenant_id = p.tenant_id
+      AND ps.person_id = p.id
+    WHERE p.tenant_id = ${tenantId} AND p.id = ${personId}
+    GROUP BY p.id, p.tenant_id, p.site_id, p.full_name, p.email, p.title, p.created_at, p.updated_at
     LIMIT 1
   `;
 
@@ -59,25 +101,69 @@ export async function PUT(request, { params }) {
     return errorJson("fullName is required", 400);
   }
 
-  const siteId = await parseSiteId(context.sql, tenantId, payload.siteId);
+  const { siteIds, invalidSiteIds } = await resolveSiteIds(context.sql, tenantId, payload);
+  if (invalidSiteIds.length > 0) {
+    return errorJson("One or more siteIds are invalid for this tenant", 400, { invalidSiteIds });
+  }
+
+  const primarySiteId = siteIds[0] || null;
   const email = cleanString(payload.email).toLowerCase() || null;
 
   try {
-    const rows = await context.sql`
-      UPDATE people
-      SET
-        site_id = ${siteId},
-        full_name = ${fullName},
-        email = ${email},
-        title = ${cleanString(payload.title) || null},
-        updated_at = NOW()
-      WHERE tenant_id = ${tenantId} AND id = ${personId}
-      RETURNING id, tenant_id, site_id, full_name, email, title, created_at, updated_at
-    `;
+    const updateRows = await context.sql.transaction([
+      context.sql`
+        UPDATE people
+        SET
+          site_id = ${primarySiteId},
+          full_name = ${fullName},
+          email = ${email},
+          title = ${cleanString(payload.title) || null},
+          updated_at = NOW()
+        WHERE tenant_id = ${tenantId} AND id = ${personId}
+        RETURNING id
+      `,
+      context.sql`
+        DELETE FROM people_sites
+        WHERE tenant_id = ${tenantId} AND person_id = ${personId}
+      `,
+      ...siteIds.map((siteId) => context.sql`
+        INSERT INTO people_sites (tenant_id, person_id, site_id)
+        SELECT ${tenantId}, ${personId}, ${siteId}
+        WHERE EXISTS (
+          SELECT 1
+          FROM people
+          WHERE tenant_id = ${tenantId} AND id = ${personId}
+        )
+        ON CONFLICT (tenant_id, person_id, site_id) DO NOTHING
+      `),
+    ]);
 
-    if (!rows?.[0]) {
+    if (!updateRows?.[0]?.[0]) {
       return errorJson("Person not found", 404);
     }
+
+    const rows = await context.sql`
+      SELECT
+        p.id,
+        p.tenant_id,
+        p.site_id,
+        p.full_name,
+        p.email,
+        p.title,
+        p.created_at,
+        p.updated_at,
+        COALESCE(
+          ARRAY_AGG(ps.site_id ORDER BY ps.site_id) FILTER (WHERE ps.site_id IS NOT NULL),
+          ARRAY[]::uuid[]
+        ) AS site_ids
+      FROM people p
+      LEFT JOIN people_sites ps
+        ON ps.tenant_id = p.tenant_id
+        AND ps.person_id = p.id
+      WHERE p.tenant_id = ${tenantId} AND p.id = ${personId}
+      GROUP BY p.id, p.tenant_id, p.site_id, p.full_name, p.email, p.title, p.created_at, p.updated_at
+      LIMIT 1
+    `;
 
     await writeAuditLog(context.sql, {
       tenantId,
@@ -85,7 +171,7 @@ export async function PUT(request, { params }) {
       action: "person.update",
       entityType: "person",
       entityId: personId,
-      payload: { fullName, siteId },
+      payload: { fullName, siteIds, primarySiteId },
     });
 
     return json({ person: normalizePerson(rows[0]) });

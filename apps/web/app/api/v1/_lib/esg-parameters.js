@@ -1,3 +1,6 @@
+const CURRENT_YEAR = new Date().getUTCFullYear();
+const REPORTING_YEAR_ALLOWED_VALUES = Array.from({ length: 11 }, (_item, index) => CURRENT_YEAR + 5 - index);
+
 export const ESG_PARAMETER_DEFINITIONS = [
   {
     key: "e.profile.reporting_year",
@@ -6,7 +9,16 @@ export const ESG_PARAMETER_DEFINITIONS = [
     description: "Fiscal year covered by this assessment.",
     type: "select",
     required: true,
-    options: ["2026", "2025", "2024", "2023"],
+    options: {
+      values: REPORTING_YEAR_ALLOWED_VALUES.map((year) => String(year)),
+      validation: {
+        required: true,
+        type: "integer",
+        min: CURRENT_YEAR - 5,
+        max: CURRENT_YEAR + 5,
+        allowedYears: REPORTING_YEAR_ALLOWED_VALUES,
+      },
+    },
     sortOrder: 10,
   },
   {
@@ -14,9 +26,17 @@ export const ESG_PARAMETER_DEFINITIONS = [
     category: "E",
     label: "Base year",
     description: "Base year used for target comparison.",
-    type: "number",
+    type: "integer",
     required: true,
-    options: null,
+    options: {
+      validation: {
+        required: true,
+        type: "integer",
+        min: CURRENT_YEAR - 5,
+        max: CURRENT_YEAR + 5,
+        lteField: "e.profile.reporting_year",
+      },
+    },
     sortOrder: 20,
   },
   {
