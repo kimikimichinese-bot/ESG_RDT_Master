@@ -11,7 +11,8 @@
     "test": "echo \"No API tests yet.\""
   },
   "dependencies": {
-    "@esg-rdt/shared": "workspace:*"
+    "@esg-rdt/shared": "workspace:*",
+    "@esg-rdt/db": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

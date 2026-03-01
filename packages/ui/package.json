@@ -2,6 +2,10 @@
   "name": "@esg-rdt/ui",
   "version": "1.0.0",
   "private": true,
+  "exports": {
+    "./contracts.js": "./src/contracts.js",
+    "./index.tsx": "./src/index.tsx"
+  },
   "scripts": {
     "build": "echo \"UI component library placeholder.\"",
     "test": "echo \"No UI tests yet.\""

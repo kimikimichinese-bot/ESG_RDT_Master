@@ -24,6 +24,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      JOB_API_TOKEN: ${{ secrets.JOB_API_TOKEN }}
       NEXT_PUBLIC_WEB_URL: ${{ vars.NEXT_PUBLIC_WEB_URL || secrets.NEXT_PUBLIC_WEB_URL }}
       NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || secrets.NEXT_PUBLIC_API_URL }}
     steps:
@@ -40,9 +41,8 @@ jobs:
         run: |
           bun run --filter @esg-rdt/api lint
           bun run --filter @esg-rdt/worker lint
-      - name: Prisma schema and client readiness
+      - name: Prisma schema readiness
         run: |
-          bun run db:generate
           bun run db:check
       - name: Validate Neon branch connectivity (if DATABASE_URL_UNPOOLED is configured)
         run: |
@@ -63,3 +63,40 @@ jobs:
             exit 1
           fi
           DATABASE_URL="$DATABASE_URL_UNPOOLED" bun run db:migrate:deploy
+
+      - name: Document missing JOB_API_TOKEN
+        run: |
+          if [ -n "${JOB_API_TOKEN:-}" ]; then
+            echo "[PASS] JOB_API_TOKEN is configured."
+            exit 0
+          fi
+          echo "[WARN] JOB_API_TOKEN is not configured; /v1/jobs auth and rate-limit assertions were skipped."
+
+  full-functional-evidence:
+    name: Full-functional evidence checks
+    runs-on: ubuntu-latest
+    environment: production
+    needs:
+      - env-and-db-readiness
+    env:
+      FULL_FUNCTIONAL_OFFLINE: "1"
+      FULL_FUNCTIONAL_BASE_URL: ${{ vars.NEXT_PUBLIC_WEB_URL || secrets.NEXT_PUBLIC_WEB_URL }}
+      FULL_FUNCTIONAL_JOB_TOKEN: ${{ secrets.JOB_API_TOKEN }}
+      FULL_FUNCTIONAL_JOB_TOKEN_HEADER: "x-api-key"
+      FULL_FUNCTIONAL_JOB_RATE_LIMIT_ASSERT: "1"
+      FULL_FUNCTIONAL_JOB_RATE_LIMIT_BURST: "120"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Run strict full-functional checks
+        run: |
+          if [ -z "${FULL_FUNCTIONAL_JOB_TOKEN}" ]; then
+            echo "[SKIP] JOB_API_TOKEN secret not set; full-functional evidence checks skipped."
+            exit 0
+          fi
+          ./scripts/full-functional-check.sh

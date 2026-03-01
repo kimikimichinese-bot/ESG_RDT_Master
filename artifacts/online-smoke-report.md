@@ -1,36 +1,19 @@
-# Online smoke report (Deployment Protection bypass)
+# Online smoke report (Deployment Protection bypass attempt)
 
-- HEAD: f3ec0b776d58010968b2e0fe2386869fe3a4b008
-- Vercel details: https://vercel.com/kimikimichineses-projects/esg-rdt-master/E5BsyXhatNoRhwaEaR2mKTuX5E8B
-- Domain: https://esg-rdt-master-14nzib8u5-kimikimichineses-projects.vercel.app
+- HEAD: `4f16c7c`
+- Vercel details: https://vercel.com/kimikimichineses-projects/esg-rdt-master/FiUfPvpgtogKEfBxiVwQsbQ3eZhK
+- Domain used for checks: https://esg-rdt-master-lzgida4ga-kimikimichineses-projects.vercel.app
+- Note: Header-based bypass was attempted with `x-vercel-protection-bypass` but endpoints still return 401.
+- Note: A valid `VERCEL_AUTOMATION_BYPASS_SECRET` (already set to a non-empty value in session) was used; please verify it matches the Vercel project secret if 401 persists.
 
-## Results (bypass via header `x-vercel-protection-bypass`, secret not logged)
-
-- / => HTTP 200
-  - server: Vercel
-  - cache: public, max-age=0, must-revalidate
-  - snippet: <!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-s
-
-- /api/health => HTTP 503
-  - server: Vercel
-  - cache: public, max-age=0, must-revalidate
-  - snippet: {"status":"degraded","service":"esg-rdt-master-api","timestamp":"2026-02-27T14:50:33.805Z","version":"c53d7bed","request
-
-- /api/ready => HTTP 503
-  - server: Vercel
-  - cache: public, max-age=0, must-revalidate
-  - snippet: {"status":"degraded","service":"esg-rdt-master-api","timestamp":"2026-02-27T14:50:34.086Z","version":"c53d7bed","request
-
-- /api/v1/health => HTTP 503
-  - server: Vercel
-  - cache: public, max-age=0, must-revalidate
-  - snippet: {"status":"degraded","service":"esg-rdt-master-api","timestamp":"2026-02-27T14:50:34.382Z","version":"c53d7bed","request
-
-- /api/v1/status => HTTP 503
-  - server: Vercel
-  - cache: public, max-age=0, must-revalidate
-  - snippet: {"status":"degraded","service":"esg-rdt-master-api","timestamp":"2026-02-27T14:50:34.694Z","version":"c53d7bed","request
+## Results
+| Endpoint | HTTP status | Snippet |
+|---|---:|---|
+| / | 401 | This page requires Vercel authentication. Here are your options: |
+| /api/health | 401 | This page requires Vercel authentication. Here are your options: |
+| /api/ready | 401 | This page requires Vercel authentication. Here are your options: |
+| /api/v1/health | 401 | This page requires Vercel authentication. Here are your options: |
+| /api/v1/status | 401 | This page requires Vercel authentication. Here are your options: |
 
 ## Notes
-- If an endpoint returns 404, it is acceptable when the route is intentionally absent.
-- Goal is to avoid 401 (protection gating) and identify 5xx runtime errors.
+- If secret is correct and 401 persists, check whether the deployment target is protected by Vercel Project Protection and whether the bypass secret in GitHub Actions / local env matches the project setting.

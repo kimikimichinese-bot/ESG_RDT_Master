@@ -274,3 +274,50 @@ model EventStore {
 
   @@index([tenantId, stream])
 }
+
+enum WorkerRuntimeStatus {
+  idle
+  busy
+}
+
+enum WorkerJobStatus {
+  queued
+  running
+  succeeded
+  failed
+}
+
+model WorkerRuntimeState {
+  id             String            @id @default(cuid())
+  workerId       String            @unique
+  status         WorkerRuntimeStatus @default(idle)
+  lastHeartbeatAt DateTime
+  processedJobs  Int               @default(0)
+  activeJobId    String?           @unique
+  activeJob      WorkerJob?        @relation("ActiveWorkerJob", fields: [activeJobId], references: [id], onDelete: SetNull)
+  version        String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model WorkerJob {
+  id          String          @id @default(cuid())
+  jobType     String
+  tenantId    String?
+  status      WorkerJobStatus  @default(queued)
+  requestedAt DateTime         @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  updatedAt   DateTime         @updatedAt
+  progress    Int             @default(0)
+  message     String
+  attempts    Int             @default(0)
+  lastError   String?
+  result      Json?
+  metadata    Json
+
+  runtime     WorkerRuntimeState[] @relation("ActiveWorkerJob")
+
+  @@index([status, updatedAt])
+  @@index([tenantId, status])
+}
