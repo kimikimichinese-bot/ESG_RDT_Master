@@ -183,8 +183,13 @@ Use Neon’s Vercel integration to:
 - `DATABASE_URL_UNPOOLED` (Neon unpooled; recommended for migrations)
 
 **Auth**
-- `AUTH_SECRET` (or `NEXTAUTH_SECRET`)
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`) for user session/auth flows
 - `AUTH_TRUST_HOST=true` (if required by your auth stack)
+
+**Job API auth (separate domain)**
+- `JOB_API_TOKEN`: required secret for `/v1/jobs*` endpoints.
+- Keep `/v1/jobs*` auth decoupled from `AUTH_SECRET`; this is now enforced independently.
+- In production checks this token is used to validate authenticated trigger/list/detail/rate-limit behavior.
 
 **App URLs**
 - `NEXT_PUBLIC_WEB_URL`
@@ -408,6 +413,7 @@ A `CalculationRun` is immutable:
   - DB layer (indexes + constraints)
 - File access checks (Blob URLs must be protected or signed)
 - Rate limiting (optional but recommended)
+  - `/v1/jobs*` endpoints have a separate token policy using `JOB_API_TOKEN`
 - Audit log (append-only, chain-hashed)
 
 ### 11.3 Enterprise controls (V1/P2)
@@ -572,6 +578,7 @@ NEXT_PUBLIC_API_URL="http://localhost:3001"
 
 # Auth
 AUTH_SECRET="__SET_ME__"
+JOB_API_TOKEN="__OPTIONAL_JOB_API_TOKEN__"
 
 # Blob (if used)
 BLOB_READ_WRITE_TOKEN="__SET_ME__"
@@ -598,7 +605,7 @@ UPSTASH_REDIS_REST_TOKEN="__SET_ME__"
 To keep branch protection and CI gates reproducible:
 
 1. Ensure this branch is up to date and all required checks are green.
-2. Confirm the PR status/check summary on GitHub (`lint-build-test`, `Neon/Postgres + env readiness`).
+2. Confirm the PR status/check summary on GitHub (`lint-build-test`, `full-functional-evidence`, `Neon/Postgres + env readiness`, `Full-functional evidence checks`).
 3. Merge from PR using:
    - `gh pr merge <PR_NUMBER> --merge --delete-branch`
 
@@ -620,6 +627,8 @@ For production-readiness gating on `ESG_RDT_Master` (`master`):
 - Required status checks (exact names):
   - `Neon/Postgres + env readiness`
   - `lint-build-test`
+  - `full-functional-evidence`
+  - `Full-functional evidence checks`
 - Branch rules:
   - `master` is protected
   - Strict mode enabled
@@ -645,7 +654,9 @@ Use this for each production-ready push on `master`:
    - `gh workflow run production-readiness.yml -f run_migrations=true --ref master`
 4. Confirm required checks on `master` are green:
    - `Neon/Postgres + env readiness`
+   - `Full-functional evidence checks`
    - `lint-build-test`
+   - `full-functional-evidence`
 5. Merge only when checks are green, then verify deployment:
    - `./scripts/context-check.sh`
    - `vercel ls esg-rdt-master`
@@ -942,6 +953,8 @@ Use this rule:
 3. Require required checks:
    - `Neon/Postgres + env readiness`
    - `lint-build-test`
+   - `Full-functional evidence checks`
+   - `full-functional-evidence`
 4. Require review + merge via PR UI/CLI:
    - `gh pr merge <PR_NUMBER> --merge --delete-branch`
 5. Run one-command full production check only on merged state.
@@ -10246,3 +10259,72 @@ TICKET753_LOG_DEPTH=4 \
 PROD_ALIAS="https://esg-rdt-master-pi.vercel.app" \
 ./scripts/ticket-753-production-readiness-evidence-continuity-wrapup.sh
 ```
+
+## Persistent jobs on Vercel + Neon (production-ready)
+
+This repo now supports persistent job processing in production using Neon Postgres and a Vercel Cron worker.
+
+### Required environment variables
+
+- `DATABASE_URL`: Neon Postgres connection string (required for API persistence and queue processing).
+- `CRON_SECRET`: shared secret used by `/api/v1/cron/jobs` (`Authorization: Bearer <CRON_SECRET>`).
+- `NEXT_PUBLIC_API_URL` (optional): external API base. If not set, frontend uses same-origin `/api/...`.
+- `API_BASE_URL` (optional): compatibility fallback for existing diagnostics/proxy paths.
+
+### Vercel setup
+
+Set env vars in all environments:
+
+```bash
+vercel env add DATABASE_URL production
+vercel env add DATABASE_URL preview
+vercel env add DATABASE_URL development
+
+vercel env add CRON_SECRET production
+vercel env add CRON_SECRET preview
+vercel env add CRON_SECRET development
+```
+
+Cron schedule is configured in `vercel.json`:
+
+- path: `/api/v1/cron/jobs`
+- schedule: every minute (`* * * * *`)
+
+### Local verification
+
+Run app and test APIs with same-origin:
+
+```bash
+bun run dev:web
+curl -sS http://127.0.0.1:3000/api/v1/health
+curl -sS -X POST http://127.0.0.1:3000/api/v1/jobs/trigger
+curl -sS -X POST http://127.0.0.1:3000/api/v1/jobs/trigger \
+  -H 'content-type: application/json' \
+  -d '{"jobType":"analyze_url","payload":{"url":"https://example.com"}}'
+```
+
+### Manual cron verification
+
+Use CRON auth header:
+
+```bash
+curl -sS "https://<your-prod-domain>/api/v1/cron/jobs" \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+### Production smoke test helper
+
+```bash
+bash ./scripts/smoke-prod.sh
+# optional custom target URL
+bash ./scripts/smoke-prod.sh https://esg-rdt-master-pi.vercel.app https://example.com
+```
+
+The smoke script validates:
+
+- `/api/v1/health`, `/api/v1/status`, `/api/v1/jobs`
+- trigger with JSON body (`analyze_url`)
+- trigger without body (must return created job)
+- optional manual cron tick when `CRON_SECRET` is exported locally
+
+Note: on Vercel Hobby, Cron frequency is limited; this project uses one automatic daily tick (`0 0 * * *`) and supports manual authenticated ticks via `/api/v1/cron/jobs` for immediate processing when needed.

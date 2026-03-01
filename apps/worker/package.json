@@ -11,7 +11,8 @@
     "test": "echo \"No worker tests yet.\""
   },
   "dependencies": {
-    "@esg-rdt/shared": "*"
+    "@esg-rdt/shared": "*",
+    "@esg-rdt/db": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

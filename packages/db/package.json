@@ -2,6 +2,11 @@
   "name": "@esg-rdt/db",
   "version": "1.0.0",
   "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "check": "prisma validate",
     "generate": "prisma generate",
@@ -12,6 +17,7 @@
     "seed": "echo \"Seed placeholder for demo tenant.\""
   },
   "dependencies": {
+    "@esg-rdt/shared": "workspace:*",
     "@prisma/client": "^5.20.0"
   },
   "devDependencies": {
