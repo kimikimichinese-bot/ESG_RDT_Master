@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./esg.css";
 
 export const metadata = {
   title: "ESG RDT Master",
