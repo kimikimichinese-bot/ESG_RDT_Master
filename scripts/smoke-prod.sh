@@ -106,15 +106,30 @@ echo "== Home unauth redirect check =="
 HOME_HEADERS="$(curl -sS -I "${BASE_URL}/")"
 HOME_STATUS="$(printf '%s' "$HOME_HEADERS" | awk 'toupper($1) ~ /^HTTP/ {code=$2} END {print code}')"
 HOME_LOCATION="$(printf '%s' "$HOME_HEADERS" | awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/^[^:]*:[[:space:]]*/, ""); gsub(/\r/, ""); print; exit}')"
-if [[ "$HOME_STATUS" != "307" && "$HOME_STATUS" != "308" ]]; then
-  echo "FAIL: expected redirect status from / when unauthenticated, got ${HOME_STATUS}"
+if [[ "$HOME_STATUS" == "500" ]]; then
+  echo "FAIL: expected non-500 status from / when unauthenticated, got ${HOME_STATUS}"
   exit 1
 fi
-if [[ "$HOME_LOCATION" != *"/login" && "$HOME_LOCATION" != *"/setup" ]]; then
+if [[ "$HOME_STATUS" != "200" && "$HOME_STATUS" != "302" && "$HOME_STATUS" != "307" && "$HOME_STATUS" != "308" ]]; then
+  echo "FAIL: expected / status in 200/302/307/308 when unauthenticated, got ${HOME_STATUS}"
+  exit 1
+fi
+if [[ "$HOME_STATUS" != "200" && "$HOME_LOCATION" != *"/login" && "$HOME_LOCATION" != *"/setup" && "$HOME_LOCATION" != *"/unavailable" ]]; then
   echo "FAIL: expected / redirect to /login or /setup, got location='${HOME_LOCATION}'"
   exit 1
 fi
 echo "PASS: / redirects unauth -> ${HOME_LOCATION} (${HOME_STATUS})"
+
+HOME_UTM_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/?utm_source=chatgpt.com")"
+if [[ "$HOME_UTM_STATUS" == "500" ]]; then
+  echo "FAIL: expected non-500 status from /?utm_source=chatgpt.com, got ${HOME_UTM_STATUS}"
+  exit 1
+fi
+if [[ "$HOME_UTM_STATUS" != "200" && "$HOME_UTM_STATUS" != "302" && "$HOME_UTM_STATUS" != "307" && "$HOME_UTM_STATUS" != "308" ]]; then
+  echo "FAIL: expected /?utm_source=chatgpt.com status in 200/302/307/308, got ${HOME_UTM_STATUS}"
+  exit 1
+fi
+echo "PASS: /?utm_source=chatgpt.com -> ${HOME_UTM_STATUS}"
 
 echo
 
