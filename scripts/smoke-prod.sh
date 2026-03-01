@@ -149,3 +149,12 @@ if [[ -n "${CRON_SECRET:-}" ]]; then
 else
   echo "CRON_SECRET not set locally: skipping manual /api/v1/cron/jobs invocation"
 fi
+
+echo
+echo "== Help page =="
+HELP_STATUS="$(curl -sS -o /dev/null -w "%{http_code}" "${BASE_URL}/help")"
+echo "/help -> ${HELP_STATUS}"
+if [[ "${HELP_STATUS}" != "200" ]]; then
+  echo "FAIL: /help must return 200"
+  exit 1
+fi

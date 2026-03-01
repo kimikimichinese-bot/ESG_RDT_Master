@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const toApiUrl = (path) => {
   const base = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "");
@@ -37,12 +39,16 @@ const getFirstJob = (payload) => {
   return null;
 };
 
-export default function HomePage() {
+function HomePageClient() {
+  const searchParams = useSearchParams();
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [job, setJob] = useState(null);
   const [rawJson, setRawJson] = useState(null);
+  const autoRunKeysRef = useRef(new Set());
+  const prefillUrl = useMemo(() => searchParams.get("url")?.trim() ?? "", [searchParams]);
+  const shouldAutorun = useMemo(() => searchParams.get("autorun") === "1", [searchParams]);
 
   const output = useMemo(() => (job && job.result && typeof job.result === "object" ? job.result : null), [job]);
   const failedInfo = useMemo(() => {
@@ -57,7 +63,7 @@ export default function HomePage() {
     return { errorKind, message };
   }, [job, output]);
 
-  const pollJob = async (jobId) => {
+  const pollJob = useCallback(async (jobId) => {
     for (let attempt = 0; attempt < 90; attempt += 1) {
       await sleep(2000);
       const detailResponse = await fetch(toApiUrl(`/api/v1/jobs/${encodeURIComponent(jobId)}`), {
@@ -79,15 +85,14 @@ export default function HomePage() {
       }
     }
     throw new Error("Polling timeout reached");
-  };
+  }, []);
 
-  const onRun = async (event) => {
-    event.preventDefault();
+  const runAnalyze = useCallback(async (inputUrl) => {
     setBusy(true);
     setError("");
 
     try {
-      const targetUrl = url.trim();
+      const targetUrl = inputUrl.trim();
       if (!targetUrl) {
         throw new Error("URL is required");
       }
@@ -126,6 +131,30 @@ export default function HomePage() {
     } finally {
       setBusy(false);
     }
+  }, [pollJob]);
+
+  useEffect(() => {
+    if (!prefillUrl) {
+      return;
+    }
+    setUrl((current) => (current === prefillUrl ? current : prefillUrl));
+  }, [prefillUrl]);
+
+  useEffect(() => {
+    if (!shouldAutorun || !prefillUrl) {
+      return;
+    }
+    const autoRunKey = `${shouldAutorun}:${prefillUrl}`;
+    if (autoRunKeysRef.current.has(autoRunKey)) {
+      return;
+    }
+    autoRunKeysRef.current.add(autoRunKey);
+    void runAnalyze(prefillUrl);
+  }, [prefillUrl, runAnalyze, shouldAutorun]);
+
+  const onRun = async (event) => {
+    event.preventDefault();
+    await runAnalyze(url);
   };
 
   return (
@@ -133,6 +162,9 @@ export default function HomePage() {
       <h1 style={{ marginBottom: 8 }}>URL Analyzer Job Runner</h1>
       <p style={{ color: "#444", marginTop: 0 }}>
         Insert a URL, run a persistent background job, and inspect final output.
+      </p>
+      <p style={{ marginTop: 4 }}>
+        Need examples and safety limits? <Link href="/help">Read the help page</Link>.
       </p>
 
       <form onSubmit={onRun} style={{ display: "grid", gap: 12, marginTop: 20 }}>
@@ -214,5 +246,13 @@ export default function HomePage() {
         </section>
       ) : null}
     </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<main style={{ maxWidth: 840, margin: "40px auto", padding: "0 16px" }}>Loading...</main>}>
+      <HomePageClient />
+    </Suspense>
   );
 }
