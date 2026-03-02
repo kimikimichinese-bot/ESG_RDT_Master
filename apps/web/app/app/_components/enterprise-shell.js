@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/app/sites", label: "Sites" },
   { href: "/app/environment", label: "Environment Data" },
   { href: "/app/social", label: "Social Data" },
+  { href: "/app/governance", label: "Governance" },
   { href: "/app/factors", label: "Factors" },
   { href: "/app/emissions", label: "Emissions" },
   { href: "/app/personnel", label: "Personnel" },
