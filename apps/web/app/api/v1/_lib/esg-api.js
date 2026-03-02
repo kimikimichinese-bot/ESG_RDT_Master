@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
   EMISSION_FACTOR_DEFINITIONS,
+  FACTOR_SUGGESTED_PRESETS_BY_KEY,
+  FACTOR_REFERENCE_OPTIONS_BY_KEY,
   METRIC_DEFINITION_BY_KEY,
   METRIC_DEFINITIONS,
   parseInteger,
@@ -277,6 +279,37 @@ export const normalizeFactorRow = (row, required = false) => ({
   createdAt: row.created_at ? new Date(row.created_at).toISOString() : null,
   updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : null,
 });
+
+export const getFactorReferenceOptions = (factorKey) => {
+  if (!factorKey || typeof factorKey !== "string") {
+    return [];
+  }
+  const options = FACTOR_REFERENCE_OPTIONS_BY_KEY[factorKey];
+  if (!Array.isArray(options)) {
+    return [];
+  }
+  const presets = Array.isArray(FACTOR_SUGGESTED_PRESETS_BY_KEY[factorKey])
+    ? FACTOR_SUGGESTED_PRESETS_BY_KEY[factorKey]
+    : [];
+
+  return options.map((item) => ({
+    id: item.id,
+    label: item.label,
+    jurisdiction: item.jurisdiction || null,
+    year: item.year || null,
+    url: item.url,
+    suggestedValue:
+      typeof item.suggestedValue === "number" && Number.isFinite(item.suggestedValue) ? item.suggestedValue : null,
+    presets: presets
+      .filter((preset) => preset.referenceId === item.id)
+      .map((preset) => ({
+        country: preset.country,
+        year: preset.year,
+        value: preset.value,
+        note: preset.note || null,
+      })),
+  }));
+};
 
 export const parseWorkforceRow = (row) => {
   const month = parseInteger(row.month);

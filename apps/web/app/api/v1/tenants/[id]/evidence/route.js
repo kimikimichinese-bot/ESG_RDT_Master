@@ -44,17 +44,22 @@ export async function GET(request, { params }) {
       size_bytes,
       sha256,
       blob_url,
+      storage_kind,
+      (file_base64 IS NOT NULL) AS has_file,
       created_at
     FROM evidence
     WHERE tenant_id = ${tenantId}
-      AND (${siteId} = '' OR site_id = ${siteId})
       AND (
-        ${companyId} = ''
+        NULLIF(${siteId}, '') IS NULL
+        OR site_id = NULLIF(${siteId}, '')::uuid
+      )
+      AND (
+        NULLIF(${companyId}, '') IS NULL
         OR site_id IN (
           SELECT s.id
           FROM sites s
           WHERE s.tenant_id = ${tenantId}
-            AND s.company_id = ${companyId}
+            AND s.company_id = NULLIF(${companyId}, '')::uuid
         )
       )
     ORDER BY created_at DESC
@@ -62,7 +67,7 @@ export async function GET(request, { params }) {
   `;
 
   return json({
-    blobEnabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    blobEnabled: false,
     evidence: rows.map((row) => normalizeEvidence(row)),
   });
 }
@@ -86,10 +91,11 @@ export async function POST(request, { params }) {
   }
 
   const siteId = await resolveSite(context.sql, tenantId, payload.siteId);
+  const blobUrl = cleanString(payload.blobUrl) || null;
   const evidenceId = randomUUID();
 
   const rows = await context.sql`
-    INSERT INTO evidence (id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url)
+    INSERT INTO evidence (id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, storage_kind)
     VALUES (
       ${evidenceId},
       ${tenantId},
@@ -98,9 +104,10 @@ export async function POST(request, { params }) {
       ${contentType},
       ${Number.isFinite(sizeBytes) && sizeBytes > 0 ? sizeBytes : 0},
       ${cleanString(payload.sha256) || null},
-      ${cleanString(payload.blobUrl) || null}
+      ${blobUrl},
+      ${blobUrl ? "blob" : "db"}
     )
-    RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+    RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, storage_kind, (file_base64 IS NOT NULL) AS has_file, created_at
   `;
 
   await writeAuditLog(context.sql, {
@@ -114,6 +121,7 @@ export async function POST(request, { params }) {
       contentType,
       siteId,
       sizeBytes: Number.isFinite(sizeBytes) ? sizeBytes : 0,
+      storageKind: blobUrl ? "blob" : "db",
     },
   });
 

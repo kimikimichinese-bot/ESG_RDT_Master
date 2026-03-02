@@ -74,15 +74,13 @@ export async function PUT(request, { params }) {
       unit: entry.unit,
     });
 
-    if (entry.evidenceIds.length > 0) {
-      await replaceEntityEvidence({
-        sql: context.sql,
-        tenantId,
-        entityType: "metric",
-        entityId: row.id,
-        evidenceIds: entry.evidenceIds,
-      });
-    }
+    await replaceEntityEvidence({
+      sql: context.sql,
+      tenantId,
+      entityType: "metric",
+      entityId: row.id,
+      evidenceIds: Array.isArray(entry.evidenceIds) ? entry.evidenceIds : [],
+    });
 
     upserted.push(row);
 

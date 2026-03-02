@@ -4,6 +4,54 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTenantSession } from "../_components/use-tenant-session";
 
+const CUSTOM_REFERENCE_VALUE = "__custom__";
+const PRESET_COUNTRIES = ["UK", "US", "IT"];
+const PRESET_YEARS = [2026, 2025, 2024, 2023];
+
+const formatReferenceSource = (option) => {
+  if (!option || !option.url) {
+    return "";
+  }
+  const meta = [option.jurisdiction, option.year].filter(Boolean).join(" · ");
+  return meta ? `${option.label} (${meta}) - ${option.url}` : `${option.label} - ${option.url}`;
+};
+
+const getSelectedReferenceId = (factor) => {
+  const source = typeof factor?.source === "string" ? factor.source : "";
+  const options = Array.isArray(factor?.referenceOptions) ? factor.referenceOptions : [];
+  for (const option of options) {
+    if (option?.url && source.includes(option.url)) {
+      return option.id;
+    }
+  }
+  return CUSTOM_REFERENCE_VALUE;
+};
+
+const findSuggestedPreset = (factor, country, year) => {
+  const selectedReferenceId = getSelectedReferenceId(factor);
+  const options = Array.isArray(factor?.referenceOptions) ? factor.referenceOptions : [];
+  const selectedOption =
+    selectedReferenceId !== CUSTOM_REFERENCE_VALUE
+      ? options.find((option) => option.id === selectedReferenceId) || null
+      : null;
+  const orderedOptions = selectedOption ? [selectedOption, ...options.filter((option) => option.id !== selectedOption.id)] : options;
+
+  for (const option of orderedOptions) {
+    const presets = Array.isArray(option?.presets) ? option.presets : [];
+    const exact = presets.find((preset) => preset.country === country && Number(preset.year) === Number(year));
+    if (exact) {
+      return { option, preset: exact };
+    }
+    const byCountry = presets.filter((preset) => preset.country === country);
+    if (byCountry.length > 0) {
+      byCountry.sort((a, b) => Number(b.year) - Number(a.year));
+      return { option, preset: byCountry[0] };
+    }
+  }
+
+  return null;
+};
+
 export default function FactorsPage() {
   const tenant = useTenantSession();
   const [factors, setFactors] = useState([]);
@@ -11,6 +59,8 @@ export default function FactorsPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [presetCountry, setPresetCountry] = useState("IT");
+  const [presetYear, setPresetYear] = useState(PRESET_YEARS[0]);
 
   const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
 
@@ -96,6 +146,36 @@ export default function FactorsPage() {
           <p className="enterprise-muted">Tenant emission factors used for Scope 1 and Scope 2 calculations.</p>
         </div>
         <div className="enterprise-inline-actions">
+          <label className="enterprise-muted" htmlFor="factor-country">
+            Country
+          </label>
+          <select
+            id="factor-country"
+            className="enterprise-input"
+            value={presetCountry}
+            onChange={(event) => setPresetCountry(event.target.value)}
+          >
+            {PRESET_COUNTRIES.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <label className="enterprise-muted" htmlFor="factor-year">
+            Year
+          </label>
+          <select
+            id="factor-year"
+            className="enterprise-input"
+            value={presetYear}
+            onChange={(event) => setPresetYear(Number(event.target.value))}
+          >
+            {PRESET_YEARS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
           <button className="enterprise-button-secondary" type="button" onClick={() => void loadFactors()}>
             Refresh
           </button>
@@ -125,6 +205,7 @@ export default function FactorsPage() {
                 <th>Label</th>
                 <th>Unit</th>
                 <th>Value</th>
+                <th>Reference</th>
                 <th>Source</th>
                 <th>Status</th>
               </tr>
@@ -152,6 +233,85 @@ export default function FactorsPage() {
                     />
                   </td>
                   <td>
+                    <select
+                      className="enterprise-input"
+                      value={getSelectedReferenceId(factor)}
+                      onChange={(event) =>
+                        setFactors((current) =>
+                          current.map((item) => {
+                            if (item.key !== factor.key) {
+                              return item;
+                            }
+                            const options = Array.isArray(item.referenceOptions) ? item.referenceOptions : [];
+                            const selected = options.find((option) => option.id === event.target.value) || null;
+                            if (!selected) {
+                              return item;
+                            }
+                            return {
+                              ...item,
+                              source: formatReferenceSource(selected),
+                            };
+                          }),
+                        )
+                      }
+                      disabled={!canWrite}
+                    >
+                      <option value={CUSTOM_REFERENCE_VALUE}>Manual / custom source</option>
+                      {(factor.referenceOptions || []).map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {getSelectedReferenceId(factor) !== CUSTOM_REFERENCE_VALUE ? (
+                      <a
+                        className="enterprise-muted"
+                        href={(factor.referenceOptions || []).find((option) => option.id === getSelectedReferenceId(factor))?.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open reference
+                      </a>
+                    ) : null}
+                  </td>
+                  <td>
+                    {(() => {
+                      const suggested = findSuggestedPreset(factor, presetCountry, presetYear);
+                      if (!suggested) {
+                        return <p className="enterprise-muted">No suggested preset for {presetCountry}/{presetYear}.</p>;
+                      }
+                      return (
+                        <div>
+                          <p className="enterprise-muted">
+                            Suggested {presetCountry}/{presetYear}: <strong>{suggested.preset.value}</strong>
+                            {Number(suggested.preset.year) !== Number(presetYear)
+                              ? ` (from ${suggested.preset.year})`
+                              : ""}
+                            {suggested.preset.note ? ` · ${suggested.preset.note}` : ""}
+                          </p>
+                          <button
+                            type="button"
+                            className="enterprise-button-secondary"
+                            disabled={!canWrite}
+                            onClick={() =>
+                              setFactors((current) =>
+                                current.map((item) =>
+                                  item.key === factor.key
+                                    ? {
+                                        ...item,
+                                        value: suggested.preset.value,
+                                        source: formatReferenceSource(suggested.option),
+                                      }
+                                    : item,
+                                ),
+                              )
+                            }
+                          >
+                            Apply suggested value
+                          </button>
+                        </div>
+                      );
+                    })()}
                     <input
                       className="enterprise-input"
                       type="text"

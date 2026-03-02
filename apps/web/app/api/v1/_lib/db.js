@@ -347,6 +347,8 @@ export const ensureEnterpriseSchema = async () => {
           size_bytes BIGINT NOT NULL DEFAULT 0,
           sha256 TEXT NULL,
           blob_url TEXT NULL,
+          file_base64 TEXT NULL,
+          storage_kind TEXT NOT NULL DEFAULT 'db',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `;
@@ -416,6 +418,16 @@ export const ensureEnterpriseSchema = async () => {
         CREATE UNIQUE INDEX IF NOT EXISTS idx_people_tenant_email_unique
         ON people (tenant_id, LOWER(email))
         WHERE email IS NOT NULL
+      `;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS file_base64 TEXT NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS storage_kind TEXT NOT NULL DEFAULT 'db'`;
+      await sql`
+        UPDATE evidence
+        SET storage_kind = CASE
+          WHEN blob_url IS NOT NULL AND blob_url <> '' THEN 'blob'
+          ELSE 'db'
+        END
+        WHERE storage_kind IS NULL OR storage_kind = ''
       `;
 
       await sql`

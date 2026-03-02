@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const rows = await context.sql`
-    SELECT id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+    SELECT id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, storage_kind, (file_base64 IS NOT NULL) AS has_file, created_at
     FROM evidence
     WHERE tenant_id = ${tenantId} AND id = ${evidenceId}
     LIMIT 1
@@ -61,6 +61,7 @@ export async function PUT(request, { params }) {
 
   const siteId = await resolveSite(context.sql, tenantId, payload.siteId);
   const sizeBytes = Number(payload.sizeBytes);
+  const blobUrl = cleanString(payload.blobUrl) || null;
 
   const rows = await context.sql`
     UPDATE evidence
@@ -70,9 +71,10 @@ export async function PUT(request, { params }) {
       content_type = ${cleanString(payload.contentType) || "application/octet-stream"},
       size_bytes = ${Number.isFinite(sizeBytes) && sizeBytes > 0 ? sizeBytes : 0},
       sha256 = ${cleanString(payload.sha256) || null},
-      blob_url = ${cleanString(payload.blobUrl) || null}
+      blob_url = ${blobUrl},
+      storage_kind = ${blobUrl ? "blob" : "db"}
     WHERE tenant_id = ${tenantId} AND id = ${evidenceId}
-    RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+    RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, storage_kind, (file_base64 IS NOT NULL) AS has_file, created_at
   `;
 
   if (!rows?.[0]) {
