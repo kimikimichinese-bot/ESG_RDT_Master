@@ -90,6 +90,18 @@ LOGIN_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/login")"
 assert_status "$LOGIN_STATUS" "200" "/login"
 SETUP_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/setup")"
 assert_status "$SETUP_STATUS" "200" "/setup"
+SOCIAL_PAGE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/app/social")"
+if [[ "$SOCIAL_PAGE_STATUS" != "200" && "$SOCIAL_PAGE_STATUS" != "302" && "$SOCIAL_PAGE_STATUS" != "307" && "$SOCIAL_PAGE_STATUS" != "308" ]]; then
+  echo "FAIL: /app/social expected 200/302/307/308, got ${SOCIAL_PAGE_STATUS}"
+  exit 1
+fi
+echo "PASS: /app/social -> ${SOCIAL_PAGE_STATUS}"
+GOV_PAGE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/app/governance")"
+if [[ "$GOV_PAGE_STATUS" != "200" && "$GOV_PAGE_STATUS" != "302" && "$GOV_PAGE_STATUS" != "307" && "$GOV_PAGE_STATUS" != "308" ]]; then
+  echo "FAIL: /app/governance expected 200/302/307/308, got ${GOV_PAGE_STATUS}"
+  exit 1
+fi
+echo "PASS: /app/governance -> ${GOV_PAGE_STATUS}"
 
 request_json "GET" "/api/v1/auth/bootstrap"
 assert_status "$REQUEST_STATUS" "200" "/api/v1/auth/bootstrap"
