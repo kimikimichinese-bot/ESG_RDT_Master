@@ -7,6 +7,10 @@ const SCHEMA_READY_KEY = "__esg_rdt_jobs_schema_ready__";
 const SCHEMA_PROMISE_KEY = "__esg_rdt_jobs_schema_promise__";
 const ENTERPRISE_SCHEMA_READY_KEY = "__esg_rdt_enterprise_schema_ready__";
 const ENTERPRISE_SCHEMA_PROMISE_KEY = "__esg_rdt_enterprise_schema_promise__";
+const SOCIAL_SCHEMA_READY_KEY = "__esg_rdt_social_schema_ready__";
+const SOCIAL_SCHEMA_PROMISE_KEY = "__esg_rdt_social_schema_promise__";
+const GOVERNANCE_SCHEMA_READY_KEY = "__esg_rdt_governance_schema_ready__";
+const GOVERNANCE_SCHEMA_PROMISE_KEY = "__esg_rdt_governance_schema_promise__";
 const ASSESSMENT_SCHEMA_READY_KEY = "__esg_rdt_assessment_schema_ready__";
 const ASSESSMENT_SCHEMA_PROMISE_KEY = "__esg_rdt_assessment_schema_promise__";
 
@@ -553,6 +557,91 @@ export const ensureEnterpriseSchema = async () => {
   }
 
   await globalThis[ENTERPRISE_SCHEMA_PROMISE_KEY];
+};
+
+export const ensureSocialSchema = async () => {
+  if (globalThis[SOCIAL_SCHEMA_READY_KEY]) {
+    return;
+  }
+
+  if (!globalThis[SOCIAL_SCHEMA_PROMISE_KEY]) {
+    globalThis[SOCIAL_SCHEMA_PROMISE_KEY] = (async () => {
+      await ensureEnterpriseSchema();
+      globalThis[SOCIAL_SCHEMA_READY_KEY] = true;
+    })().finally(() => {
+      globalThis[SOCIAL_SCHEMA_PROMISE_KEY] = null;
+    });
+  }
+
+  await globalThis[SOCIAL_SCHEMA_PROMISE_KEY];
+};
+
+export const ensureGovernanceSchema = async () => {
+  if (globalThis[GOVERNANCE_SCHEMA_READY_KEY]) {
+    return;
+  }
+
+  if (!globalThis[GOVERNANCE_SCHEMA_PROMISE_KEY]) {
+    globalThis[GOVERNANCE_SCHEMA_PROMISE_KEY] = (async () => {
+      await ensureEnterpriseSchema();
+      const sql = getSql();
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS governance_yearly (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          reporting_year INTEGER NOT NULL,
+          board_total INTEGER NOT NULL DEFAULT 0 CHECK (board_total >= 0),
+          board_women INTEGER NOT NULL DEFAULT 0 CHECK (board_women >= 0),
+          board_independent INTEGER NOT NULL DEFAULT 0 CHECK (board_independent >= 0),
+          board_meetings INTEGER NOT NULL DEFAULT 0 CHECK (board_meetings >= 0),
+          anti_corruption_policy BOOLEAN NOT NULL DEFAULT FALSE,
+          whistleblowing_channel BOOLEAN NOT NULL DEFAULT FALSE,
+          data_privacy_policy BOOLEAN NOT NULL DEFAULT FALSE,
+          supplier_code_of_conduct BOOLEAN NOT NULL DEFAULT FALSE,
+          gdpr_training BOOLEAN NOT NULL DEFAULT FALSE,
+          data_breaches_count INTEGER NOT NULL DEFAULT 0 CHECK (data_breaches_count >= 0),
+          corruption_incidents_count INTEGER NOT NULL DEFAULT 0 CHECK (corruption_incidents_count >= 0),
+          fines_amount_eur NUMERIC NOT NULL DEFAULT 0 CHECK (fines_amount_eur >= 0),
+          notes TEXT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (tenant_id, company_id, reporting_year)
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS governance_policies (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          reporting_year INTEGER NOT NULL,
+          policy_key TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'no' CHECK (status IN ('yes', 'no', 'in_progress')),
+          notes TEXT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          UNIQUE (tenant_id, company_id, reporting_year, policy_key)
+        )
+      `;
+
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_governance_yearly_lookup
+        ON governance_yearly (tenant_id, company_id, reporting_year)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_governance_policies_lookup
+        ON governance_policies (tenant_id, company_id, reporting_year, policy_key)
+      `;
+
+      globalThis[GOVERNANCE_SCHEMA_READY_KEY] = true;
+    })().finally(() => {
+      globalThis[GOVERNANCE_SCHEMA_PROMISE_KEY] = null;
+    });
+  }
+
+  await globalThis[GOVERNANCE_SCHEMA_PROMISE_KEY];
 };
 
 export const ensureAssessmentSchema = async () => {
