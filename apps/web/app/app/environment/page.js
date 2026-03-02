@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCompanyScope } from "../_components/use-company-scope";
 import { useTenantSession } from "../_components/use-tenant-session";
@@ -307,16 +308,37 @@ export default function EnvironmentPage() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload?.error || `HTTP ${response.status}`);
+        throw new Error(payload?.message || payload?.error || `HTTP ${response.status}`);
       }
 
       await loadEvidence();
-      setSaveMessage("Evidence uploaded to vault");
+      setSaveMessage(`Evidence uploaded: ${payload?.evidence?.filename || file.name}`);
     } catch (error) {
       setSaveMessage(error instanceof Error ? error.message : "Unable to upload evidence");
     } finally {
       setUploading(false);
       event.target.value = "";
+    }
+  };
+
+  const onDeleteEvidence = async (evidenceId) => {
+    if (!tenant.tenantId || !evidenceId) {
+      return;
+    }
+    try {
+      setSaveMessage("");
+      const response = await fetch(
+        `/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence/${encodeURIComponent(evidenceId)}`,
+        { method: "DELETE" },
+      );
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.message || payload?.error || `HTTP ${response.status}`);
+      }
+      await loadEvidence();
+      setSaveMessage("Evidence deleted");
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : "Unable to delete evidence");
     }
   };
 
@@ -410,6 +432,55 @@ export default function EnvironmentPage() {
             onChange={(event) => void onUploadEvidence(event)}
             disabled={!selectedSiteId || uploading}
           />
+          <div className="enterprise-muted" style={{ gridColumn: "1 / -1" }}>
+            Uploaded evidence files:{" "}
+            {evidence.filter((item) => !selectedSiteId || item.siteId === selectedSiteId).length}
+          </div>
+          {evidence.filter((item) => !selectedSiteId || item.siteId === selectedSiteId).length > 0 ? (
+            <div className="enterprise-table-wrap" style={{ gridColumn: "1 / -1" }}>
+              <table className="enterprise-table">
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Open</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {evidence
+                    .filter((item) => !selectedSiteId || item.siteId === selectedSiteId)
+                    .slice(0, 10)
+                    .map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.filename}</td>
+                        <td>{item.contentType || "-"}</td>
+                        <td>{typeof item.sizeBytes === "number" ? `${Math.round(item.sizeBytes / 1024)} KB` : "-"}</td>
+                        <td>
+                          <Link
+                            href={`/app/evidence/${encodeURIComponent(item.id)}`}
+                            className="enterprise-button-secondary"
+                            target="_blank"
+                          >
+                            Open
+                          </Link>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="enterprise-button enterprise-button-ghost"
+                            onClick={() => void onDeleteEvidence(item.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -46,9 +46,8 @@ export default function EvidenceDetailPage() {
     }
   }, [tenant.loading, tenant.tenantId, evidenceId, loadEvidence]);
 
-  const canRenderPdf = Boolean(
-    item?.blobUrl && typeof item.contentType === "string" && item.contentType.toLowerCase().includes("pdf"),
-  );
+  const viewerUrl = item?.downloadUrl || item?.blobUrl || "";
+  const canRenderPdf = Boolean(viewerUrl && typeof item?.contentType === "string" && item.contentType.toLowerCase().includes("pdf"));
 
   return (
     <section className="enterprise-grid">
@@ -77,14 +76,10 @@ export default function EvidenceDetailPage() {
             <p className="enterprise-muted">Type: {item.contentType}</p>
             <p className="enterprise-muted">Size: {item.sizeBytes}</p>
             <p className="enterprise-muted">SHA256: {item.sha256 || "-"}</p>
-            <p className="enterprise-muted">Blob URL: {item.blobUrl || "-"}</p>
-            {item.blobUrl ? (
-              <a
-                className="enterprise-button-secondary"
-                href={item.blobUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
+            <p className="enterprise-muted">Storage: {item.storageKind || "db"}</p>
+            <p className="enterprise-muted">Download URL: {item.downloadUrl || "-"}</p>
+            {viewerUrl ? (
+              <a className="enterprise-button-secondary" href={viewerUrl} target="_blank" rel="noreferrer noopener">
                 Open file in new tab
               </a>
             ) : null}
@@ -96,12 +91,12 @@ export default function EvidenceDetailPage() {
               <iframe
                 title="Evidence PDF"
                 className="enterprise-pdf-viewer"
-                src={item.blobUrl}
+                src={viewerUrl}
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="enterprise-empty">No PDF blob URL available for this evidence.</div>
+              <div className="enterprise-empty">No PDF payload available for this evidence.</div>
             )}
           </section>
         </>

@@ -1,5 +1,4 @@
 import { createHash, randomUUID } from "node:crypto";
-import { put } from "@vercel/blob";
 import { writeAuditLog } from "../../../../_lib/audit.js";
 import { normalizeEvidence, requireTenantContext } from "../../../../_lib/enterprise-api.js";
 import { cleanString, errorJson, json } from "../../../../_lib/http.js";
@@ -7,6 +6,7 @@ import { cleanString, errorJson, json } from "../../../../_lib/http.js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const resolveSite = async (sql, tenantId, siteId) => {
   if (!siteId || typeof siteId !== "string") {
@@ -22,9 +22,17 @@ const resolveSite = async (sql, tenantId, siteId) => {
   return rows?.[0]?.id || null;
 };
 
-const buildBlobKey = (tenantId, filename) => {
-  const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "-");
-  return `evidence/${tenantId}/${safeFilename}`;
+const formatUploadError = (error) => {
+  if (!error) {
+    return "Unexpected upload error";
+  }
+  if (error instanceof Error) {
+    return error.message || "Unexpected upload error";
+  }
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+  return "Unexpected upload error";
 };
 
 export async function POST(request, { params }) {
@@ -63,22 +71,19 @@ export async function POST(request, { params }) {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const contentType = cleanString(file.type) || "application/octet-stream";
     const sizeBytes = fileBuffer.byteLength;
-    const sha256 = createHash("sha256").update(fileBuffer).digest("hex");
-
-    const uploadOptions = {
-      access: "public",
-      addRandomSuffix: true,
-      contentType,
-    };
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      uploadOptions.token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (sizeBytes <= 0) {
+      return errorJson("Uploaded file is empty", 400);
+    }
+    if (sizeBytes > MAX_FILE_BYTES) {
+      return errorJson(`File too large. Max ${Math.floor(MAX_FILE_BYTES / (1024 * 1024))} MB`, 413);
     }
 
-    const blob = await put(buildBlobKey(tenantId, filename), fileBuffer, uploadOptions);
+    const sha256 = createHash("sha256").update(fileBuffer).digest("hex");
+    const fileBase64 = fileBuffer.toString("base64");
     const evidenceId = randomUUID();
 
     const rows = await context.sql`
-      INSERT INTO evidence (id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url)
+      INSERT INTO evidence (id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, file_base64, storage_kind)
       VALUES (
         ${evidenceId},
         ${tenantId},
@@ -87,9 +92,11 @@ export async function POST(request, { params }) {
         ${contentType},
         ${sizeBytes},
         ${sha256},
-        ${blob?.url || null}
+        NULL,
+        ${fileBase64},
+        'db'
       )
-      RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+      RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, storage_kind, (file_base64 IS NOT NULL) AS has_file, created_at
     `;
 
     await writeAuditLog(context.sql, {
@@ -104,13 +111,21 @@ export async function POST(request, { params }) {
         siteId,
         sizeBytes,
         sha256,
+        storageKind: "db",
       },
     });
 
     return json({ evidence: normalizeEvidence(rows[0]) }, 201);
   } catch (error) {
+    const message = formatUploadError(error);
+    console.error("evidence.upload.failed", {
+      tenantId,
+      siteId,
+      filename,
+      error: message,
+    });
     return errorJson("Failed to upload evidence", 500, {
-      message: error instanceof Error ? error.message : "Unexpected error",
+      message,
     });
   }
 }

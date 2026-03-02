@@ -18,7 +18,7 @@ export async function POST(request, { params }) {
     return errorJson("filename is required", 400);
   }
 
-  const blobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const blobEnabled = false;
   const uploadUrl = `/api/v1/tenants/${encodeURIComponent(tenantId)}/evidence/complete`;
 
   return json({
@@ -26,8 +26,6 @@ export async function POST(request, { params }) {
     uploadUrl,
     method: "POST",
     expiresInSeconds: 300,
-    note: blobEnabled
-      ? "Upload complete endpoint will store file in Vercel Blob and persist metadata."
-      : "Uploads disabled until BLOB_READ_WRITE_TOKEN is set. Metadata-only flow remains available.",
+    note: "Upload complete endpoint stores file content in DB and persists metadata.",
   });
 }

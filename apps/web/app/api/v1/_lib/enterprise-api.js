@@ -160,6 +160,9 @@ export const normalizeEvidence = (row) => ({
   sizeBytes: Number(row.size_bytes ?? 0),
   sha256: row.sha256,
   blobUrl: row.blob_url,
+  hasFile: Boolean(row.has_file),
+  storageKind: row.storage_kind || (row.blob_url ? "blob" : "db"),
+  downloadUrl: `/api/v1/tenants/${encodeURIComponent(String(row.tenant_id))}/evidence/${encodeURIComponent(String(row.id))}/file`,
   createdAt: toIso(row.created_at),
 });
 
