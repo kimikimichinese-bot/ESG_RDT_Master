@@ -27,6 +27,26 @@ const buildBlobKey = (tenantId, filename) => {
   return `evidence/${tenantId}/${safeFilename}`;
 };
 
+const normalizeDocType = (value) => {
+  const normalized = cleanString(value).toLowerCase();
+  return ["policy", "action", "reporting", "audit", "certification", "other"].includes(normalized)
+    ? normalized
+    : null;
+};
+
+const normalizeCoverage = (value) => {
+  const normalized = cleanString(value).toLowerCase();
+  return ["tenant", "company", "site"].includes(normalized) ? normalized : null;
+};
+
+const normalizeIssueDate = (value) => {
+  const normalized = cleanString(value);
+  if (!normalized) {
+    return null;
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+};
+
 export async function POST(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "evidence");
@@ -64,6 +84,11 @@ export async function POST(request, { params }) {
     const contentType = cleanString(file.type) || "application/octet-stream";
     const sizeBytes = fileBuffer.byteLength;
     const sha256 = createHash("sha256").update(fileBuffer).digest("hex");
+    const issueDate = normalizeIssueDate(formData.get("issueDate"));
+    const docType = normalizeDocType(formData.get("docType"));
+    const scopeCoverage = normalizeCoverage(formData.get("scopeCoverage"));
+    const isEncrypted = cleanString(formData.get("isEncrypted")).toLowerCase() === "true";
+    const language = cleanString(formData.get("language")) || null;
 
     const uploadOptions = {
       access: "public",
@@ -78,7 +103,21 @@ export async function POST(request, { params }) {
     const evidenceId = randomUUID();
 
     const rows = await context.sql`
-      INSERT INTO evidence (id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url)
+      INSERT INTO evidence (
+        id,
+        tenant_id,
+        site_id,
+        filename,
+        content_type,
+        size_bytes,
+        sha256,
+        blob_url,
+        issue_date,
+        doc_type,
+        scope_coverage,
+        is_encrypted,
+        language
+      )
       VALUES (
         ${evidenceId},
         ${tenantId},
@@ -87,9 +126,28 @@ export async function POST(request, { params }) {
         ${contentType},
         ${sizeBytes},
         ${sha256},
-        ${blob?.url || null}
+        ${blob?.url || null},
+        ${issueDate},
+        ${docType},
+        ${scopeCoverage},
+        ${isEncrypted},
+        ${language}
       )
-      RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+      RETURNING
+        id,
+        tenant_id,
+        site_id,
+        filename,
+        content_type,
+        size_bytes,
+        sha256,
+        blob_url,
+        issue_date,
+        doc_type,
+        scope_coverage,
+        is_encrypted,
+        language,
+        created_at
     `;
 
     await writeAuditLog(context.sql, {
@@ -104,6 +162,11 @@ export async function POST(request, { params }) {
         siteId,
         sizeBytes,
         sha256,
+        issueDate,
+        docType,
+        scopeCoverage,
+        isEncrypted,
+        language,
       },
     });
 

@@ -437,6 +437,28 @@
   gap: 12px;
 }
 
+.enterprise-grid-compact {
+  gap: 8px;
+}
+
+.enterprise-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.enterprise-subcard {
+  border: 1px solid #d5e1e6;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 12px;
+}
+
+.enterprise-card-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
 .enterprise-toolbar {
   display: flex;
   justify-content: space-between;
@@ -621,6 +643,16 @@
   border: 1px solid #bb6558;
   background: #fff7f5;
   color: #9d2e22;
+}
+
+.enterprise-button-link {
+  border: 0;
+  background: transparent;
+  color: #1b648a;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  text-decoration: underline;
 }
 
 .enterprise-empty {

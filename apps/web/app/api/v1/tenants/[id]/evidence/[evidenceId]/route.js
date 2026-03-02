@@ -20,6 +20,26 @@ const resolveSite = async (sql, tenantId, siteId) => {
   return rows?.[0]?.id || null;
 };
 
+const normalizeDocType = (value) => {
+  const normalized = cleanString(value).toLowerCase();
+  return ["policy", "action", "reporting", "audit", "certification", "other"].includes(normalized)
+    ? normalized
+    : null;
+};
+
+const normalizeCoverage = (value) => {
+  const normalized = cleanString(value).toLowerCase();
+  return ["tenant", "company", "site"].includes(normalized) ? normalized : null;
+};
+
+const normalizeIssueDate = (value) => {
+  const normalized = cleanString(value);
+  if (!normalized) {
+    return null;
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+};
+
 export async function GET(request, { params }) {
   const tenantId = params?.id;
   const evidenceId = params?.evidenceId;
@@ -30,7 +50,21 @@ export async function GET(request, { params }) {
 
   const { context } = scoped;
   const rows = await context.sql`
-    SELECT id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+    SELECT
+      id,
+      tenant_id,
+      site_id,
+      filename,
+      content_type,
+      size_bytes,
+      sha256,
+      blob_url,
+      issue_date,
+      doc_type,
+      scope_coverage,
+      is_encrypted,
+      language,
+      created_at
     FROM evidence
     WHERE tenant_id = ${tenantId} AND id = ${evidenceId}
     LIMIT 1
@@ -70,9 +104,28 @@ export async function PUT(request, { params }) {
       content_type = ${cleanString(payload.contentType) || "application/octet-stream"},
       size_bytes = ${Number.isFinite(sizeBytes) && sizeBytes > 0 ? sizeBytes : 0},
       sha256 = ${cleanString(payload.sha256) || null},
-      blob_url = ${cleanString(payload.blobUrl) || null}
+      blob_url = ${cleanString(payload.blobUrl) || null},
+      issue_date = ${normalizeIssueDate(payload.issueDate)},
+      doc_type = ${normalizeDocType(payload.docType)},
+      scope_coverage = ${normalizeCoverage(payload.scopeCoverage)},
+      is_encrypted = ${payload.isEncrypted === true},
+      language = ${cleanString(payload.language) || null}
     WHERE tenant_id = ${tenantId} AND id = ${evidenceId}
-    RETURNING id, tenant_id, site_id, filename, content_type, size_bytes, sha256, blob_url, created_at
+    RETURNING
+      id,
+      tenant_id,
+      site_id,
+      filename,
+      content_type,
+      size_bytes,
+      sha256,
+      blob_url,
+      issue_date,
+      doc_type,
+      scope_coverage,
+      is_encrypted,
+      language,
+      created_at
   `;
 
   if (!rows?.[0]) {

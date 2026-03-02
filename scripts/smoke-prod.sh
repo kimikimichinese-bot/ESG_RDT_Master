@@ -77,6 +77,16 @@ assert_status() {
   echo "PASS: ${label} -> ${status}"
 }
 
+assert_auth_or_redirect_eco_page() {
+  local path="$1"
+  local status="$2"
+  if [[ "$status" != "200" && "$status" != "307" ]]; then
+    echo "FAIL: ${path} expected 200 (authed) or 307 (unauth), got ${status}"
+    exit 1
+  fi
+  echo "PASS: ${path} -> ${status}"
+}
+
 echo "== BASE URL: ${BASE_URL}"
 
 echo
@@ -102,6 +112,10 @@ if [[ "$GOV_PAGE_STATUS" != "200" && "$GOV_PAGE_STATUS" != "302" && "$GOV_PAGE_S
   exit 1
 fi
 echo "PASS: /app/governance -> ${GOV_PAGE_STATUS}"
+ECOVADIS_PAGE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/app/ecovadis")"
+assert_auth_or_redirect_eco_page "/app/ecovadis" "$ECOVADIS_PAGE_STATUS"
+MATERIALITY_PAGE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' "${BASE_URL}/app/materiality")"
+assert_auth_or_redirect_eco_page "/app/materiality" "$MATERIALITY_PAGE_STATUS"
 
 request_json "GET" "/api/v1/auth/bootstrap"
 assert_status "$REQUEST_STATUS" "200" "/api/v1/auth/bootstrap"

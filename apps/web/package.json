@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
+    "docx": "^9.5.1",
+    "mammoth": "^1.9.1",
     "@vercel/blob": "^1.0.0",
     "pg": "^8.11.6",
     "next": "^14.2.3",
