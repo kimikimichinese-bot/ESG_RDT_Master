@@ -69,14 +69,14 @@ export async function GET(request, { params }) {
       updated_at
     FROM activities
     WHERE tenant_id = ${tenantId}
-      AND (${siteId} = '' OR site_id = ${siteId})
+      AND (${siteId} = '' OR site_id::text = ${siteId})
       AND (
         ${companyId} = ''
         OR site_id IN (
           SELECT s.id
           FROM sites s
           WHERE s.tenant_id = ${tenantId}
-            AND s.company_id = ${companyId}
+            AND s.company_id::text = ${companyId}
         )
       )
     ORDER BY created_at DESC

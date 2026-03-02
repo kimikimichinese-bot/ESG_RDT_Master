@@ -26,6 +26,21 @@ const sanitizeBlobKey = (tenantId, filename) => {
   return `evidence/${tenantId}/${Date.now()}-${safe}`;
 };
 
+const normalizeBlobToken = (value) => {
+  const raw = cleanString(value);
+  if (!raw) {
+    return null;
+  }
+  const withoutQuotes = raw.replace(/^['"]+|['"]+$/g, "").trim();
+  const withoutBearer = withoutQuotes.replace(/^bearer\s+/i, "").trim();
+  const asciiOnly = withoutBearer.replace(/[^\x20-\x7E]/g, "");
+  const compact = asciiOnly.replace(/\s+/g, "").trim();
+  if (!compact) {
+    return null;
+  }
+  return compact;
+};
+
 export async function POST(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "evidence");
@@ -44,7 +59,7 @@ export async function POST(request, { params }) {
   const contentType = cleanString(payload.contentType) || "application/octet-stream";
   const siteId = await resolveSite(context.sql, tenantId, payload.siteId);
 
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN || "";
+  const blobToken = normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN) || "";
   const fileBase64 = cleanString(payload.fileBase64);
 
   let blobUrl = cleanString(payload.blobUrl) || null;

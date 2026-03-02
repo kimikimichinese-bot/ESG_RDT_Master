@@ -35,15 +35,22 @@ export async function GET(request, { params }) {
   const { limit } = parsePagination(request, { limit: 200, max: 500 });
   const url = new URL(request.url);
   const companyId = cleanString(url.searchParams.get("companyId"));
-
-  const rows = await context.sql`
-    SELECT id, tenant_id, company_id, name, country, address, water_stressed, created_at, updated_at
-    FROM sites
-    WHERE tenant_id = ${tenantId}
-      AND (${companyId} = '' OR company_id = ${companyId})
-    ORDER BY created_at DESC
-    LIMIT ${limit}
-  `;
+  const rows = companyId
+    ? await context.sql`
+        SELECT id, tenant_id, company_id, name, country, address, water_stressed, created_at, updated_at
+        FROM sites
+        WHERE tenant_id = ${tenantId}
+          AND company_id = ${companyId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `
+    : await context.sql`
+        SELECT id, tenant_id, company_id, name, country, address, water_stressed, created_at, updated_at
+        FROM sites
+        WHERE tenant_id = ${tenantId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
 
   return json({ sites: rows.map((row) => normalizeSite(row)) });
 }
