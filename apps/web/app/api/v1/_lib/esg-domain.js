@@ -153,6 +153,165 @@ export const EMISSION_FACTOR_DEFINITIONS = [
 
 export const EMISSION_FACTOR_BY_KEY = new Map(EMISSION_FACTOR_DEFINITIONS.map((item) => [item.key, item]));
 
+export const FACTOR_REFERENCE_OPTIONS_BY_KEY = {
+  ef_scope2_location_kgco2e_per_kwh: [
+    {
+      id: "uk_desnz_conversion_factors",
+      label: "UK DESNZ Conversion Factors (national, annual)",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+    {
+      id: "us_epa_egrid",
+      label: "US EPA eGRID subregion factors (national dataset)",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/egrid",
+      suggestedValue: null,
+    },
+    {
+      id: "unfccc_national_inventories",
+      label: "UNFCCC national inventory submissions (country-specific)",
+      jurisdiction: "International",
+      year: "latest",
+      url: "https://unfccc.int/ghg-inventories-annex-i-parties/latest-submissions",
+      suggestedValue: null,
+    },
+  ],
+  ef_scope2_market_kgco2e_per_kwh: [
+    {
+      id: "ghg_protocol_scope2_guidance",
+      label: "GHG Protocol Scope 2 Guidance (market-based method)",
+      jurisdiction: "International",
+      year: "2015+",
+      url: "https://ghgprotocol.org/scope-2-guidance",
+      suggestedValue: null,
+    },
+    {
+      id: "uk_desnz_conversion_factors_market",
+      label: "UK DESNZ Conversion Factors (supplier/market values)",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+    {
+      id: "us_epa_egrid_market_context",
+      label: "US EPA eGRID (market-context electricity data support)",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/egrid",
+      suggestedValue: null,
+    },
+  ],
+  ef_natural_gas_kgco2e_per_mwh: [
+    {
+      id: "us_epa_emission_factors_hub_ng",
+      label: "US EPA Emission Factors Hub - natural gas combustion",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/climateleadership/ghg-emission-factors-hub",
+      suggestedValue: null,
+    },
+    {
+      id: "uk_desnz_conversion_factors_ng",
+      label: "UK DESNZ Conversion Factors - natural gas",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+    {
+      id: "ipcc_2006_guidelines_stationary_combustion",
+      label: "IPCC 2006 Guidelines - default stationary combustion factors",
+      jurisdiction: "International",
+      year: "2006",
+      url: "https://www.ipcc-nggip.iges.or.jp/public/2006gl/vol2.html",
+      suggestedValue: null,
+    },
+  ],
+  ef_diesel_kgco2e_per_liter: [
+    {
+      id: "us_epa_emission_factors_hub_diesel",
+      label: "US EPA Emission Factors Hub - diesel",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/climateleadership/ghg-emission-factors-hub",
+      suggestedValue: null,
+    },
+    {
+      id: "uk_desnz_conversion_factors_diesel",
+      label: "UK DESNZ Conversion Factors - diesel (stationary/mobile)",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+    {
+      id: "ipcc_2006_guidelines_diesel",
+      label: "IPCC 2006 Guidelines - liquid fuel default factors",
+      jurisdiction: "International",
+      year: "2006",
+      url: "https://www.ipcc-nggip.iges.or.jp/public/2006gl/vol2.html",
+      suggestedValue: null,
+    },
+  ],
+  ef_gasoline_kgco2e_per_liter: [
+    {
+      id: "us_epa_emission_factors_hub_gasoline",
+      label: "US EPA Emission Factors Hub - gasoline",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/climateleadership/ghg-emission-factors-hub",
+      suggestedValue: null,
+    },
+    {
+      id: "uk_desnz_conversion_factors_gasoline",
+      label: "UK DESNZ Conversion Factors - petrol/gasoline",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+    {
+      id: "ipcc_2006_guidelines_gasoline",
+      label: "IPCC 2006 Guidelines - liquid fuel default factors",
+      jurisdiction: "International",
+      year: "2006",
+      url: "https://www.ipcc-nggip.iges.or.jp/public/2006gl/vol2.html",
+      suggestedValue: null,
+    },
+  ],
+  ef_refrigerant_kgco2e_per_kg: [
+    {
+      id: "ipcc_ar6_gwp100",
+      label: "IPCC AR6 GWP100 values (refrigerants depend on gas type)",
+      jurisdiction: "International",
+      year: "2021",
+      url: "https://www.ipcc.ch/report/ar6/wg1/chapter/chapter-7/",
+      suggestedValue: null,
+    },
+    {
+      id: "us_epa_emission_factors_hub_refrigerants",
+      label: "US EPA Emission Factors Hub - refrigerants",
+      jurisdiction: "US",
+      year: "latest",
+      url: "https://www.epa.gov/climateleadership/ghg-emission-factors-hub",
+      suggestedValue: null,
+    },
+    {
+      id: "uk_desnz_conversion_factors_refrigerants",
+      label: "UK DESNZ Conversion Factors - refrigerants",
+      jurisdiction: "UK",
+      year: "latest",
+      url: "https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting",
+      suggestedValue: null,
+    },
+  ],
+};
+
 export const CONTRACT_TYPES = ["total", "permanent", "temporary"];
 export const GENDERS = ["M", "F", "D"];
 

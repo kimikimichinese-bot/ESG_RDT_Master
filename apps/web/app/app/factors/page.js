@@ -4,6 +4,27 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTenantSession } from "../_components/use-tenant-session";
 
+const CUSTOM_REFERENCE_VALUE = "__custom__";
+
+const formatReferenceSource = (option) => {
+  if (!option || !option.url) {
+    return "";
+  }
+  const meta = [option.jurisdiction, option.year].filter(Boolean).join(" · ");
+  return meta ? `${option.label} (${meta}) - ${option.url}` : `${option.label} - ${option.url}`;
+};
+
+const getSelectedReferenceId = (factor) => {
+  const source = typeof factor?.source === "string" ? factor.source : "";
+  const options = Array.isArray(factor?.referenceOptions) ? factor.referenceOptions : [];
+  for (const option of options) {
+    if (option?.url && source.includes(option.url)) {
+      return option.id;
+    }
+  }
+  return CUSTOM_REFERENCE_VALUE;
+};
+
 export default function FactorsPage() {
   const tenant = useTenantSession();
   const [factors, setFactors] = useState([]);
@@ -125,6 +146,7 @@ export default function FactorsPage() {
                 <th>Label</th>
                 <th>Unit</th>
                 <th>Value</th>
+                <th>Reference</th>
                 <th>Source</th>
                 <th>Status</th>
               </tr>
@@ -150,6 +172,53 @@ export default function FactorsPage() {
                       }
                       disabled={!canWrite}
                     />
+                  </td>
+                  <td>
+                    <select
+                      className="enterprise-input"
+                      value={getSelectedReferenceId(factor)}
+                      onChange={(event) =>
+                        setFactors((current) =>
+                          current.map((item) => {
+                            if (item.key !== factor.key) {
+                              return item;
+                            }
+                            const options = Array.isArray(item.referenceOptions) ? item.referenceOptions : [];
+                            const selected = options.find((option) => option.id === event.target.value) || null;
+                            if (!selected) {
+                              return item;
+                            }
+                            const nextValue =
+                              (item.value === "" || item.value == null) && typeof selected.suggestedValue === "number"
+                                ? selected.suggestedValue
+                                : item.value;
+                            return {
+                              ...item,
+                              value: nextValue,
+                              source: formatReferenceSource(selected),
+                            };
+                          }),
+                        )
+                      }
+                      disabled={!canWrite}
+                    >
+                      <option value={CUSTOM_REFERENCE_VALUE}>Manual / custom source</option>
+                      {(factor.referenceOptions || []).map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {getSelectedReferenceId(factor) !== CUSTOM_REFERENCE_VALUE ? (
+                      <a
+                        className="enterprise-muted"
+                        href={(factor.referenceOptions || []).find((option) => option.id === getSelectedReferenceId(factor))?.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open reference
+                      </a>
+                    ) : null}
                   </td>
                   <td>
                     <input

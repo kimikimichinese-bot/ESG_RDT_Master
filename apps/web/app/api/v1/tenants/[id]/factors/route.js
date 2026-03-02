@@ -1,5 +1,5 @@
 import { writeAuditLog } from "../../../_lib/audit.js";
-import { getFactorDefaults, normalizeFactorRow } from "../../../_lib/esg-api.js";
+import { getFactorDefaults, getFactorReferenceOptions, normalizeFactorRow } from "../../../_lib/esg-api.js";
 import { requireTenantContext } from "../../../_lib/enterprise-api.js";
 import { cleanString, errorJson, json, parseJsonBody } from "../../../_lib/http.js";
 
@@ -27,6 +27,11 @@ const normalizePayloadRows = (payload) => {
   }
   return [];
 };
+
+const withReferences = (factor) => ({
+  ...factor,
+  referenceOptions: getFactorReferenceOptions(factor.key),
+});
 
 export async function GET(request, { params }) {
   const tenantId = params?.id;
@@ -57,7 +62,7 @@ export async function GET(request, { params }) {
       created_at: null,
       updated_at: null,
     };
-    return normalizeFactorRow(row, item.required);
+    return withReferences(normalizeFactorRow(row, item.required));
   });
 
   const missingRequiredFactors = factors.filter((item) => item.required && item.value == null).map((item) => item.key);
@@ -145,7 +150,7 @@ export async function PUT(request, { params }) {
       created_at: null,
       updated_at: null,
     };
-    return normalizeFactorRow(row, item.required);
+    return withReferences(normalizeFactorRow(row, item.required));
   });
 
   const missingRequiredFactors = factors.filter((item) => item.required && item.value == null).map((item) => item.key);
