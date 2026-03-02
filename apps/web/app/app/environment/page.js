@@ -23,6 +23,25 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const dedupeEvidenceIds = (value) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const seen = new Set();
+  const nextIds = [];
+
+  for (const item of value) {
+    const id = typeof item === "string" ? item : item == null ? "" : String(item);
+    if (!id || seen.has(id)) {
+      continue;
+    }
+    seen.add(id);
+    nextIds.push(id);
+  }
+
+  return nextIds;
+};
+
 export default function EnvironmentPage() {
   const tenant = useTenantSession();
   const companyScope = useCompanyScope(tenant.tenantId);
@@ -69,6 +88,13 @@ export default function EnvironmentPage() {
     }
     return map;
   }, [sites]);
+
+  const selectedSiteEvidence = useMemo(() => {
+    if (!selectedSiteId) {
+      return [];
+    }
+    return evidence.filter((item) => item.siteId === selectedSiteId);
+  }, [evidence, selectedSiteId]);
 
   const loadSites = useCallback(async () => {
     if (!tenant.tenantId) {
@@ -145,7 +171,7 @@ export default function EnvironmentPage() {
 
       for (const metric of metrics) {
         nextValues[metric.metricKey] = Number.isFinite(metric.value) ? String(metric.value) : "";
-        nextEvidence[metric.metricKey] = Array.isArray(metric.evidenceIds) ? metric.evidenceIds : [];
+        nextEvidence[metric.metricKey] = dedupeEvidenceIds(metric.evidenceIds);
       }
 
       setValues(nextValues);
@@ -254,7 +280,7 @@ export default function EnvironmentPage() {
         .map((definition) => ({
           metricKey: definition.key,
           value: toNumber(values[definition.key]) ?? 0,
-          evidenceIds: Array.isArray(evidenceByMetricKey[definition.key]) ? evidenceByMetricKey[definition.key] : [],
+          evidenceIds: dedupeEvidenceIds(evidenceByMetricKey[definition.key]),
         }));
 
       const response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/metrics/bulk`, {
@@ -345,7 +371,7 @@ export default function EnvironmentPage() {
   const updateMetricEvidence = (metricKey, selectedEvidenceIds) => {
     setEvidenceByMetricKey((current) => ({
       ...current,
-      [metricKey]: selectedEvidenceIds,
+      [metricKey]: dedupeEvidenceIds(selectedEvidenceIds),
     }));
   };
 
@@ -566,7 +592,7 @@ export default function EnvironmentPage() {
                           }
                           disabled={!canWrite}
                         >
-                          {evidence.map((item) => (
+                          {selectedSiteEvidence.map((item) => (
                             <option key={item.id} value={item.id}>
                               {item.filename}
                             </option>
