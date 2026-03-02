@@ -48,7 +48,7 @@ export const canAccessResource = (role, resource, method) => {
     return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
-  if (resource === "audit" || resource === "assessments") {
+  if (resource === "audit" || resource === "assessments" || resource === "ecovadis" || resource === "materiality") {
     return role !== ROLES.AUDITOR ? true : isReadMethod(method);
   }
 

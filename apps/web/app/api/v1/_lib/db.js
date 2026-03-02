@@ -13,6 +13,10 @@ const GOVERNANCE_SCHEMA_READY_KEY = "__esg_rdt_governance_schema_ready__";
 const GOVERNANCE_SCHEMA_PROMISE_KEY = "__esg_rdt_governance_schema_promise__";
 const ASSESSMENT_SCHEMA_READY_KEY = "__esg_rdt_assessment_schema_ready__";
 const ASSESSMENT_SCHEMA_PROMISE_KEY = "__esg_rdt_assessment_schema_promise__";
+const ECOVADIS_SCHEMA_READY_KEY = "__esg_rdt_ecovadis_schema_ready__";
+const ECOVADIS_SCHEMA_PROMISE_KEY = "__esg_rdt_ecovadis_schema_promise__";
+const MATERIALITY_SCHEMA_READY_KEY = "__esg_rdt_materiality_schema_ready__";
+const MATERIALITY_SCHEMA_PROMISE_KEY = "__esg_rdt_materiality_schema_promise__";
 
 const LEGACY_TENANT_ID = "00000000-0000-0000-0000-000000000001";
 
@@ -792,4 +796,345 @@ export const ensureAssessmentSchema = async () => {
   }
 
   await globalThis[ASSESSMENT_SCHEMA_PROMISE_KEY];
+};
+
+export const ensureEcoVadisSchema = async () => {
+  if (globalThis[ECOVADIS_SCHEMA_READY_KEY]) {
+    return;
+  }
+
+  if (!globalThis[ECOVADIS_SCHEMA_PROMISE_KEY]) {
+    globalThis[ECOVADIS_SCHEMA_PROMISE_KEY] = (async () => {
+      await ensureEnterpriseSchema();
+      const sql = getSql();
+
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS issue_date DATE NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS doc_type TEXT NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS scope_coverage TEXT NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS is_encrypted BOOLEAN NOT NULL DEFAULT FALSE`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS language TEXT NULL`;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS ecovadis_assessments (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          scope_type TEXT NOT NULL,
+          reporting_year INTEGER NOT NULL,
+          status TEXT NOT NULL DEFAULT 'draft',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS ecovadis_questions (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          assessment_id UUID NOT NULL REFERENCES ecovadis_assessments(id) ON DELETE CASCADE,
+          code TEXT NOT NULL,
+          theme TEXT NOT NULL,
+          indicator TEXT NOT NULL,
+          text TEXT NOT NULL,
+          required BOOLEAN NOT NULL DEFAULT FALSE,
+          sort_order INTEGER NOT NULL DEFAULT 0
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS ecovadis_options (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          question_id UUID NOT NULL REFERENCES ecovadis_questions(id) ON DELETE CASCADE,
+          label TEXT NOT NULL,
+          requires_evidence BOOLEAN NOT NULL DEFAULT TRUE,
+          has_free_text BOOLEAN NOT NULL DEFAULT FALSE,
+          sort_order INTEGER NOT NULL DEFAULT 0
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS ecovadis_answers (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          option_id UUID NOT NULL REFERENCES ecovadis_options(id) ON DELETE CASCADE,
+          selected BOOLEAN NOT NULL DEFAULT FALSE,
+          free_text TEXT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS ecovadis_answer_evidence (
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          answer_id UUID NOT NULL REFERENCES ecovadis_answers(id) ON DELETE CASCADE,
+          evidence_id UUID NOT NULL REFERENCES evidence(id) ON DELETE CASCADE,
+          pages TEXT NOT NULL,
+          comment TEXT NULL,
+          visibility TEXT NOT NULL DEFAULT 'private',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, answer_id, evidence_id)
+        )
+      `;
+
+      await sql`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'evidence_doc_type_check'
+          ) THEN
+            ALTER TABLE evidence
+            ADD CONSTRAINT evidence_doc_type_check
+            CHECK (
+              doc_type IS NULL
+              OR doc_type IN ('policy', 'action', 'reporting', 'audit', 'certification', 'other')
+            );
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'evidence_scope_coverage_check'
+          ) THEN
+            ALTER TABLE evidence
+            ADD CONSTRAINT evidence_scope_coverage_check
+            CHECK (
+              scope_coverage IS NULL
+              OR scope_coverage IN ('tenant', 'company', 'site')
+            );
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'ecovadis_scope_type_check'
+          ) THEN
+            ALTER TABLE ecovadis_assessments
+            ADD CONSTRAINT ecovadis_scope_type_check
+            CHECK (scope_type IN ('Group', 'Entity', 'Site'));
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'ecovadis_status_check'
+          ) THEN
+            ALTER TABLE ecovadis_assessments
+            ADD CONSTRAINT ecovadis_status_check
+            CHECK (status IN ('draft', 'ready', 'submitted'));
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'ecovadis_answer_evidence_visibility_check'
+          ) THEN
+            ALTER TABLE ecovadis_answer_evidence
+            ADD CONSTRAINT ecovadis_answer_evidence_visibility_check
+            CHECK (visibility IN ('private', 'public'));
+          END IF;
+        END $$;
+      `;
+
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_ecovadis_assessment_scope_unique
+        ON ecovadis_assessments (tenant_id, company_id, reporting_year, scope_type)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_ecovadis_assessments_tenant_updated
+        ON ecovadis_assessments (tenant_id, updated_at DESC)
+      `;
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_ecovadis_questions_unique_code
+        ON ecovadis_questions (tenant_id, assessment_id, code)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_ecovadis_questions_assessment_sort
+        ON ecovadis_questions (tenant_id, assessment_id, sort_order)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_ecovadis_options_question_sort
+        ON ecovadis_options (tenant_id, question_id, sort_order)
+      `;
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_ecovadis_answers_option_unique
+        ON ecovadis_answers (tenant_id, option_id)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_ecovadis_answers_tenant_updated
+        ON ecovadis_answers (tenant_id, updated_at DESC)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_ecovadis_answer_evidence_lookup
+        ON ecovadis_answer_evidence (tenant_id, answer_id, created_at DESC)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_evidence_issue_date
+        ON evidence (tenant_id, issue_date DESC)
+      `;
+
+      globalThis[ECOVADIS_SCHEMA_READY_KEY] = true;
+    })().finally(() => {
+      globalThis[ECOVADIS_SCHEMA_PROMISE_KEY] = null;
+    });
+  }
+
+  await globalThis[ECOVADIS_SCHEMA_PROMISE_KEY];
+};
+
+export const ensureMaterialitySchema = async () => {
+  if (globalThis[MATERIALITY_SCHEMA_READY_KEY]) {
+    return;
+  }
+
+  if (!globalThis[MATERIALITY_SCHEMA_PROMISE_KEY]) {
+    globalThis[MATERIALITY_SCHEMA_PROMISE_KEY] = (async () => {
+      await ensureEnterpriseSchema();
+      const sql = getSql();
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS materiality_topics (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          code TEXT NOT NULL,
+          name TEXT NOT NULL,
+          category TEXT NOT NULL,
+          description TEXT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS materiality_stakeholders (
+          id UUID PRIMARY KEY,
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          name TEXT NOT NULL,
+          weight NUMERIC NOT NULL DEFAULT 1,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS materiality_scores (
+          tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          reporting_year INTEGER NOT NULL,
+          topic_id UUID NOT NULL REFERENCES materiality_topics(id) ON DELETE CASCADE,
+          impact_severity INTEGER NOT NULL,
+          impact_scope INTEGER NOT NULL,
+          impact_irremediability INTEGER NOT NULL,
+          impact_likelihood INTEGER NOT NULL,
+          financial_magnitude INTEGER NOT NULL,
+          financial_likelihood INTEGER NOT NULL,
+          notes TEXT NULL,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (tenant_id, company_id, reporting_year, topic_id)
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS materiality_thresholds (
+          tenant_id UUID PRIMARY KEY REFERENCES tenants(id) ON DELETE CASCADE,
+          impact_threshold NUMERIC NOT NULL DEFAULT 9.0,
+          financial_threshold NUMERIC NOT NULL DEFAULT 9.0,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+
+      await sql`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_stakeholders_weight_check'
+          ) THEN
+            ALTER TABLE materiality_stakeholders
+            ADD CONSTRAINT materiality_stakeholders_weight_check
+            CHECK (weight > 0);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_impact_severity_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_impact_severity_check
+            CHECK (impact_severity BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_impact_scope_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_impact_scope_check
+            CHECK (impact_scope BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_impact_irremediability_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_impact_irremediability_check
+            CHECK (impact_irremediability BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_impact_likelihood_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_impact_likelihood_check
+            CHECK (impact_likelihood BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_financial_magnitude_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_financial_magnitude_check
+            CHECK (financial_magnitude BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_scores_financial_likelihood_check'
+          ) THEN
+            ALTER TABLE materiality_scores
+            ADD CONSTRAINT materiality_scores_financial_likelihood_check
+            CHECK (financial_likelihood BETWEEN 1 AND 5);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_thresholds_impact_threshold_check'
+          ) THEN
+            ALTER TABLE materiality_thresholds
+            ADD CONSTRAINT materiality_thresholds_impact_threshold_check
+            CHECK (impact_threshold > 0);
+          END IF;
+
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = 'materiality_thresholds_financial_threshold_check'
+          ) THEN
+            ALTER TABLE materiality_thresholds
+            ADD CONSTRAINT materiality_thresholds_financial_threshold_check
+            CHECK (financial_threshold > 0);
+          END IF;
+        END $$;
+      `;
+
+      await sql`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_materiality_topics_code_unique
+        ON materiality_topics (tenant_id, code)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_materiality_topics_lookup
+        ON materiality_topics (tenant_id, category, code)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_materiality_scores_company_year
+        ON materiality_scores (tenant_id, company_id, reporting_year)
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_materiality_scores_topic
+        ON materiality_scores (tenant_id, topic_id, updated_at DESC)
+      `;
+
+      globalThis[MATERIALITY_SCHEMA_READY_KEY] = true;
+    })().finally(() => {
+      globalThis[MATERIALITY_SCHEMA_PROMISE_KEY] = null;
+    });
+  }
+
+  await globalThis[MATERIALITY_SCHEMA_PROMISE_KEY];
 };

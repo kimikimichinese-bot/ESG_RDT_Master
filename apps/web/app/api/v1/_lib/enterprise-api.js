@@ -160,6 +160,11 @@ export const normalizeEvidence = (row) => ({
   sizeBytes: Number(row.size_bytes ?? 0),
   sha256: row.sha256,
   blobUrl: row.blob_url,
+  issueDate: row.issue_date || null,
+  docType: row.doc_type || null,
+  scopeCoverage: row.scope_coverage || null,
+  isEncrypted: Boolean(row.is_encrypted),
+  language: row.language || null,
   createdAt: toIso(row.created_at),
 });
 

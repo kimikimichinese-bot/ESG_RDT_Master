@@ -17,6 +17,8 @@ const NAV_ITEMS = [
   { href: "/app/personnel", label: "Personnel" },
   { href: "/app/activities", label: "Activities" },
   { href: "/app/evidence", label: "Evidence" },
+  { href: "/app/ecovadis", label: "EcoVadis" },
+  { href: "/app/materiality", label: "Materiality" },
   { href: "/app/assessments", label: "Assessments" },
   { href: "/app/audit", label: "Audit" },
 ];
