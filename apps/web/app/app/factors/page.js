@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTenantSession } from "../_components/use-tenant-session";
 
 const CUSTOM_REFERENCE_VALUE = "__custom__";
+const PRESET_COUNTRIES = ["UK", "US", "IT"];
+const PRESET_YEARS = [2026, 2025, 2024, 2023];
 
 const formatReferenceSource = (option) => {
   if (!option || !option.url) {
@@ -25,6 +27,31 @@ const getSelectedReferenceId = (factor) => {
   return CUSTOM_REFERENCE_VALUE;
 };
 
+const findSuggestedPreset = (factor, country, year) => {
+  const selectedReferenceId = getSelectedReferenceId(factor);
+  const options = Array.isArray(factor?.referenceOptions) ? factor.referenceOptions : [];
+  const selectedOption =
+    selectedReferenceId !== CUSTOM_REFERENCE_VALUE
+      ? options.find((option) => option.id === selectedReferenceId) || null
+      : null;
+  const orderedOptions = selectedOption ? [selectedOption, ...options.filter((option) => option.id !== selectedOption.id)] : options;
+
+  for (const option of orderedOptions) {
+    const presets = Array.isArray(option?.presets) ? option.presets : [];
+    const exact = presets.find((preset) => preset.country === country && Number(preset.year) === Number(year));
+    if (exact) {
+      return { option, preset: exact };
+    }
+    const byCountry = presets.filter((preset) => preset.country === country);
+    if (byCountry.length > 0) {
+      byCountry.sort((a, b) => Number(b.year) - Number(a.year));
+      return { option, preset: byCountry[0] };
+    }
+  }
+
+  return null;
+};
+
 export default function FactorsPage() {
   const tenant = useTenantSession();
   const [factors, setFactors] = useState([]);
@@ -32,6 +59,8 @@ export default function FactorsPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [presetCountry, setPresetCountry] = useState("IT");
+  const [presetYear, setPresetYear] = useState(PRESET_YEARS[0]);
 
   const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
 
@@ -117,6 +146,36 @@ export default function FactorsPage() {
           <p className="enterprise-muted">Tenant emission factors used for Scope 1 and Scope 2 calculations.</p>
         </div>
         <div className="enterprise-inline-actions">
+          <label className="enterprise-muted" htmlFor="factor-country">
+            Country
+          </label>
+          <select
+            id="factor-country"
+            className="enterprise-input"
+            value={presetCountry}
+            onChange={(event) => setPresetCountry(event.target.value)}
+          >
+            {PRESET_COUNTRIES.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <label className="enterprise-muted" htmlFor="factor-year">
+            Year
+          </label>
+          <select
+            id="factor-year"
+            className="enterprise-input"
+            value={presetYear}
+            onChange={(event) => setPresetYear(Number(event.target.value))}
+          >
+            {PRESET_YEARS.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
           <button className="enterprise-button-secondary" type="button" onClick={() => void loadFactors()}>
             Refresh
           </button>
@@ -188,13 +247,8 @@ export default function FactorsPage() {
                             if (!selected) {
                               return item;
                             }
-                            const nextValue =
-                              (item.value === "" || item.value == null) && typeof selected.suggestedValue === "number"
-                                ? selected.suggestedValue
-                                : item.value;
                             return {
                               ...item,
-                              value: nextValue,
                               source: formatReferenceSource(selected),
                             };
                           }),
@@ -221,6 +275,43 @@ export default function FactorsPage() {
                     ) : null}
                   </td>
                   <td>
+                    {(() => {
+                      const suggested = findSuggestedPreset(factor, presetCountry, presetYear);
+                      if (!suggested) {
+                        return <p className="enterprise-muted">No suggested preset for {presetCountry}/{presetYear}.</p>;
+                      }
+                      return (
+                        <div>
+                          <p className="enterprise-muted">
+                            Suggested {presetCountry}/{presetYear}: <strong>{suggested.preset.value}</strong>
+                            {Number(suggested.preset.year) !== Number(presetYear)
+                              ? ` (from ${suggested.preset.year})`
+                              : ""}
+                            {suggested.preset.note ? ` · ${suggested.preset.note}` : ""}
+                          </p>
+                          <button
+                            type="button"
+                            className="enterprise-button-secondary"
+                            disabled={!canWrite}
+                            onClick={() =>
+                              setFactors((current) =>
+                                current.map((item) =>
+                                  item.key === factor.key
+                                    ? {
+                                        ...item,
+                                        value: suggested.preset.value,
+                                        source: formatReferenceSource(suggested.option),
+                                      }
+                                    : item,
+                                ),
+                              )
+                            }
+                          >
+                            Apply suggested value
+                          </button>
+                        </div>
+                      );
+                    })()}
                     <input
                       className="enterprise-input"
                       type="text"

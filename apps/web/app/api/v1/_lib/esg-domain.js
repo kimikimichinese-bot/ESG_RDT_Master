@@ -312,6 +312,210 @@ export const FACTOR_REFERENCE_OPTIONS_BY_KEY = {
   ],
 };
 
+export const FACTOR_SUGGESTED_PRESETS_BY_KEY = {
+  ef_scope2_location_kgco2e_per_kwh: [
+    {
+      referenceId: "uk_desnz_conversion_factors",
+      country: "UK",
+      year: 2024,
+      value: 0.207,
+      note: "Grid electricity location-based factor (indicative).",
+    },
+    {
+      referenceId: "uk_desnz_conversion_factors",
+      country: "UK",
+      year: 2025,
+      value: 0.182,
+      note: "Grid electricity location-based factor (indicative).",
+    },
+    {
+      referenceId: "us_epa_egrid",
+      country: "US",
+      year: 2024,
+      value: 0.386,
+      note: "National average from eGRID-style dataset (indicative).",
+    },
+    {
+      referenceId: "us_epa_egrid",
+      country: "US",
+      year: 2025,
+      value: 0.369,
+      note: "National average from eGRID-style dataset (indicative).",
+    },
+    {
+      referenceId: "unfccc_national_inventories",
+      country: "IT",
+      year: 2024,
+      value: 0.233,
+      note: "Country-level grid factor (indicative).",
+    },
+    {
+      referenceId: "unfccc_national_inventories",
+      country: "IT",
+      year: 2025,
+      value: 0.216,
+      note: "Country-level grid factor (indicative).",
+    },
+  ],
+  ef_scope2_market_kgco2e_per_kwh: [
+    {
+      referenceId: "uk_desnz_conversion_factors_market",
+      country: "UK",
+      year: 2024,
+      value: 0.249,
+      note: "Market-based / supplier mix indicative factor.",
+    },
+    {
+      referenceId: "uk_desnz_conversion_factors_market",
+      country: "UK",
+      year: 2025,
+      value: 0.231,
+      note: "Market-based / supplier mix indicative factor.",
+    },
+    {
+      referenceId: "us_epa_egrid_market_context",
+      country: "US",
+      year: 2024,
+      value: 0.41,
+      note: "Market-context indicative factor.",
+    },
+    {
+      referenceId: "us_epa_egrid_market_context",
+      country: "US",
+      year: 2025,
+      value: 0.39,
+      note: "Market-context indicative factor.",
+    },
+    {
+      referenceId: "ghg_protocol_scope2_guidance",
+      country: "IT",
+      year: 2024,
+      value: 0.29,
+      note: "Residual mix indicative value (verify supplier-specific data).",
+    },
+    {
+      referenceId: "ghg_protocol_scope2_guidance",
+      country: "IT",
+      year: 2025,
+      value: 0.27,
+      note: "Residual mix indicative value (verify supplier-specific data).",
+    },
+  ],
+  ef_natural_gas_kgco2e_per_mwh: [
+    {
+      referenceId: "uk_desnz_conversion_factors_ng",
+      country: "UK",
+      year: 2024,
+      value: 183,
+      note: "Combustion factor indicative.",
+    },
+    {
+      referenceId: "uk_desnz_conversion_factors_ng",
+      country: "UK",
+      year: 2025,
+      value: 183,
+      note: "Combustion factor indicative.",
+    },
+    {
+      referenceId: "us_epa_emission_factors_hub_ng",
+      country: "US",
+      year: 2024,
+      value: 181,
+      note: "Combustion factor indicative.",
+    },
+    {
+      referenceId: "us_epa_emission_factors_hub_ng",
+      country: "US",
+      year: 2025,
+      value: 181,
+      note: "Combustion factor indicative.",
+    },
+    {
+      referenceId: "ipcc_2006_guidelines_stationary_combustion",
+      country: "IT",
+      year: 2024,
+      value: 202,
+      note: "Default combustion factor indicative.",
+    },
+    {
+      referenceId: "ipcc_2006_guidelines_stationary_combustion",
+      country: "IT",
+      year: 2025,
+      value: 202,
+      note: "Default combustion factor indicative.",
+    },
+  ],
+  ef_diesel_kgco2e_per_liter: [
+    {
+      referenceId: "uk_desnz_conversion_factors_diesel",
+      country: "UK",
+      year: 2024,
+      value: 2.68,
+      note: "Indicative combustion factor.",
+    },
+    {
+      referenceId: "us_epa_emission_factors_hub_diesel",
+      country: "US",
+      year: 2024,
+      value: 2.68,
+      note: "Indicative combustion factor.",
+    },
+    {
+      referenceId: "ipcc_2006_guidelines_diesel",
+      country: "IT",
+      year: 2024,
+      value: 2.68,
+      note: "Indicative combustion factor.",
+    },
+  ],
+  ef_gasoline_kgco2e_per_liter: [
+    {
+      referenceId: "uk_desnz_conversion_factors_gasoline",
+      country: "UK",
+      year: 2024,
+      value: 2.31,
+      note: "Indicative combustion factor.",
+    },
+    {
+      referenceId: "us_epa_emission_factors_hub_gasoline",
+      country: "US",
+      year: 2024,
+      value: 2.31,
+      note: "Indicative combustion factor.",
+    },
+    {
+      referenceId: "ipcc_2006_guidelines_gasoline",
+      country: "IT",
+      year: 2024,
+      value: 2.31,
+      note: "Indicative combustion factor.",
+    },
+  ],
+  ef_refrigerant_kgco2e_per_kg: [
+    {
+      referenceId: "ipcc_ar6_gwp100",
+      country: "UK",
+      year: 2024,
+      value: 1430,
+      note: "Example for HFC-134a (gas-specific, verify refrigerant type).",
+    },
+    {
+      referenceId: "ipcc_ar6_gwp100",
+      country: "US",
+      year: 2024,
+      value: 1430,
+      note: "Example for HFC-134a (gas-specific, verify refrigerant type).",
+    },
+    {
+      referenceId: "ipcc_ar6_gwp100",
+      country: "IT",
+      year: 2024,
+      value: 1430,
+      note: "Example for HFC-134a (gas-specific, verify refrigerant type).",
+    },
+  ],
+};
+
 export const CONTRACT_TYPES = ["total", "permanent", "temporary"];
 export const GENDERS = ["M", "F", "D"];
 
