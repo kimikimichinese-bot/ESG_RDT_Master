@@ -358,6 +358,11 @@ export const ensureEnterpriseSchema = async () => {
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
       `;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS issue_date DATE NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS doc_type TEXT NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS scope_coverage TEXT NULL`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS is_encrypted BOOLEAN NOT NULL DEFAULT FALSE`;
+      await sql`ALTER TABLE evidence ADD COLUMN IF NOT EXISTS language TEXT NULL`;
 
       await sql`
         CREATE TABLE IF NOT EXISTS activities (

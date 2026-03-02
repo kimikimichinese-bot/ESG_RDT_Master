@@ -5,6 +5,18 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const normalizeBlobToken = (value) => {
+  const raw = cleanString(value);
+  if (!raw) {
+    return null;
+  }
+  const withoutQuotes = raw.replace(/^['"]+|['"]+$/g, "").trim();
+  const withoutBearer = withoutQuotes.replace(/^bearer\s+/i, "").trim();
+  const asciiOnly = withoutBearer.replace(/[^\x20-\x7E]/g, "");
+  const compact = asciiOnly.replace(/\s+/g, "").trim();
+  return compact || null;
+};
+
 export async function POST(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "evidence");
@@ -18,7 +30,7 @@ export async function POST(request, { params }) {
     return errorJson("filename is required", 400);
   }
 
-  const blobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const blobEnabled = Boolean(normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN));
   const uploadUrl = `/api/v1/tenants/${encodeURIComponent(tenantId)}/evidence/complete`;
 
   return json({

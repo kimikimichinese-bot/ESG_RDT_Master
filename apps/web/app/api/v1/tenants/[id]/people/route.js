@@ -66,8 +66,8 @@ export async function GET(request, { params }) {
       FROM people p
       LEFT JOIN sites s ON s.id = p.site_id
       WHERE p.tenant_id = ${tenantId}
-        AND (${siteId} = '' OR p.site_id = ${siteId})
-        AND (${companyId} = '' OR s.company_id = ${companyId})
+        AND (${siteId} = '' OR p.site_id::text = ${siteId})
+        AND (${companyId} = '' OR s.company_id::text = ${companyId})
       ORDER BY p.created_at DESC
       LIMIT ${limit}
     )

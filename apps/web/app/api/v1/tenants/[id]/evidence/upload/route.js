@@ -47,6 +47,21 @@ const normalizeIssueDate = (value) => {
   return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
 };
 
+const normalizeBlobToken = (value) => {
+  const raw = cleanString(value);
+  if (!raw) {
+    return null;
+  }
+  const withoutQuotes = raw.replace(/^['"]+|['"]+$/g, "").trim();
+  const withoutBearer = withoutQuotes.replace(/^bearer\s+/i, "").trim();
+  const asciiOnly = withoutBearer.replace(/[^\x20-\x7E]/g, "");
+  const compact = asciiOnly.replace(/\s+/g, "").trim();
+  if (!compact) {
+    return null;
+  }
+  return compact;
+};
+
 export async function POST(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "evidence");
@@ -95,8 +110,9 @@ export async function POST(request, { params }) {
       addRandomSuffix: true,
       contentType,
     };
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
-      uploadOptions.token = process.env.BLOB_READ_WRITE_TOKEN;
+    const normalizedBlobToken = normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN);
+    if (normalizedBlobToken) {
+      uploadOptions.token = normalizedBlobToken;
     }
 
     const blob = await put(buildBlobKey(tenantId, filename), fileBuffer, uploadOptions);
@@ -172,8 +188,15 @@ export async function POST(request, { params }) {
 
     return json({ evidence: normalizeEvidence(rows[0]) }, 201);
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unexpected error";
+    if (/bytestring|blob_read_write_token|token/i.test(message)) {
+      return errorJson("Blob upload configuration error", 502, {
+        message,
+        hint: "Verify BLOB_READ_WRITE_TOKEN in Vercel env and remove extra characters/spaces.",
+      });
+    }
     return errorJson("Failed to upload evidence", 500, {
-      message: error instanceof Error ? error.message : "Unexpected error",
+      message,
     });
   }
 }
