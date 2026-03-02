@@ -84,7 +84,7 @@ export default function SocialPage() {
     scope3ScreeningPerformed: false,
   });
   const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -116,6 +116,7 @@ export default function SocialPage() {
       return;
     }
 
+    setError("");
     const siteQuery = selectedCompanyId ? `?companyId=${encodeURIComponent(selectedCompanyId)}` : "";
     const [sitesRes, evidenceRes] = await Promise.all([
       fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites${siteQuery}`, { cache: "no-store" }),
@@ -135,9 +136,14 @@ export default function SocialPage() {
     setSites(nextSites);
     setEvidence(Array.isArray(evidencePayload.evidence) ? evidencePayload.evidence : []);
 
-    if (selectedSiteId && !nextSites.some((site) => site.id === selectedSiteId)) {
-      setSelectedSiteId("");
+    if (nextSites.length > 0) {
+      if (selectedSiteId && nextSites.some((site) => site.id === selectedSiteId)) {
+        return;
+      }
+      setSelectedSiteId(nextSites[0].id);
+      return;
     }
+    setSelectedSiteId("");
   }, [selectedCompanyId, selectedSiteId, tenant.tenantId]);
 
   const loadSummary = useCallback(async () => {
@@ -248,6 +254,7 @@ export default function SocialPage() {
     if (!tenant.loading && tenant.tenantId) {
       void loadScopeData().catch((scopeError) => {
         setError(scopeError instanceof Error ? scopeError.message : "Unable to load scope data");
+        setLoading(false);
       });
     }
   }, [tenant.loading, tenant.tenantId, loadScopeData]);
@@ -422,6 +429,19 @@ export default function SocialPage() {
     }));
   };
 
+  const retryLoad = () => {
+    if (!tenant.tenantId) {
+      return;
+    }
+    if (selectedSiteId && reportingYear) {
+      void loadSiteYearData();
+      return;
+    }
+    void loadScopeData().catch((scopeError) => {
+      setError(scopeError instanceof Error ? scopeError.message : "Unable to load scope data");
+    });
+  };
+
   return (
     <section className="enterprise-grid">
       <div className="enterprise-toolbar">
@@ -491,14 +511,36 @@ export default function SocialPage() {
 
       {tenant.error ? <p className="enterprise-status enterprise-status-error">{tenant.error}</p> : null}
       {companyScope.error ? <p className="enterprise-status enterprise-status-error">{companyScope.error}</p> : null}
-      {error ? <p className="enterprise-status enterprise-status-error">{error}</p> : null}
+      {error ? (
+        <div className="enterprise-status enterprise-status-error">
+          <span>{error}</span>
+          <span> </span>
+          <button className="enterprise-button-secondary" type="button" onClick={retryLoad}>
+            Retry
+          </button>
+        </div>
+      ) : null}
       {message ? <p className="enterprise-status">{message}</p> : null}
 
       {validationErrors.length > 0 ? (
         <div className="enterprise-warning">Validation issues detected. Fix invalid non-negative values before saving.</div>
       ) : null}
 
-      {loading ? <p className="enterprise-status">Loading social data...</p> : null}
+      {selectedSiteId && loading ? <p className="enterprise-status">Loading social data...</p> : null}
+
+      {!loading && selectedCompanyId && !selectedSiteId ? (
+        <>
+          <div className="enterprise-empty">Select a site to load social data</div>
+          <div className="enterprise-inline-actions">
+            <button className="enterprise-button-secondary" type="button" onClick={retryLoad}>
+              Retry
+            </button>
+            <button className="enterprise-button-primary" type="button" disabled>
+              Save social data
+            </button>
+          </div>
+        </>
+      ) : null}
 
       {!loading && selectedSiteId ? (
         <>
