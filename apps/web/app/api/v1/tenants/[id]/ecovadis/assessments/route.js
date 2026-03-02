@@ -47,14 +47,22 @@ export async function GET(request, { params }) {
   const companyId = cleanString(url.searchParams.get("companyId"));
   const reportingYear = parseYear(url.searchParams.get("year"));
 
-  const rows = await context.sql`
-    SELECT id, tenant_id, company_id, scope_type, reporting_year, status, created_at, updated_at
-    FROM ecovadis_assessments
-    WHERE tenant_id = ${tenantId}
-      AND (${companyId} = '' OR company_id = ${companyId})
-      AND (${reportingYear || null}::int IS NULL OR reporting_year = ${reportingYear || null}::int)
-    ORDER BY reporting_year DESC, updated_at DESC
-  `;
+  const rows = companyId
+    ? await context.sql`
+        SELECT id, tenant_id, company_id, scope_type, reporting_year, status, created_at, updated_at
+        FROM ecovadis_assessments
+        WHERE tenant_id = ${tenantId}
+          AND company_id = ${companyId}
+          AND (${reportingYear || null}::int IS NULL OR reporting_year = ${reportingYear || null}::int)
+        ORDER BY reporting_year DESC, updated_at DESC
+      `
+    : await context.sql`
+        SELECT id, tenant_id, company_id, scope_type, reporting_year, status, created_at, updated_at
+        FROM ecovadis_assessments
+        WHERE tenant_id = ${tenantId}
+          AND (${reportingYear || null}::int IS NULL OR reporting_year = ${reportingYear || null}::int)
+        ORDER BY reporting_year DESC, updated_at DESC
+      `;
 
   const assessments = [];
   for (const row of rows) {
