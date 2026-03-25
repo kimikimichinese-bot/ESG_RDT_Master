@@ -18,7 +18,7 @@ export default async function EnterpriseLayout({ children }) {
   }
 
   if (bootstrap.needsSetup) {
-    redirect("/setup");
+    redirect("/platform/setup");
   }
 
   const sessionState = await getServerSessionState(cookies(), { ensureSchema: false, suppressErrors: true });
@@ -41,6 +41,9 @@ export default async function EnterpriseLayout({ children }) {
       initialMemberships={sessionState.memberships}
       initialActiveTenantId={sessionState.activeTenantId}
       initialRole={sessionState.activeMembership?.role || null}
+      initialPlatformRole={sessionState.platformRole}
+      initialImpersonationReadOnly={sessionState.impersonationReadOnly}
+      initialAvailableTenants={sessionState.memberships}
     >
       {children}
     </EnterpriseShell>

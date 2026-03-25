@@ -1,8 +1,11 @@
 import { createHash, randomUUID } from "node:crypto";
-import { put } from "@vercel/blob";
 import { writeAuditLog } from "../../../../_lib/audit.js";
+import { checkEvidenceQuota, incrementTenantUsage } from "../../../../_lib/db.js";
 import { normalizeEvidence, requireTenantContext } from "../../../../_lib/enterprise-api.js";
+import { buildEvidenceAccess, getStorageAdapter, resolveTenantStorageConfig } from "../../../../_lib/storage-adapters.js";
 import { cleanString, errorJson, json } from "../../../../_lib/http.js";
+import { logRequest, resolveRequestId } from "../../../../_lib/observability.js";
+import { buildRateLimitKey, consumeRateLimit } from "../../../../_lib/rate-limit.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,11 +23,6 @@ const resolveSite = async (sql, tenantId, siteId) => {
     LIMIT 1
   `;
   return rows?.[0]?.id || null;
-};
-
-const buildBlobKey = (tenantId, filename) => {
-  const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "-");
-  return `evidence/${tenantId}/${safeFilename}`;
 };
 
 const normalizeDocType = (value) => {
@@ -47,75 +45,147 @@ const normalizeIssueDate = (value) => {
   return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
 };
 
-const normalizeBlobToken = (value) => {
-  const raw = cleanString(value);
-  if (!raw) {
-    return null;
-  }
-  const withoutQuotes = raw.replace(/^['"]+|['"]+$/g, "").trim();
-  const withoutBearer = withoutQuotes.replace(/^bearer\s+/i, "").trim();
-  const asciiOnly = withoutBearer.replace(/[^\x20-\x7E]/g, "");
-  const compact = asciiOnly.replace(/\s+/g, "").trim();
-  if (!compact) {
-    return null;
-  }
-  return compact;
-};
-
 export async function POST(request, { params }) {
   const tenantId = params?.id;
+  const requestId = resolveRequestId(request);
+  const startedAt = Date.now();
+  let response = null;
   const scoped = await requireTenantContext(request, tenantId, "evidence");
   if (scoped.response) {
-    return scoped.response;
+    response = scoped.response;
+    logRequest({ request, response, startedAt, route: "/api/v1/tenants/[id]/evidence/upload", requestId, extra: { tenantId } });
+    return response;
   }
 
   const { context } = scoped;
+  const uploadLimit = consumeRateLimit({
+    key: buildRateLimitKey({ tenantId, routeKey: "evidence_upload" }),
+    limit: 10,
+    windowMs: 60_000,
+  });
+  if (!uploadLimit.allowed) {
+    response = errorJson("Too many evidence uploads. Please retry later.", 429, {
+      code: "rate_limited",
+      retryAfterSec: uploadLimit.retryAfterSec,
+      requestId,
+    });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+      extra: { retryAfterSec: uploadLimit.retryAfterSec },
+    });
+    return response;
+  }
 
   let formData = null;
   try {
     formData = await request.formData();
   } catch (_error) {
-    return errorJson("Request must be multipart/form-data", 400);
+    response = errorJson("Request must be multipart/form-data", 400, { requestId });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   }
 
   const file = formData.get("file");
   if (!file || typeof file !== "object" || typeof file.arrayBuffer !== "function") {
-    return errorJson("file is required", 400);
+    response = errorJson("file is required", 400, { requestId });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   }
 
   const filename = cleanString(file.name);
   if (!filename) {
-    return errorJson("Uploaded file must include a filename", 400);
+    response = errorJson("Uploaded file must include a filename", 400, { requestId });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   }
 
   const rawSiteId = cleanString(formData.get("siteId"));
   const siteId = await resolveSite(context.sql, tenantId, rawSiteId);
   if (rawSiteId && !siteId) {
-    return errorJson("siteId is invalid for this tenant", 400);
+    response = errorJson("siteId is invalid for this tenant", 400, { requestId });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   }
 
   try {
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const contentType = cleanString(file.type) || "application/octet-stream";
     const sizeBytes = fileBuffer.byteLength;
+    const quotaCheck = await checkEvidenceQuota(context.sql, tenantId, sizeBytes, {
+      isSuperadmin: context.isSuperadmin,
+    });
+    if (!quotaCheck.allowed) {
+      response = errorJson("Evidence quota exceeded", 403, {
+        code: quotaCheck.code,
+        usage: quotaCheck.usage,
+        limit: quotaCheck.limit,
+        projected: quotaCheck.projected,
+        requestId,
+      });
+      logRequest({
+        request,
+        response,
+        startedAt,
+        context: { ...context, tenantId },
+        route: "/api/v1/tenants/[id]/evidence/upload",
+        requestId,
+      });
+      return response;
+    }
     const sha256 = createHash("sha256").update(fileBuffer).digest("hex");
     const issueDate = normalizeIssueDate(formData.get("issueDate"));
     const docType = normalizeDocType(formData.get("docType"));
     const scopeCoverage = normalizeCoverage(formData.get("scopeCoverage"));
     const isEncrypted = cleanString(formData.get("isEncrypted")).toLowerCase() === "true";
     const language = cleanString(formData.get("language")) || null;
-
-    const uploadOptions = {
-      access: "public",
-      addRandomSuffix: true,
+    const storageConfig = await resolveTenantStorageConfig(context.sql, tenantId);
+    const adapter = getStorageAdapter(storageConfig);
+    const uploadResult = await adapter.uploadEvidence({
+      config: storageConfig,
+      tenantId,
+      fileBuffer,
+      filename,
       contentType,
-    };
-    const normalizedBlobToken = normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN);
-    if (normalizedBlobToken) {
-      uploadOptions.token = normalizedBlobToken;
-    }
-
-    const blob = await put(buildBlobKey(tenantId, filename), fileBuffer, uploadOptions);
+      metadata: {
+        siteId,
+        issueDate,
+        docType,
+        scopeCoverage,
+      },
+    });
     const evidenceId = randomUUID();
 
     const rows = await context.sql`
@@ -128,6 +198,15 @@ export async function POST(request, { params }) {
         size_bytes,
         sha256,
         blob_url,
+        storage_backend,
+        storage_key,
+        external_file_id,
+        external_drive_id,
+        external_parent_id,
+        external_web_url,
+        source_of_truth,
+        storage_status,
+        last_verified_at,
         issue_date,
         doc_type,
         scope_coverage,
@@ -142,7 +221,16 @@ export async function POST(request, { params }) {
         ${contentType},
         ${sizeBytes},
         ${sha256},
-        ${blob?.url || null},
+        ${uploadResult?.blobUrl || null},
+        ${storageConfig.primaryBackend || "vercel_blob"},
+        ${uploadResult?.storageKey || null},
+        ${uploadResult?.externalFileId || null},
+        ${uploadResult?.externalDriveId || null},
+        ${uploadResult?.externalParentId || null},
+        ${uploadResult?.externalWebUrl || null},
+        ${uploadResult?.sourceOfTruth || storageConfig.primaryBackend || "vercel_blob"},
+        ${uploadResult?.storageStatus || "available"},
+        ${uploadResult?.lastVerifiedAt || new Date().toISOString()},
         ${issueDate},
         ${docType},
         ${scopeCoverage},
@@ -158,6 +246,15 @@ export async function POST(request, { params }) {
         size_bytes,
         sha256,
         blob_url,
+        storage_backend,
+        storage_key,
+        external_file_id,
+        external_drive_id,
+        external_parent_id,
+        external_web_url,
+        source_of_truth,
+        storage_status,
+        last_verified_at,
         issue_date,
         doc_type,
         scope_coverage,
@@ -178,6 +275,7 @@ export async function POST(request, { params }) {
         siteId,
         sizeBytes,
         sha256,
+        storageBackend: storageConfig.primaryBackend || "vercel_blob",
         issueDate,
         docType,
         scopeCoverage,
@@ -186,17 +284,55 @@ export async function POST(request, { params }) {
       },
     });
 
-    return json({ evidence: normalizeEvidence(rows[0]) }, 201);
+    await incrementTenantUsage(context.sql, tenantId, {
+      evidenceBytes: sizeBytes,
+    });
+
+    response = json({
+      evidence: {
+        ...normalizeEvidence(rows[0]),
+        ...buildEvidenceAccess(tenantId, rows[0]),
+      },
+    }, 201);
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
-    if (/bytestring|blob_read_write_token|token/i.test(message)) {
-      return errorJson("Blob upload configuration error", 502, {
+    if (/bytestring|blob_read_write_token|token/i.test(message) || error?.code === "blob_token_missing") {
+      response = errorJson("Storage backend configuration error", 502, {
         message,
-        hint: "Verify BLOB_READ_WRITE_TOKEN in Vercel env and remove extra characters/spaces.",
+        hint: "Verify the active storage backend configuration and required local secrets.",
+        requestId,
       });
+      logRequest({
+        request,
+        response,
+        startedAt,
+        context: { ...context, tenantId },
+        route: "/api/v1/tenants/[id]/evidence/upload",
+        requestId,
+      });
+      return response;
     }
-    return errorJson("Failed to upload evidence", 500, {
+    response = errorJson("Failed to upload evidence", 500, {
       message,
+      requestId,
     });
+    logRequest({
+      request,
+      response,
+      startedAt,
+      context: { ...context, tenantId },
+      route: "/api/v1/tenants/[id]/evidence/upload",
+      requestId,
+    });
+    return response;
   }
 }

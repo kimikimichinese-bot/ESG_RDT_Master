@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { ensureAssessmentSchema, getSql } from "./db.js";
-import { json, parseJsonBody } from "./http.js";
+import { checkMonthlyQuota, ensureAssessmentSchema, getSql, incrementTenantUsage } from "./db.js";
+import { errorJson, json, parseJsonBody } from "./http.js";
 import { requireAuthContext } from "./enterprise-api.js";
 import { canAccessResource } from "./rbac.js";
 import { writeAuditLog } from "./audit.js";
@@ -91,7 +91,7 @@ const getTenantContextOrResponse = async (request) => {
 
   const { context } = auth;
   const membership = context.memberships.find((item) => item.tenantId === context.activeTenantId) || null;
-  if (!membership) {
+  if (!membership && !context.isSuperadmin) {
     return {
       response: json(
         {
@@ -105,13 +105,20 @@ const getTenantContextOrResponse = async (request) => {
   return {
     context: {
       ...context,
-      role: membership.role,
+      role: membership?.role || "TenantAdmin",
       tenantId: context.activeTenantId,
     },
   };
 };
 
 const canMutateAssessments = (role) => canAccessResource(role, "assessments", "POST");
+
+const forbiddenByAssessmentRole = (role) =>
+  errorJson("Forbidden by role policy", 403, {
+    code: role === "Auditor" ? "rbac_read_only" : "forbidden",
+    role,
+    resource: "assessments",
+  });
 
 const getProjectById = async (sql, tenantId, projectId) => {
   const rows = await sql`
@@ -227,7 +234,7 @@ export const createProject = async (request) => {
 
     const { tenantId, role, user } = auth.context;
     if (!canMutateAssessments(role)) {
-      return json({ error: "Forbidden by role policy" }, 403);
+      return forbiddenByAssessmentRole(role);
     }
 
     const sql = getSql();
@@ -316,7 +323,7 @@ export const updateProject = async (request, projectId) => {
 
     const { tenantId, role, user } = auth.context;
     if (!canMutateAssessments(role)) {
-      return json({ error: "Forbidden by role policy" }, 403);
+      return forbiddenByAssessmentRole(role);
     }
 
     const sql = getSql();
@@ -402,7 +409,7 @@ export const upsertProjectAnswers = async (request, projectId) => {
 
     const { tenantId, role, user } = auth.context;
     if (!canMutateAssessments(role)) {
-      return json({ error: "Forbidden by role policy" }, 403);
+      return forbiddenByAssessmentRole(role);
     }
 
     const sql = getSql();
@@ -538,6 +545,22 @@ export const getProjectReport = async (request, projectId) => {
 
     const { tenantId } = auth.context;
     const sql = getSql();
+    const quotaCheck = await checkMonthlyQuota(sql, tenantId, "exports", {
+      increment: 1,
+      isSuperadmin: auth.context.isSuperadmin,
+    });
+    if (!quotaCheck.allowed) {
+      return json(
+        {
+          error: "Exports quota exceeded",
+          code: quotaCheck.code,
+          usage: quotaCheck.usage,
+          limit: quotaCheck.limit,
+          projected: quotaCheck.projected,
+        },
+        403,
+      );
+    }
 
     const projectRow = await getProjectById(sql, tenantId, projectId);
     if (!projectRow) {
@@ -593,6 +616,10 @@ export const getProjectReport = async (request, projectId) => {
     const validation = validateAssessmentAnswers({
       parameters,
       answerMap,
+    });
+
+    await incrementTenantUsage(sql, tenantId, {
+      exportsCount: 1,
     });
 
     return json({

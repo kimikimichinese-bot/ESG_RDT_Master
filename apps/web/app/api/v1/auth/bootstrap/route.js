@@ -8,12 +8,14 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    const { usersCount, tenantsCount, membershipsCount } = await getBootstrapMetrics();
+    const { usersCount, superadminsCount, tenantsCount, membershipsCount } = await getBootstrapMetrics();
     return json({
       ok: true,
       usersCount,
+      superadminsCount,
       tenantsCount,
       membershipsCount,
+      needsPlatformSetup: superadminsCount === 0,
     });
   } catch (error) {
     const requestId = randomUUID();

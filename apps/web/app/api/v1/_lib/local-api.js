@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import { setDefaultResultOrder } from "node:dns";
 import { lookup as dnsLookup } from "node:dns/promises";
 import { isIP } from "node:net";
-import { ensureSchema, getSql } from "./db.js";
+import { getSessionContext } from "./auth.js";
+import { checkMonthlyQuota, ensureSchema, getSql, incrementTenantUsage } from "./db.js";
 
 const SERVICE_NAME = "esg-rdt-master-api";
 const WORKER_ID = process.env.WORKER_ID ?? "cron-worker";
@@ -58,6 +59,18 @@ const isWarn = (value) => value === "warn" || value === "down";
 const deriveStatus = (checks) => {
   if (Object.values(checks).some((value) => isWarn(value))) {
     return "degraded";
+  }
+  return "ready";
+};
+const deriveStatusIgnoringWarnKeys = (checks, ignoredWarnKeys = []) => {
+  const ignored = new Set(ignoredWarnKeys);
+  for (const [key, value] of Object.entries(checks || {})) {
+    if (value === "down") {
+      return "degraded";
+    }
+    if (value === "warn" && !ignored.has(key)) {
+      return "degraded";
+    }
   }
   return "ready";
 };
@@ -754,16 +767,30 @@ export const handleV1Status = async (request) => {
       queue: queued > 0 ? "warn" : "ok",
       tenantScope: tenantId ? "ok" : "warn",
     };
+    const tenantContext = tenantId
+      ? {
+          provided: true,
+          status: "ok",
+          tenantHeader: tenantId,
+          message: "Tenant-scoped readiness checks are enabled for this request.",
+        }
+      : {
+          provided: false,
+          status: "not_provided",
+          tenantHeader: null,
+          message: "Platform readiness is healthy. Tenant-scoped checks were skipped because no x-tenant-id header was provided.",
+        };
 
     return json(
       {
-        status: deriveStatus(checks),
+        status: deriveStatusIgnoringWarnKeys(checks, ["tenantScope"]),
         service: SERVICE_NAME,
         timestamp: safeDate(),
         version: getBuildVersion(),
         requestId: requestId(),
         ready: checks.db === "ok",
         checks,
+        tenantContext,
         queueDepth: queued,
         latestJob: latest ? normalizeJob(latest) : null,
         tenantHeader: tenantId,
@@ -877,6 +904,20 @@ export const triggerJob = async (request) => {
     return auth;
   }
 
+  const sessionContext = await getSessionContext(request).catch(() => ({ error: "Unauthorized" }));
+  if (!sessionContext?.error && sessionContext.impersonationReadOnly) {
+    return json(
+      {
+        error: "Write blocked during read-only impersonation",
+        code: "impersonation_read_only",
+        requestId: requestId(),
+        timestamp: safeDate(),
+        service: SERVICE_NAME,
+      },
+      403,
+    );
+  }
+
   await ensureSchema();
   const parsed = await parseTriggerRequest(request);
   if (!parsed.ok) {
@@ -893,11 +934,39 @@ export const triggerJob = async (request) => {
 
   const id = randomUUID();
   const sql = getSql();
+  let quotaOverride = false;
+  if (tenantId) {
+    quotaOverride = !sessionContext?.error && sessionContext.isSuperadmin;
+    const quotaCheck = await checkMonthlyQuota(sql, tenantId, "jobs", {
+      increment: 1,
+      isSuperadmin: quotaOverride,
+    });
+    if (!quotaCheck.allowed) {
+      return json(
+        {
+          error: "Jobs quota exceeded",
+          code: quotaCheck.code,
+          usage: quotaCheck.usage,
+          limit: quotaCheck.limit,
+          projected: quotaCheck.projected,
+          requestId: requestId(),
+          timestamp: safeDate(),
+          service: SERVICE_NAME,
+        },
+        403,
+      );
+    }
+  }
   const rows = await sql`
     INSERT INTO jobs (id, job_type, status, input)
     VALUES (${id}, ${parsed.jobType}, 'queued', ${JSON.stringify(parsed.payload)}::jsonb)
     RETURNING *
   `;
+  if (tenantId) {
+    await incrementTenantUsage(sql, tenantId, {
+      jobsCount: 1,
+    });
+  }
   const created = rows[0];
   const createdJob = normalizeJob(created);
 

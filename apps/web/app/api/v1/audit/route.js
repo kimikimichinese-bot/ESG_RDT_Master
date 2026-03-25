@@ -14,8 +14,11 @@ export async function GET(request) {
   const { context } = auth;
   const url = new URL(request.url);
   const requestedTenantId = url.searchParams.get("tenantId") || context.activeTenantId;
+  if (!requestedTenantId) {
+    return errorJson("tenantId is required", 400);
+  }
 
-  if (!context.memberships.some((item) => item.tenantId === requestedTenantId)) {
+  if (!context.isSuperadmin && !context.memberships.some((item) => item.tenantId === requestedTenantId)) {
     return errorJson("Forbidden for tenant", 403);
   }
 

@@ -5,6 +5,14 @@ import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
 import { useCompanyScope } from "../_components/use-company-scope";
 
+function TooltipText({ text, children }) {
+  return (
+    <span className="enterprise-tooltip" data-tooltip={text} aria-label={text}>
+      {children}
+    </span>
+  );
+}
+
 const emptyForm = {
   companyId: "",
   name: "",
@@ -199,7 +207,7 @@ export default function SitesPage() {
           </button>
           {canWrite ? (
             <button className="enterprise-button-primary" type="button" onClick={openCreate}>
-              New site
+              <TooltipText text="Aggiungi una sede">New site</TooltipText>
             </button>
           ) : null}
         </div>
@@ -219,8 +227,12 @@ export default function SitesPage() {
               <tr>
                 <th>Name</th>
                 <th>Company</th>
-                <th>Country</th>
-                <th>Water stressed</th>
+                <th>
+                  <TooltipText text="Paese della sede">Country</TooltipText>
+                </th>
+                <th>
+                  <TooltipText text="Area a stress idrico">Water stressed</TooltipText>
+                </th>
                 <th>Address</th>
                 <th>Actions</th>
               </tr>

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "echo \"UI component library placeholder.\"",
-    "test": "echo \"No UI tests yet.\""
+    "test": "bunx vitest run --config ../../vitest.config.mjs --dir tests --passWithNoTests"
   },
   "peerDependencies": {
     "react": "^18.0.0"

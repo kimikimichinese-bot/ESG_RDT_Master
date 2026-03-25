@@ -8,7 +8,11 @@ export function useTenantSession() {
     error: "",
     tenantId: "",
     role: "",
+    platformRole: "none",
+    impersonationReadOnly: false,
     memberships: [],
+    availableTenants: [],
+    quota: null,
     user: null,
   });
 
@@ -25,14 +29,18 @@ export function useTenantSession() {
         error: "",
         tenantId: payload.activeTenantId || "",
         role: payload.activeRole || "",
+        platformRole: typeof payload.platformRole === "string" ? payload.platformRole : "none",
+        impersonationReadOnly: payload.impersonationReadOnly === true,
         memberships: Array.isArray(payload.memberships) ? payload.memberships : [],
+        availableTenants: Array.isArray(payload.availableTenants) ? payload.availableTenants : [],
+        quota: payload.quota || null,
         user: payload.user || null,
       });
     } catch (error) {
       setState((current) => ({
         ...current,
         loading: false,
-        error: error instanceof Error ? error.message : "Unable to load tenant session",
+        error: error instanceof Error ? error.message : "Unable to load user session",
       }));
     }
   }, []);

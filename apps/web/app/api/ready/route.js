@@ -1,10 +1,5 @@
-import { proxyDiagnosticGet } from "../_lib/diagnostics-proxy.js";
+import { handleV1Status } from "../v1/_lib/local-api.js";
 
 export async function GET(request) {
-  return proxyDiagnosticGet(
-    request,
-    "/ready",
-    { web: "warn" },
-    "/ready",
-  );
+  return handleV1Status(request);
 }

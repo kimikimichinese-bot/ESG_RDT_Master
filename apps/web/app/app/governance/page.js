@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useCompanyScope } from "../_components/use-company-scope";
 import { useTenantSession } from "../_components/use-tenant-session";
@@ -10,6 +11,26 @@ const parseNumber = (value) => {
   const parsed = Number(String(value ?? "").trim());
   return Number.isFinite(parsed) ? parsed : 0;
 };
+
+const SYSTEM_GOVERNANCE_KEYS = new Set([
+  "board_total",
+  "board_women",
+  "board_independent",
+  "board_meetings",
+  "anti_corruption_policy",
+  "whistleblowing_channel",
+  "data_privacy_policy",
+  "supplier_code_of_conduct",
+  "gdpr_training",
+  "data_breaches_count",
+  "corruption_incidents_count",
+  "fines_amount_eur",
+  "policy_anti_corruption",
+  "policy_whistleblowing",
+  "policy_data_privacy",
+  "policy_supplier_code",
+  "policy_grievance_mechanism",
+]);
 
 export default function GovernancePage() {
   const tenant = useTenantSession();
@@ -46,6 +67,9 @@ export default function GovernancePage() {
     { policyKey: "supplier_code", status: "no", notes: "" },
     { policyKey: "grievance_mechanism", status: "no", notes: "" },
   ]);
+  const [governanceDefinitions, setGovernanceDefinitions] = useState([]);
+  const [customValues, setCustomValues] = useState({});
+  const [enabledGovernanceFields, setEnabledGovernanceFields] = useState(null);
 
   const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
 
@@ -92,6 +116,10 @@ export default function GovernancePage() {
           finesAmountEur: String(data.finesAmountEur ?? 0),
           notes: data.notes || "",
         });
+        setCustomValues(
+          data?.customValues && typeof data.customValues === "object" && !Array.isArray(data.customValues) ? data.customValues : {},
+        );
+        setGovernanceDefinitions(Array.isArray(payload?.definitions) ? payload.definitions : []);
 
         if (Array.isArray(payload?.policies) && payload.policies.length > 0) {
           setPolicies(
@@ -126,6 +154,30 @@ export default function GovernancePage() {
     };
   }, [tenant.tenantId, selectedCompanyId, reportingYear]);
 
+  useEffect(() => {
+    if (!Array.isArray(governanceDefinitions) || governanceDefinitions.length === 0) {
+      setEnabledGovernanceFields(null);
+      return;
+    }
+    const enabledKeys = governanceDefinitions.filter((item) => item?.enabled !== false).map((item) => item.key);
+    setEnabledGovernanceFields(new Set(enabledKeys));
+  }, [governanceDefinitions]);
+
+  const isFieldEnabled = (key) => !enabledGovernanceFields || enabledGovernanceFields.has(key);
+  const customDefinitions = useMemo(
+    () =>
+      (governanceDefinitions || []).filter((item) => {
+        if (!item?.key || item.enabled === false) {
+          return false;
+        }
+        if (item.isSystem === false || item.custom === true) {
+          return true;
+        }
+        return !SYSTEM_GOVERNANCE_KEYS.has(item.key);
+      }),
+    [governanceDefinitions],
+  );
+
   const onSave = async () => {
     if (!tenant.tenantId || !selectedCompanyId || !canWrite) {
       return;
@@ -143,6 +195,7 @@ export default function GovernancePage() {
           companyId: selectedCompanyId,
           reportingYear,
           governance,
+          customValues,
           policies,
         }),
       });
@@ -165,12 +218,89 @@ export default function GovernancePage() {
     }
   };
 
+  const renderCustomField = (definition) => {
+    const key = definition.key;
+    const type = String(definition.fieldType || "text").toLowerCase();
+    const value = customValues?.[key];
+    const disabled = !canWrite;
+
+    if (type === "boolean") {
+      return (
+        <label className="enterprise-checkbox-row" htmlFor={`gov-custom-${key}`}>
+          <input
+            id={`gov-custom-${key}`}
+            type="checkbox"
+            checked={value === true}
+            onChange={(event) =>
+              setCustomValues((current) => ({
+                ...current,
+                [key]: event.target.checked,
+              }))
+            }
+            disabled={disabled}
+          />
+          <span>{definition.label || definition.name || key}</span>
+        </label>
+      );
+    }
+    if (type === "select") {
+      const options = Array.isArray(definition.options) ? definition.options : [];
+      return (
+        <>
+          <label className="enterprise-label" htmlFor={`gov-custom-${key}`}>{definition.label || definition.name || key}</label>
+          <select
+            id={`gov-custom-${key}`}
+            className="enterprise-input"
+            value={typeof value === "string" ? value : ""}
+            onChange={(event) =>
+              setCustomValues((current) => ({
+                ...current,
+                [key]: event.target.value,
+              }))
+            }
+            disabled={disabled}
+          >
+            <option value="">Select status</option>
+            {options.map((item) => (
+              <option key={`${key}:${item}`} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </>
+      );
+    }
+    return (
+      <>
+        <label className="enterprise-label" htmlFor={`gov-custom-${key}`}>{definition.label || definition.name || key}</label>
+        <input
+          id={`gov-custom-${key}`}
+          className="enterprise-input"
+          type={type === "number" ? "number" : "text"}
+          value={value == null ? "" : String(value)}
+          onChange={(event) =>
+            setCustomValues((current) => ({
+              ...current,
+              [key]: type === "number" ? parseNumber(event.target.value) : event.target.value,
+            }))
+          }
+          disabled={disabled}
+        />
+      </>
+    );
+  };
+
   return (
     <section className="enterprise-grid">
       <div className="enterprise-toolbar">
         <div>
           <h2 className="enterprise-section-title">Governance</h2>
           <p className="enterprise-muted">Board composition, policies, incidents and governance KPIs by company/year.</p>
+        </div>
+        <div className="enterprise-inline-actions">
+          <Link className="enterprise-button-secondary" href="/app/definitions?type=governance">
+            Manage fields
+          </Link>
         </div>
       </div>
 
@@ -212,31 +342,74 @@ export default function GovernancePage() {
             <div className="enterprise-card">
               <h3 className="enterprise-section-title">Board</h3>
               <div className="enterprise-filter-grid">
-                <label className="enterprise-label">Board total</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.boardTotal} onChange={(e) => setGovernance((c) => ({ ...c, boardTotal: e.target.value }))} />
-                <label className="enterprise-label">Board women</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.boardWomen} onChange={(e) => setGovernance((c) => ({ ...c, boardWomen: e.target.value }))} />
-                <label className="enterprise-label">Independent directors</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.boardIndependent} onChange={(e) => setGovernance((c) => ({ ...c, boardIndependent: e.target.value }))} />
-                <label className="enterprise-label">Board meetings</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.boardMeetings} onChange={(e) => setGovernance((c) => ({ ...c, boardMeetings: e.target.value }))} />
+                {isFieldEnabled("board_total") ? (
+                  <>
+                    <label className="enterprise-label">Board total</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.boardTotal} onChange={(e) => setGovernance((c) => ({ ...c, boardTotal: e.target.value }))} />
+                  </>
+                ) : null}
+                {isFieldEnabled("board_women") ? (
+                  <>
+                    <label className="enterprise-label">Board women</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.boardWomen} onChange={(e) => setGovernance((c) => ({ ...c, boardWomen: e.target.value }))} />
+                  </>
+                ) : null}
+                {isFieldEnabled("board_independent") ? (
+                  <>
+                    <label className="enterprise-label">Independent directors</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.boardIndependent} onChange={(e) => setGovernance((c) => ({ ...c, boardIndependent: e.target.value }))} />
+                  </>
+                ) : null}
+                {isFieldEnabled("board_meetings") ? (
+                  <>
+                    <label className="enterprise-label">Board meetings</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.boardMeetings} onChange={(e) => setGovernance((c) => ({ ...c, boardMeetings: e.target.value }))} />
+                  </>
+                ) : null}
               </div>
             </div>
+
+            {customDefinitions.length > 0 ? (
+              <div className="enterprise-card">
+                <h3 className="enterprise-section-title">Custom governance fields</h3>
+                <div className="enterprise-filter-grid">
+                  {customDefinitions.map((definition) => (
+                    <div key={`custom:${definition.key}`}>{renderCustomField(definition)}</div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="enterprise-card">
               <h3 className="enterprise-section-title">Incidents & compliance</h3>
               <div className="enterprise-filter-grid">
-                <label className="enterprise-label">GDPR training</label>
-                <select className="enterprise-input" value={governance.gdprTraining ? "yes" : "no"} onChange={(e) => setGovernance((c) => ({ ...c, gdprTraining: e.target.value === "yes" }))}>
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-                <label className="enterprise-label">Data breaches count</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.dataBreachesCount} onChange={(e) => setGovernance((c) => ({ ...c, dataBreachesCount: e.target.value }))} />
-                <label className="enterprise-label">Corruption incidents count</label>
-                <input className="enterprise-input" type="number" min="0" value={governance.corruptionIncidentsCount} onChange={(e) => setGovernance((c) => ({ ...c, corruptionIncidentsCount: e.target.value }))} />
-                <label className="enterprise-label">Fines amount (EUR)</label>
-                <input className="enterprise-input" type="number" min="0" step="0.01" value={governance.finesAmountEur} onChange={(e) => setGovernance((c) => ({ ...c, finesAmountEur: e.target.value }))} />
+                {isFieldEnabled("gdpr_training") ? (
+                  <>
+                    <label className="enterprise-label">GDPR training</label>
+                    <select className="enterprise-input" value={governance.gdprTraining ? "yes" : "no"} onChange={(e) => setGovernance((c) => ({ ...c, gdprTraining: e.target.value === "yes" }))}>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </>
+                ) : null}
+                {isFieldEnabled("data_breaches_count") ? (
+                  <>
+                    <label className="enterprise-label">Data breaches count</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.dataBreachesCount} onChange={(e) => setGovernance((c) => ({ ...c, dataBreachesCount: e.target.value }))} />
+                  </>
+                ) : null}
+                {isFieldEnabled("corruption_incidents_count") ? (
+                  <>
+                    <label className="enterprise-label">Corruption incidents count</label>
+                    <input className="enterprise-input" type="number" min="0" value={governance.corruptionIncidentsCount} onChange={(e) => setGovernance((c) => ({ ...c, corruptionIncidentsCount: e.target.value }))} />
+                  </>
+                ) : null}
+                {isFieldEnabled("fines_amount_eur") ? (
+                  <>
+                    <label className="enterprise-label">Fines amount (EUR)</label>
+                    <input className="enterprise-input" type="number" min="0" step="0.01" value={governance.finesAmountEur} onChange={(e) => setGovernance((c) => ({ ...c, finesAmountEur: e.target.value }))} />
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
@@ -248,30 +421,32 @@ export default function GovernancePage() {
                 <tr><th>Policy</th><th>Status</th><th>Notes</th></tr>
               </thead>
               <tbody>
-                {policies.map((row, idx) => (
-                  <tr key={row.policyKey}>
-                    <td>{row.policyKey}</td>
-                    <td>
-                      <select
-                        className="enterprise-input"
-                        value={row.status}
-                        onChange={(event) => setPolicies((current) => current.map((item, itemIdx) => (itemIdx === idx ? { ...item, status: event.target.value } : item)))}
-                      >
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                        <option value="in_progress">In progress</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        className="enterprise-input"
-                        type="text"
-                        value={row.notes}
-                        onChange={(event) => setPolicies((current) => current.map((item, itemIdx) => (itemIdx === idx ? { ...item, notes: event.target.value } : item)))}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {policies.map((row, idx) =>
+                  isFieldEnabled(`policy_${row.policyKey}`) ? (
+                    <tr key={row.policyKey}>
+                      <td>{row.policyKey}</td>
+                      <td>
+                        <select
+                          className="enterprise-input"
+                          value={row.status}
+                          onChange={(event) => setPolicies((current) => current.map((item, itemIdx) => (itemIdx === idx ? { ...item, status: event.target.value } : item)))}
+                        >
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                          <option value="in_progress">In progress</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          className="enterprise-input"
+                          type="text"
+                          value={row.notes}
+                          onChange={(event) => setPolicies((current) => current.map((item, itemIdx) => (itemIdx === idx ? { ...item, notes: event.target.value } : item)))}
+                        />
+                      </td>
+                    </tr>
+                  ) : null,
+                )}
               </tbody>
             </table>
           </div>

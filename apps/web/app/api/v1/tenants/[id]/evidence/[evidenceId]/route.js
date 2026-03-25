@@ -1,5 +1,6 @@
 import { writeAuditLog } from "../../../../_lib/audit.js";
 import { normalizeEvidence, requireTenantContext } from "../../../../_lib/enterprise-api.js";
+import { buildEvidenceAccess } from "../../../../_lib/storage-adapters.js";
 import { cleanString, errorJson, json, parseJsonBody } from "../../../../_lib/http.js";
 
 export const runtime = "nodejs";
@@ -59,6 +60,15 @@ export async function GET(request, { params }) {
       size_bytes,
       sha256,
       blob_url,
+      storage_backend,
+      storage_key,
+      external_file_id,
+      external_drive_id,
+      external_parent_id,
+      external_web_url,
+      source_of_truth,
+      storage_status,
+      last_verified_at,
       issue_date,
       doc_type,
       scope_coverage,
@@ -74,7 +84,12 @@ export async function GET(request, { params }) {
     return errorJson("Evidence not found", 404);
   }
 
-  return json({ evidence: normalizeEvidence(rows[0]) });
+  return json({
+    evidence: {
+      ...normalizeEvidence(rows[0]),
+      ...buildEvidenceAccess(tenantId, rows[0]),
+    },
+  });
 }
 
 export async function PUT(request, { params }) {
@@ -105,6 +120,7 @@ export async function PUT(request, { params }) {
       size_bytes = ${Number.isFinite(sizeBytes) && sizeBytes > 0 ? sizeBytes : 0},
       sha256 = ${cleanString(payload.sha256) || null},
       blob_url = ${cleanString(payload.blobUrl) || null},
+      storage_backend = ${cleanString(payload.storageBackend) || (cleanString(payload.blobUrl) ? "vercel_blob" : null)},
       issue_date = ${normalizeIssueDate(payload.issueDate)},
       doc_type = ${normalizeDocType(payload.docType)},
       scope_coverage = ${normalizeCoverage(payload.scopeCoverage)},
@@ -120,6 +136,15 @@ export async function PUT(request, { params }) {
       size_bytes,
       sha256,
       blob_url,
+      storage_backend,
+      storage_key,
+      external_file_id,
+      external_drive_id,
+      external_parent_id,
+      external_web_url,
+      source_of_truth,
+      storage_status,
+      last_verified_at,
       issue_date,
       doc_type,
       scope_coverage,
@@ -141,7 +166,12 @@ export async function PUT(request, { params }) {
     payload: { filename, siteId },
   });
 
-  return json({ evidence: normalizeEvidence(rows[0]) });
+  return json({
+    evidence: {
+      ...normalizeEvidence(rows[0]),
+      ...buildEvidenceAccess(tenantId, rows[0]),
+    },
+  });
 }
 
 export async function DELETE(request, { params }) {

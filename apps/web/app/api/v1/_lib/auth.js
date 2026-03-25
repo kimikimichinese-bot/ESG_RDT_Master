@@ -1,5 +1,15 @@
 import { createHmac, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
-import { ensureDefaultEmissionFactorsForTenant, ensureEnterpriseSchema, ensureHoldingCompanyForTenant, getSql } from "./db.js";
+import {
+  PLATFORM_ROLES,
+  ensureDefaultEmissionFactorsForTenant,
+  ensureHoldingCompanyForTenant,
+  ensurePlatformSchema,
+  ensurePlatformSettings,
+  ensureTenantEntitlements,
+  getSql,
+  getUsagePeriod,
+  setTenantUsersUsageSnapshot,
+} from "./db.js";
 import { cleanString } from "./http.js";
 
 const SESSION_COOKIE_NAME = "esg_session";
@@ -32,16 +42,70 @@ const parseCookieHeader = (header) => {
   return jar;
 };
 
+const normalizePlatformRole = (value) => {
+  if (
+    value === PLATFORM_ROLES.SUPERADMIN ||
+    value === PLATFORM_ROLES.SUPPORT ||
+    value === PLATFORM_ROLES.BILLING ||
+    value === PLATFORM_ROLES.NONE
+  ) {
+    return value;
+  }
+  return PLATFORM_ROLES.NONE;
+};
+
+const isSuperadminRole = (role) => normalizePlatformRole(role) === PLATFORM_ROLES.SUPERADMIN;
+const isPlatformOperatorRole = (role) => {
+  const normalized = normalizePlatformRole(role);
+  return normalized === PLATFORM_ROLES.SUPERADMIN || normalized === PLATFORM_ROLES.SUPPORT || normalized === PLATFORM_ROLES.BILLING;
+};
+
 const toSessionPayload = (payload) => {
   const now = Math.floor(Date.now() / 1000);
   return {
-    v: 1,
+    v: 2,
     userId: payload.userId,
     activeTenantId: payload.activeTenantId || null,
+    impersonationReadOnly: Boolean(payload.impersonationReadOnly),
     iat: now,
     exp: now + SESSION_TTL_SECONDS,
   };
 };
+
+const queryAnyTenantId = async (sql) => {
+  const rows = await sql`
+    SELECT id
+    FROM tenants
+    ORDER BY created_at ASC
+    LIMIT 1
+  `;
+  return rows?.[0]?.id || null;
+};
+
+const queryTenantIds = async (sql) => {
+  const rows = await sql`
+    SELECT id
+    FROM tenants
+  `;
+  return rows.map((row) => row.id);
+};
+
+const normalizeMembership = (row) => ({
+  tenantId: row.tenant_id,
+  tenantName: row.tenant_name,
+  tenantStatus: row.tenant_status || "active",
+  role: row.role,
+  createdAt: row.created_at ? new Date(row.created_at).toISOString() : null,
+});
+
+const normalizeUser = (row) => ({
+  id: row.id,
+  email: row.email,
+  name: row.name,
+  platformRole: normalizePlatformRole(row.platform_role),
+  createdAt: row.created_at ? new Date(row.created_at).toISOString() : null,
+  updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : null,
+});
 
 export const hashPassword = (password) => {
   const source = cleanString(password);
@@ -100,7 +164,14 @@ export const decodeSession = (token) => {
     if (!payload?.userId || !payload?.exp || payload.exp <= now) {
       return null;
     }
-    return payload;
+    return {
+      userId: payload.userId,
+      activeTenantId: payload.activeTenantId || null,
+      impersonationReadOnly: Boolean(payload.impersonationReadOnly),
+      iat: payload.iat,
+      exp: payload.exp,
+      v: payload.v || 1,
+    };
   } catch (_error) {
     return null;
   }
@@ -163,18 +234,22 @@ export const getBootstrapCounts = async (sql) => {
   const rows = await sql`
     SELECT
       (SELECT COUNT(*)::int FROM users) AS users_count,
+      (SELECT COUNT(*)::int FROM users WHERE platform_role = 'superadmin') AS superadmins_count,
       (SELECT COUNT(*)::int FROM tenants) AS tenants_count,
       (SELECT COUNT(*)::int FROM memberships) AS memberships_count
   `;
 
   const row = rows?.[0];
   const usersCount = Number(row?.users_count);
+  const superadminsCount = Number(row?.superadmins_count);
   const tenantsCount = Number(row?.tenants_count);
   const membershipsCount = Number(row?.memberships_count);
 
   if (
     !Number.isInteger(usersCount) ||
     usersCount < 0 ||
+    !Number.isInteger(superadminsCount) ||
+    superadminsCount < 0 ||
     !Number.isInteger(tenantsCount) ||
     tenantsCount < 0 ||
     !Number.isInteger(membershipsCount) ||
@@ -185,29 +260,15 @@ export const getBootstrapCounts = async (sql) => {
 
   return {
     usersCount,
+    superadminsCount,
     tenantsCount,
     membershipsCount,
   };
 };
 
-const normalizeMembership = (row) => ({
-  tenantId: row.tenant_id,
-  tenantName: row.tenant_name,
-  role: row.role,
-  createdAt: row.created_at ? new Date(row.created_at).toISOString() : null,
-});
-
-const normalizeUser = (row) => ({
-  id: row.id,
-  email: row.email,
-  name: row.name,
-  createdAt: row.created_at ? new Date(row.created_at).toISOString() : null,
-  updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : null,
-});
-
 export const getUserWithMemberships = async (sql, userId) => {
   const userRows = await sql`
-    SELECT id, email, name, created_at, updated_at
+    SELECT id, email, name, platform_role, created_at, updated_at
     FROM users
     WHERE id = ${userId}
     LIMIT 1
@@ -218,7 +279,7 @@ export const getUserWithMemberships = async (sql, userId) => {
   }
 
   const memberships = await sql`
-    SELECT m.tenant_id, t.name AS tenant_name, m.role, m.created_at
+    SELECT m.tenant_id, t.name AS tenant_name, t.tenant_status, m.role, m.created_at
     FROM memberships m
     JOIN tenants t ON t.id = m.tenant_id
     WHERE m.user_id = ${userId}
@@ -234,7 +295,7 @@ export const getUserWithMemberships = async (sql, userId) => {
 export const getMembership = (memberships, tenantId) => memberships.find((item) => item.tenantId === tenantId) || null;
 
 export const createTenantAndAdmin = async ({ tenantName, email, name, password }) => {
-  await ensureEnterpriseSchema();
+  await ensurePlatformSchema();
   const sql = getSql();
 
   const cleanedTenantName = cleanString(tenantName) || "Default Tenant";
@@ -266,9 +327,9 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
   }
 
   const counts = await getBootstrapCounts(sql);
-  if (counts.usersCount > 0) {
+  if (counts.superadminsCount > 0) {
     return {
-      error: "Setup already completed",
+      error: "Platform setup already completed",
       status: 409,
       code: "SETUP_COMPLETED",
     };
@@ -292,13 +353,13 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
     const queries = [];
     if (!existingTenantId) {
       queries.push(sql`
-        INSERT INTO tenants (id, name)
-        VALUES (${tenantId}, ${cleanedTenantName})
+        INSERT INTO tenants (id, name, tenant_status, created_by_user_id, internal_notes)
+        VALUES (${tenantId}, ${cleanedTenantName}, 'active', ${userId}, NULL)
       `);
     }
     queries.push(sql`
-      INSERT INTO users (id, email, name, password_hash)
-      VALUES (${userId}, ${cleanedEmail}, ${cleanedName}, ${passwordHash})
+      INSERT INTO users (id, email, name, password_hash, platform_role)
+      VALUES (${userId}, ${cleanedEmail}, ${cleanedName}, ${passwordHash}, 'superadmin')
     `);
     queries.push(sql`
       INSERT INTO memberships (user_id, tenant_id, role)
@@ -310,6 +371,8 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
     await sql.transaction(queries);
     await ensureHoldingCompanyForTenant(sql, tenantId, cleanedTenantName);
     await ensureDefaultEmissionFactorsForTenant(sql, tenantId);
+    await ensureTenantEntitlements(sql, tenantId);
+    await setTenantUsersUsageSnapshot(sql, tenantId, 1, getUsagePeriod());
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "23505") {
       return {
@@ -327,8 +390,72 @@ export const createTenantAndAdmin = async ({ tenantName, email, name, password }
   };
 };
 
+export const bootstrapPlatformSuperadmin = async ({ ownerName, email, name, password }) => {
+  await ensurePlatformSchema();
+  const sql = getSql();
+
+  const normalizedOwner = cleanString(ownerName) || "WindwardNexus Labs";
+  const cleanedName = cleanString(name) || "Platform Owner";
+  const cleanedEmail = cleanString(email).toLowerCase();
+  const cleanedPassword = cleanString(password);
+
+  if (!cleanedEmail.includes("@")) {
+    return { error: "Valid email is required", status: 400 };
+  }
+
+  if (cleanedPassword.length < 8) {
+    return { error: "Password must be at least 8 characters", status: 400 };
+  }
+
+  const counts = await getBootstrapCounts(sql);
+  if (counts.superadminsCount > 0) {
+    return {
+      error: "Platform bootstrap already completed",
+      status: 409,
+      code: "SUPERADMIN_EXISTS",
+    };
+  }
+
+  const existingUserRows = await sql`
+    SELECT id
+    FROM users
+    WHERE email = ${cleanedEmail}
+    LIMIT 1
+  `;
+
+  if (existingUserRows?.[0]) {
+    return {
+      error: "User already exists",
+      status: 409,
+      code: "USER_EXISTS",
+    };
+  }
+
+  const userId = randomUUID();
+  const passwordHash = hashPassword(cleanedPassword);
+
+  await sql.transaction([
+    sql`
+      INSERT INTO users (id, email, name, password_hash, platform_role)
+      VALUES (${userId}, ${cleanedEmail}, ${cleanedName}, ${passwordHash}, 'superadmin')
+    `,
+    sql`
+      INSERT INTO platform_settings (id, owner_name)
+      VALUES (1, ${normalizedOwner})
+      ON CONFLICT (id) DO NOTHING
+    `,
+  ]);
+
+  await ensurePlatformSettings(sql, normalizedOwner);
+
+  return {
+    ok: true,
+    userId,
+  };
+};
+
 export const authenticateWithPassword = async ({ email, password }) => {
-  await ensureEnterpriseSchema();
+  await ensurePlatformSchema();
   const sql = getSql();
 
   const cleanedEmail = cleanString(email).toLowerCase();
@@ -337,7 +464,7 @@ export const authenticateWithPassword = async ({ email, password }) => {
   }
 
   const rows = await sql`
-    SELECT id, email, name, password_hash
+    SELECT id, email, name, password_hash, platform_role
     FROM users
     WHERE email = ${cleanedEmail}
     LIMIT 1
@@ -352,6 +479,7 @@ export const authenticateWithPassword = async ({ email, password }) => {
     return { error: "Invalid credentials", status: 401, code: "INVALID_CREDENTIALS" };
   }
 
+  const platformRole = normalizePlatformRole(user.platform_role);
   const memberships = await sql`
     SELECT tenant_id, role
     FROM memberships
@@ -359,18 +487,21 @@ export const authenticateWithPassword = async ({ email, password }) => {
     ORDER BY created_at ASC
   `;
 
-  if (!memberships.length) {
+  if (!memberships.length && !isPlatformOperatorRole(platformRole)) {
     return { error: "User has no tenant membership", status: 403, code: "NO_MEMBERSHIP" };
   }
 
+  const fallbackTenantId = memberships[0]?.tenant_id || (isPlatformOperatorRole(platformRole) ? await queryAnyTenantId(sql) : null);
+
   return {
     userId: user.id,
-    activeTenantId: memberships[0].tenant_id,
+    platformRole,
+    activeTenantId: fallbackTenantId || null,
   };
 };
 
 export const getSessionContext = async (request) => {
-  await ensureEnterpriseSchema();
+  await ensurePlatformSchema();
   const sql = getSql();
   const session = readSessionFromRequest(request);
 
@@ -383,14 +514,20 @@ export const getSessionContext = async (request) => {
     return { error: "Unauthorized", status: 401 };
   }
 
-  if (!Array.isArray(data.memberships) || data.memberships.length === 0) {
+  const platformRole = normalizePlatformRole(data.user.platformRole);
+  const isSuperadmin = isSuperadminRole(platformRole);
+  const isPlatformOperator = isPlatformOperatorRole(platformRole);
+  const membershipTenantIds = new Set(data.memberships.map((item) => item.tenantId));
+  const availableTenantIds = isPlatformOperator ? await queryTenantIds(sql) : Array.from(membershipTenantIds);
+
+  if (availableTenantIds.length === 0 && !isPlatformOperator) {
     return { error: "User has no tenant membership", status: 403 };
   }
 
-  const activeTenantId =
-    session.activeTenantId && data.memberships.some((item) => item.tenantId === session.activeTenantId)
-      ? session.activeTenantId
-      : data.memberships[0].tenantId;
+  const canUseSessionTenant = session.activeTenantId ? availableTenantIds.includes(session.activeTenantId) : false;
+  const activeTenantId = canUseSessionTenant
+    ? session.activeTenantId
+    : availableTenantIds[0] || null;
 
   return {
     sql,
@@ -398,31 +535,48 @@ export const getSessionContext = async (request) => {
     user: data.user,
     memberships: data.memberships,
     activeTenantId,
+    platformRole,
+    isSuperadmin,
+    impersonationReadOnly: isSuperadmin ? Boolean(session.impersonationReadOnly) : false,
+    availableTenantIds,
   };
 };
 
-export const createSessionPayload = ({ userId, activeTenantId }) => ({
+export const createSessionPayload = ({ userId, activeTenantId, impersonationReadOnly = false }) => ({
   userId,
   activeTenantId,
+  impersonationReadOnly: Boolean(impersonationReadOnly),
 });
 
-export const issueSessionForUser = async (userId, preferredTenantId = null) => {
-  await ensureEnterpriseSchema();
+export const issueSessionForUser = async (userId, preferredTenantId = null, options = {}) => {
+  await ensurePlatformSchema();
   const sql = getSql();
   const data = await getUserWithMemberships(sql, userId);
-  if (!data?.user || data.memberships.length === 0) {
+  if (!data?.user) {
     return null;
   }
 
-  const activeTenantId =
-    preferredTenantId && data.memberships.some((item) => item.tenantId === preferredTenantId)
-      ? preferredTenantId
-      : data.memberships[0].tenantId;
+  const platformRole = normalizePlatformRole(data.user.platformRole);
+  const isSuperadmin = isSuperadminRole(platformRole);
+  const isPlatformOperator = isPlatformOperatorRole(platformRole);
+
+  const membershipTenantIds = data.memberships.map((item) => item.tenantId);
+  const availableTenantIds = isPlatformOperator ? await queryTenantIds(sql) : membershipTenantIds;
+
+  if (!isPlatformOperator && availableTenantIds.length === 0) {
+    return null;
+  }
+
+  const canUsePreferred = preferredTenantId ? availableTenantIds.includes(preferredTenantId) : false;
+  const activeTenantId = canUsePreferred ? preferredTenantId : availableTenantIds[0] || null;
+  const impersonationReadOnly = isSuperadmin ? Boolean(options.readOnly) : false;
 
   return {
-    token: encodeSession({ userId, activeTenantId }),
-    cookie: buildSessionCookie({ userId, activeTenantId }),
+    token: encodeSession({ userId, activeTenantId, impersonationReadOnly }),
+    cookie: buildSessionCookie({ userId, activeTenantId, impersonationReadOnly }),
     activeTenantId,
+    impersonationReadOnly,
+    platformRole,
     user: data.user,
     memberships: data.memberships,
   };

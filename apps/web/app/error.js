@@ -3,62 +3,43 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-const readRequestIdFromDocument = () => {
-  if (typeof document === "undefined") {
-    return "";
+const extractRequestId = (error) => {
+  const text = typeof error?.message === "string" ? error.message : "";
+  if (!text) {
+    return typeof error?.digest === "string" ? error.digest : null;
   }
-  const raw = document.body?.dataset?.requestId;
-  if (typeof raw !== "string") {
-    return "";
+  const match = text.match(/requestId[:=]\s*([a-zA-Z0-9._:-]+)/i);
+  if (match?.[1]) {
+    return match[1];
   }
-  return raw.trim();
+  return typeof error?.digest === "string" ? error.digest : null;
 };
 
-export default function AppError({ error, reset }) {
-  const requestId = useMemo(() => readRequestIdFromDocument(), []);
-  const digest = typeof error?.digest === "string" ? error.digest : "";
+export default function GlobalError({ error, reset }) {
+  const requestId = useMemo(() => extractRequestId(error), [error]);
 
   return (
-    <main className="esg-shell">
-      <div className="esg-container">
-        <header className="esg-topbar">
-          <div>
-            <h1 className="esg-brand">Something went wrong</h1>
-            <p className="esg-subtitle">The page failed to render. Please retry or use the links below.</p>
-          </div>
-        </header>
-
-        <section
-          style={{
-            marginTop: 20,
-            padding: 16,
-            border: "1px solid #dce3ee",
-            borderRadius: 12,
-            background: "#ffffffcc",
-            backdropFilter: "blur(6px)",
-          }}
-        >
-          <p style={{ marginTop: 0, marginBottom: 10 }}>
-            Request ID: <code>{requestId || "not-available"}</code>
-          </p>
-          {digest ? (
-            <p style={{ marginTop: 0, marginBottom: 10 }}>
-              Digest: <code>{digest}</code>
-            </p>
-          ) : null}
-          <div className="esg-link-row" style={{ marginTop: 8 }}>
-            <button className="esg-link-chip" type="button" onClick={() => reset()}>
-              Try again
-            </button>
-            <Link className="esg-link-chip" href="/help">
-              Help
-            </Link>
-            <Link className="esg-link-chip" href="/login">
-              Login
-            </Link>
-          </div>
-        </section>
-      </div>
+    <main className="enterprise-shell" style={{ minHeight: "100vh", padding: "3rem 1rem" }}>
+      <section className="enterprise-card" style={{ maxWidth: 640, margin: "0 auto", padding: "1.5rem" }}>
+        <h1 className="enterprise-topbar-title">Something went wrong</h1>
+        <p className="enterprise-topbar-subtitle" style={{ marginTop: "0.5rem" }}>
+          We could not complete your request. You can retry, open help, or sign in again.
+        </p>
+        <p style={{ marginTop: "0.75rem" }}>
+          Request ID: <code>{requestId || "not-available"}</code>
+        </p>
+        <div className="enterprise-topbar-actions" style={{ marginTop: "1rem" }}>
+          <button type="button" className="enterprise-button-primary" onClick={reset}>
+            Retry
+          </button>
+          <Link href="/help" className="enterprise-button-secondary">
+            Help
+          </Link>
+          <Link href="/login" className="enterprise-button-secondary">
+            Login
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

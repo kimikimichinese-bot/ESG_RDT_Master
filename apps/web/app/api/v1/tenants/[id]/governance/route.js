@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { writeAuditLog } from "../../../_lib/audit.js";
-import { ensureGovernanceSchema } from "../../../_lib/db.js";
+import { ensureGovernanceSchema, ensureStandardsSchema } from "../../../_lib/db.js";
 import { fetchEntityEvidenceMap, replaceEntityEvidence, resolveCompany } from "../../../_lib/esg-api.js";
 import { parseYear } from "../../../_lib/esg-domain.js";
-import { cleanString, json, parseJsonBody } from "../../../_lib/http.js";
+import { cleanString, json, parseJsonBody, parseJsonColumn } from "../../../_lib/http.js";
 import { requireTenantContext } from "../../../_lib/enterprise-api.js";
+import { filterDefinitionsByCompanyEnabled, loadInternalDefinitionCatalog } from "../../../_lib/standards-api.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,6 +104,9 @@ const normalizeGovernance = (row, evidenceIds = [], fallback = {}) => ({
   dataBreachesCount: Number(row?.data_breaches_count ?? 0),
   corruptionIncidentsCount: Number(row?.corruption_incidents_count ?? 0),
   finesAmountEur: Number(row?.fines_amount_eur ?? 0),
+  customValues: parseJsonColumn(row?.custom_values) && typeof parseJsonColumn(row?.custom_values) === "object"
+    ? parseJsonColumn(row?.custom_values)
+    : {},
   notes: row?.notes || "",
   evidenceIds,
 });
@@ -212,6 +216,50 @@ const toGovernanceInputs = (payload = {}) => {
   };
 };
 
+const normalizeCustomValuesInput = ({ input, definitions }) => {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    return { values: {} };
+  }
+
+  const out = {};
+  for (const definition of definitions || []) {
+    if (!definition?.key) {
+      continue;
+    }
+    if (!Object.prototype.hasOwnProperty.call(input, definition.key)) {
+      continue;
+    }
+    const rawValue = input[definition.key];
+    if (rawValue == null || rawValue === "") {
+      continue;
+    }
+    const fieldType = cleanString(definition.fieldType || definition.field_type || "text").toLowerCase();
+    if (fieldType === "boolean") {
+      out[definition.key] = toBoolean(rawValue);
+      continue;
+    }
+    if (fieldType === "number") {
+      const parsed = Number(rawValue);
+      if (!Number.isFinite(parsed)) {
+        return { error: `invalid_custom_value_${definition.key}` };
+      }
+      out[definition.key] = parsed;
+      continue;
+    }
+    if (fieldType === "select") {
+      const value = cleanString(rawValue);
+      const options = Array.isArray(definition.options) ? definition.options.map((item) => cleanString(item)).filter(Boolean) : [];
+      if (options.length > 0 && !options.includes(value)) {
+        return { error: `invalid_custom_option_${definition.key}` };
+      }
+      out[definition.key] = value;
+      continue;
+    }
+    out[definition.key] = cleanString(rawValue);
+  }
+  return { values: out };
+};
+
 const normalizePolicyPayload = (policies, requestId) => {
   if (!Array.isArray(policies)) {
     return { ok: true, policies: [] };
@@ -269,6 +317,7 @@ export async function GET(request, { params }) {
 
   try {
     await ensureGovernanceSchema();
+    await ensureStandardsSchema();
 
     const scoped = await requireTenantContext(request, tenantId, "governance");
     if (scoped.response) {
@@ -292,6 +341,16 @@ export async function GET(request, { params }) {
       return badRequest(requestId, "invalid_company");
     }
 
+    const catalog = await loadInternalDefinitionCatalog({ sql: context.sql, tenantId });
+    const governanceDefinitions = await filterDefinitionsByCompanyEnabled({
+      sql: context.sql,
+      tenantId,
+      companyId,
+      defType: "governance_field",
+      definitions: Array.isArray(catalog.governance_field) ? catalog.governance_field : [],
+      keyField: "key",
+    });
+
     const governanceRows = await context.sql`
       SELECT
         id,
@@ -310,6 +369,7 @@ export async function GET(request, { params }) {
         data_breaches_count,
         corruption_incidents_count,
         fines_amount_eur,
+        custom_values,
         notes,
         created_at,
         updated_at
@@ -374,6 +434,7 @@ export async function GET(request, { params }) {
       governance,
       policies,
       computed: compute({ governanceRow, policyRows }),
+      definitions: governanceDefinitions,
       requestId,
     });
   } catch (error) {
@@ -392,6 +453,7 @@ export async function PUT(request, { params }) {
 
   try {
     await ensureGovernanceSchema();
+    await ensureStandardsSchema();
 
     const scoped = await requireTenantContext(request, tenantId, "governance");
     if (scoped.response) {
@@ -415,9 +477,26 @@ export async function PUT(request, { params }) {
       return badRequest(requestId, "invalid_company");
     }
 
+    const catalog = await loadInternalDefinitionCatalog({ sql: context.sql, tenantId });
+    const governanceDefinitions = await filterDefinitionsByCompanyEnabled({
+      sql: context.sql,
+      tenantId,
+      companyId,
+      defType: "governance_field",
+      definitions: Array.isArray(catalog.governance_field) ? catalog.governance_field : [],
+      keyField: "key",
+    });
+
     const governanceInputs = toGovernanceInputs(payload);
     if (governanceInputs.error) {
       return badRequest(requestId, governanceInputs.error);
+    }
+    const customInput = normalizeCustomValuesInput({
+      input: payload.customValues ?? payload.governance?.customValues ?? {},
+      definitions: governanceDefinitions,
+    });
+    if (customInput.error) {
+      return badRequest(requestId, customInput.error);
     }
 
     const policyParse = normalizePolicyPayload(payload.policies, requestId);
@@ -443,6 +522,7 @@ export async function PUT(request, { params }) {
         data_breaches_count,
         corruption_incidents_count,
         fines_amount_eur,
+        custom_values,
         notes,
         updated_at
       )
@@ -463,6 +543,7 @@ export async function PUT(request, { params }) {
         ${governanceInputs.values.dataBreachesCount},
         ${governanceInputs.values.corruptionIncidentsCount},
         ${governanceInputs.values.finesAmountEur},
+        ${JSON.stringify(customInput.values)}::jsonb,
         ${governanceInputs.values.notes},
         NOW()
       )
@@ -480,6 +561,7 @@ export async function PUT(request, { params }) {
         data_breaches_count = EXCLUDED.data_breaches_count,
         corruption_incidents_count = EXCLUDED.corruption_incidents_count,
         fines_amount_eur = EXCLUDED.fines_amount_eur,
+        custom_values = EXCLUDED.custom_values,
         notes = EXCLUDED.notes,
         updated_at = NOW()
       RETURNING
@@ -499,6 +581,7 @@ export async function PUT(request, { params }) {
         data_breaches_count,
         corruption_incidents_count,
         fines_amount_eur,
+        custom_values,
         notes,
         created_at,
         updated_at
@@ -637,6 +720,7 @@ export async function PUT(request, { params }) {
         evidenceMap: policyEvidenceMap,
       }),
       computed: compute({ governanceRow, policyRows: finalPolicyRows }),
+      definitions: governanceDefinitions,
       requestId,
     });
   } catch (error) {

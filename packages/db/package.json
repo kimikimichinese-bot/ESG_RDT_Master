@@ -14,7 +14,7 @@
     "migrate:status": "prisma migrate status",
     "status": "prisma migrate status",
     "push": "prisma db push --skip-generate",
-    "seed": "echo \"Seed placeholder for demo tenant.\""
+    "seed": "bun src/seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

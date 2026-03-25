@@ -10,10 +10,10 @@ export const revalidate = 0;
 export async function POST(request) {
   try {
     const bootstrap = await getBootstrapMetrics();
-    if (bootstrap.usersCount === 0) {
+    if (bootstrap.superadminsCount === 0) {
       return errorJson("Setup required", 409, {
         needsSetup: true,
-        usersCount: bootstrap.usersCount,
+        superadminsCount: bootstrap.superadminsCount,
       });
     }
 
@@ -36,8 +36,10 @@ export async function POST(request) {
       JSON.stringify({
         ok: true,
         user: session.user,
+        platformRole: session.platformRole,
         memberships: session.memberships,
         activeTenantId: session.activeTenantId,
+        impersonationReadOnly: session.impersonationReadOnly,
       }),
       {
         status: 200,
@@ -47,6 +49,7 @@ export async function POST(request) {
           "set-cookie": buildSessionCookie({
             userId: session.user.id,
             activeTenantId: session.activeTenantId,
+            impersonationReadOnly: session.impersonationReadOnly,
           }),
         },
       },
