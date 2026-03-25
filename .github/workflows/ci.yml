@@ -45,7 +45,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Test
-        run: bun run test --if-present
+        run: bun run test
 
   full-functional-evidence:
     runs-on: ubuntu-latest
