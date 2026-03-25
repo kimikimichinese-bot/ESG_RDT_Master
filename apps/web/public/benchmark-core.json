@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-03-18T11:16:03.788Z",
+  "tenantId": "42db081f-b696-4ad7-a9f9-825d6aea74ce",
+  "tenantName": "Demo Holding",
+  "year": 2026,
+  "dataset": "large",
+  "results": [
+    {
+      "label": "companies",
+      "durationMs": 146.55,
+      "resultCount": 10
+    },
+    {
+      "label": "sites",
+      "durationMs": 196.17,
+      "resultCount": 21
+    },
+    {
+      "label": "metrics_summary",
+      "durationMs": 210.97,
+      "resultCount": 8
+    },
+    {
+      "label": "ghg_compute",
+      "durationMs": 9.88,
+      "resultCount": 76
+    },
+    {
+      "label": "emissions",
+      "durationMs": 2.4,
+      "resultCount": 10
+    },
+    {
+      "label": "materiality_report",
+      "durationMs": 451.93,
+      "resultCount": 7
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 .next
 node_modules
 bun.lockb
+.DS_Store
 
 # Local environment files
 .env
@@ -9,6 +10,18 @@ bun.lockb
 .env.production
 
 .env.vercel.local
+.storage-secrets.local.json
+storage-secrets.local.json
 
 # test artifacts
 apps/web/test-results/
+coverage/
+.env*.local
+
+# Local sanitation artifacts
+.theme_backup_*/
+_archive/
+_backups/
+_exports/
+apps/web/_exports/
+pptx_preview.jpg

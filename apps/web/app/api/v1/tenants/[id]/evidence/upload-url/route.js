@@ -1,4 +1,5 @@
 import { requireTenantContext } from "../../../../_lib/enterprise-api.js";
+import { resolveTenantStorageConfig } from "../../../../_lib/storage-adapters.js";
 import { cleanString, errorJson, json, parseJsonBody } from "../../../../_lib/http.js";
 
 export const runtime = "nodejs";
@@ -31,15 +32,20 @@ export async function POST(request, { params }) {
   }
 
   const blobEnabled = Boolean(normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN));
+  const storageConfig = await resolveTenantStorageConfig(scoped.context.sql, tenantId);
   const uploadUrl = `/api/v1/tenants/${encodeURIComponent(tenantId)}/evidence/complete`;
 
   return json({
     blobEnabled,
+    storageBackend: storageConfig.primaryBackend || "vercel_blob",
     uploadUrl,
     method: "POST",
     expiresInSeconds: 300,
-    note: blobEnabled
-      ? "Upload complete endpoint will store file in Vercel Blob and persist metadata."
-      : "Uploads disabled until BLOB_READ_WRITE_TOKEN is set. Metadata-only flow remains available.",
+    note:
+      storageConfig.primaryBackend === "onedrive"
+        ? "Upload complete endpoint will resolve tenant storage config and write to OneDrive."
+        : blobEnabled
+          ? "Upload complete endpoint will store file in Vercel Blob and persist metadata."
+          : "Uploads disabled until BLOB_READ_WRITE_TOKEN is set. Metadata-only flow remains available.",
   });
 }

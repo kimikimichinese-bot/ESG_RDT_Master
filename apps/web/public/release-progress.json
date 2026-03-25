@@ -1,6 +1,6 @@
 {
   "service": "esg-rdt-master-web",
-  "releaseStatus": "degraded",
+  "releaseStatus": "pilot_ready",
   "productSignals": [
     {
       "label": "Web shell",
@@ -11,15 +11,15 @@
     },
     {
       "label": "API contract",
-      "status": "basic",
-      "detail": "Core endpoints and shared check schema are wired with basic health checks.",
+      "status": "implemented",
+      "detail": "Core ESG APIs, tenant guards, requestId propagation, and health/status contracts are live.",
       "addedAt": "2026-02-24T09:00:00.000Z",
       "updatedAt": "2026-02-24T09:00:00.000Z"
     },
     {
       "label": "Worker loop",
-      "status": "scaffolded",
-      "detail": "Worker cycle execution exists, with overlap protection and structured logs.",
+      "status": "warn",
+      "detail": "Worker cycle execution exists, with overlap protection and structured logs; final prod-like verification is still required.",
       "addedAt": "2026-02-24T09:05:00.000Z",
       "updatedAt": "2026-02-24T09:05:00.000Z"
     }
@@ -27,52 +27,52 @@
   "progress": [
     {
       "area": "UI + UX",
-      "done": 25,
-      "buildPriority": 3,
-      "buildLabel": "Refine dashboard UX polish",
+      "done": 82,
+      "buildPriority": 2,
+      "buildLabel": "Clarify pilot caveats without UX regressions",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-20T08:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     },
     {
       "area": "API + health checks",
-      "done": 45,
+      "done": 78,
       "buildPriority": 1,
-      "buildLabel": "Stabilize API + health checks",
+      "buildLabel": "Close final prod-like readiness gaps",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-22T08:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     },
     {
       "area": "Data model",
-      "done": 55,
+      "done": 86,
       "buildPriority": 2,
-      "buildLabel": "Finish data model hardening",
+      "buildLabel": "Expand demo data and export coverage",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-21T10:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     },
     {
       "area": "Auth + RBAC",
-      "done": 12,
+      "done": 84,
       "buildPriority": 1,
-      "buildLabel": "Complete auth + RBAC delivery",
+      "buildLabel": "Run final role matrix verification",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-22T07:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     }
   ],
   "quickActions": [
     {
-      "text": "Open /api/ready and /api/v1/health in parallel.",
+      "text": "Run prod-like build/start, then compare /api/ready, /api/v1/health, and /api/v1/status.",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-01T00:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     },
     {
-      "text": "Wire tenant auth middleware before moving to business routes.",
+      "text": "Treat missing factors and partial Scope 3 categories as explicit caveats, not silent success.",
       "addedAt": "2026-02-01T00:00:00.000Z",
-      "updatedAt": "2026-02-22T00:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     },
     {
-      "text": "Keep this file updated for release snapshots without code changes.",
+      "text": "Keep this file aligned with the actual pilot-readiness state after each verification pass.",
       "addedAt": "2026-01-15T00:00:00.000Z",
-      "updatedAt": "2026-01-15T00:00:00.000Z"
+      "updatedAt": "2026-03-18T00:00:00.000Z"
     }
   ]
 }

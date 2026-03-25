@@ -17,6 +17,25 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const readMetricDefinitionMap = async (sql, tenantId) => {
+  const rows = await sql`
+    SELECT key, unit, validation
+    FROM metric_definitions
+    WHERE (tenant_id IS NULL OR tenant_id = ${tenantId})
+      AND is_active = TRUE
+      AND deleted_at IS NULL
+  `;
+  const map = new Map();
+  for (const row of rows || []) {
+    map.set(row.key, {
+      key: row.key,
+      unit: row.unit,
+      validation: row.validation,
+    });
+  }
+  return map;
+};
+
 export async function PUT(request, { params }) {
   const tenantId = params?.id;
   const scoped = await requireTenantContext(request, tenantId, "metrics");
@@ -52,6 +71,7 @@ export async function PUT(request, { params }) {
     entries: payload.entries,
     existingMap: asMetricValueMap(existingRows),
     strictWaterDischarge: getStrictWaterDischargeConfig(),
+    definitionByKey: await readMetricDefinitionMap(context.sql, tenantId),
   });
 
   if (validation.errors.length > 0) {

@@ -8,9 +8,9 @@ export const metadata = {
 const sectionStyle = {
   marginTop: 20,
   padding: 16,
-  border: "1px solid #dce3ee",
+  border: "1px solid var(--pal-border)",
   borderRadius: 12,
-  background: "#ffffffcc",
+  background: "var(--pal-bg-header-footer)",
   backdropFilter: "blur(6px)",
 };
 
@@ -60,6 +60,30 @@ export default function HelpPage() {
             <li>Usa il job <code>analyze_url</code> via API same-origin.</li>
             <li>Mostra stato job e payload finale.</li>
           </ul>
+        </section>
+
+        <section style={sectionStyle}>
+          <h2 style={{ marginTop: 0 }}>ESG reference resources</h2>
+          <p style={{ color: "var(--pal-text)" }}>
+            È disponibile una libreria dedicata con materiali di approfondimento ESG e un punto unico
+            per i tutorial di prodotto.
+          </p>
+          <p
+            style={{
+              marginBottom: 16,
+              padding: 12,
+              borderRadius: 10,
+              background: "var(--pal-bg-hover)",
+              border: "1px solid var(--pal-border)",
+              color: "var(--pal-text)",
+            }}
+          >
+            Materiali di supporto, formazione e ispirazione: non sostituiscono la documentazione operativa
+            della piattaforma.
+          </p>
+          <Link className="esg-link-chip" href="/help/resources">
+            Vai alla Resource Library
+          </Link>
         </section>
       </div>
     </main>

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { hashPassword } from "../../../_lib/auth.js";
 import { writeAuditLog } from "../../../_lib/audit.js";
+import { checkUsersQuota, getTenantUsersCount, getUsagePeriod, setTenantUsersUsageSnapshot } from "../../../_lib/db.js";
 import { requireTenantContext } from "../../../_lib/enterprise-api.js";
 import { cleanString, errorJson, json, parseJsonBody } from "../../../_lib/http.js";
 import { isValidRole } from "../../../_lib/rbac.js";
@@ -80,6 +81,29 @@ export async function POST(request, { params }) {
     user = created[0];
   }
 
+  const existingMembershipRows = await context.sql`
+    SELECT role
+    FROM memberships
+    WHERE user_id = ${user.id}
+      AND tenant_id = ${tenantId}
+    LIMIT 1
+  `;
+
+  if (!existingMembershipRows?.[0]) {
+    const currentUsers = await getTenantUsersCount(context.sql, tenantId);
+    const quotaCheck = await checkUsersQuota(context.sql, tenantId, {
+      nextUsersCount: currentUsers + 1,
+      isSuperadmin: context.isSuperadmin && payload.overrideQuota === true,
+    });
+    if (!quotaCheck.allowed) {
+      return errorJson("Users quota exceeded for tenant", 403, {
+        code: quotaCheck.code,
+        usage: quotaCheck.usage,
+        limit: quotaCheck.limit,
+      });
+    }
+  }
+
   await context.sql`
     INSERT INTO memberships (user_id, tenant_id, role)
     VALUES (${user.id}, ${tenantId}, ${role})
@@ -102,6 +126,9 @@ export async function POST(request, { params }) {
     entityId: user.id,
     payload: { role, email },
   });
+
+  const nextUsersCount = await getTenantUsersCount(context.sql, tenantId);
+  await setTenantUsersUsageSnapshot(context.sql, tenantId, nextUsersCount, getUsagePeriod());
 
   return json({ member: normalizeMember(rows[0]) }, 201);
 }
@@ -194,6 +221,9 @@ export async function DELETE(request, { params }) {
     entityId: userId,
     payload: {},
   });
+
+  const nextUsersCount = await getTenantUsersCount(context.sql, tenantId);
+  await setTenantUsersUsageSnapshot(context.sql, tenantId, nextUsersCount, getUsagePeriod());
 
   return json({ ok: true });
 }

@@ -8,7 +8,7 @@
     "start": "bun src/index.ts",
     "lint": "bunx tsc --pretty false --noEmit",
     "typecheck": "bunx tsc --pretty false --noEmit",
-    "test": "echo \"No API tests yet.\""
+    "test": "bunx vitest run --config ../../vitest.config.mjs --dir tests --passWithNoTests"
   },
   "dependencies": {
     "@esg-rdt/shared": "workspace:*",

@@ -47,7 +47,7 @@ export default function EvidenceDetailPage() {
   }, [tenant.loading, tenant.tenantId, evidenceId, loadEvidence]);
 
   const canRenderPdf = Boolean(
-    item?.blobUrl && typeof item.contentType === "string" && item.contentType.toLowerCase().includes("pdf"),
+    item?.previewUrl && typeof item.contentType === "string" && item.contentType.toLowerCase().includes("pdf"),
   );
 
   return (
@@ -77,17 +77,21 @@ export default function EvidenceDetailPage() {
             <p className="enterprise-muted">Type: {item.contentType}</p>
             <p className="enterprise-muted">Size: {item.sizeBytes}</p>
             <p className="enterprise-muted">SHA256: {item.sha256 || "-"}</p>
-            <p className="enterprise-muted">Blob URL: {item.blobUrl || "-"}</p>
-            {item.blobUrl ? (
-              <a
-                className="enterprise-button-secondary"
-                href={item.blobUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                Open file in new tab
-              </a>
-            ) : null}
+            <p className="enterprise-muted">Storage backend: {item.storageBackend || "vercel_blob"}</p>
+            <p className="enterprise-muted">Storage status: {item.storageStatus || "available"}</p>
+            <p className="enterprise-muted">Legacy blob URL: {item.blobUrl || "-"}</p>
+            <div className="enterprise-inline-actions">
+              {item.previewUrl ? (
+                <a className="enterprise-button-secondary" href={item.previewUrl} target="_blank" rel="noreferrer noopener">
+                  Preview
+                </a>
+              ) : null}
+              {item.downloadUrl ? (
+                <a className="enterprise-button-secondary" href={item.downloadUrl}>
+                  Download
+                </a>
+              ) : null}
+            </div>
           </section>
 
           <section className="enterprise-card">
@@ -96,12 +100,12 @@ export default function EvidenceDetailPage() {
               <iframe
                 title="Evidence PDF"
                 className="enterprise-pdf-viewer"
-                src={item.blobUrl}
+                src={item.previewUrl}
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="enterprise-empty">No PDF blob URL available for this evidence.</div>
+              <div className="enterprise-empty">No controlled PDF preview is available for this evidence.</div>
             )}
           </section>
         </>

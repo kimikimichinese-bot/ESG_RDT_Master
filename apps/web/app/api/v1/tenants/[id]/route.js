@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
   return json({
     tenant: {
       ...normalizeTenant(rows[0]),
-      role: context.membership.role,
+      role: context.membership?.role || (context.isSuperadmin ? "Superadmin" : null),
       isActive: context.activeTenantId === tenantId,
     },
   });

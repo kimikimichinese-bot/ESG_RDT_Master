@@ -4,6 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
 
+function TooltipText({ text, children }) {
+  return (
+    <span className="enterprise-tooltip" data-tooltip={text} aria-label={text}>
+      {children}
+    </span>
+  );
+}
+
 const emptyForm = { fullName: "", email: "", title: "", siteIds: [] };
 
 const extractErrorMessage = (payload, fallback) => {
@@ -219,7 +227,7 @@ export default function PersonnelPage() {
           </button>
           {canWrite ? (
             <button className="enterprise-button-primary" type="button" onClick={openCreate}>
-              Add person
+              <TooltipText text="Aggiungi una persona">Add person</TooltipText>
             </button>
           ) : null}
         </div>

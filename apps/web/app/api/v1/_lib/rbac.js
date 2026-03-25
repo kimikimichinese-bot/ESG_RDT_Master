@@ -16,6 +16,13 @@ export const canAccessResource = (role, resource, method) => {
     return false;
   }
 
+  if (resource === "storage") {
+    if (isReadMethod(method)) {
+      return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.AUDITOR;
+    }
+    return role === ROLES.TENANT_ADMIN;
+  }
+
   if (isReadMethod(method)) {
     return true;
   }
@@ -33,23 +40,31 @@ export const canAccessResource = (role, resource, method) => {
   }
 
   if (resource === "metrics") {
-    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.PERSONNEL;
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
   if (resource === "governance") {
-    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.PERSONNEL;
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
   if (resource === "social" || resource === "factors") {
     return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
-  if (resource === "sites" || resource === "companies" || resource === "people" || resource === "evidence") {
+  if (resource === "people") {
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER || role === ROLES.PERSONNEL;
+  }
+
+  if (resource === "sites" || resource === "companies" || resource === "evidence") {
     return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
-  if (resource === "audit" || resource === "assessments" || resource === "ecovadis" || resource === "materiality") {
-    return role !== ROLES.AUDITOR ? true : isReadMethod(method);
+  if (resource === "audit") {
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
+  }
+
+  if (resource === "assessments" || resource === "ecovadis" || resource === "materiality") {
+    return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;
   }
 
   return role === ROLES.TENANT_ADMIN || role === ROLES.MANAGER;

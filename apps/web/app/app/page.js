@@ -15,6 +15,26 @@ const formatDateTime = (value) => {
   return new Intl.DateTimeFormat("it-IT", { dateStyle: "medium", timeStyle: "short" }).format(date);
 };
 
+const buildQuotaMessage = (quota) => {
+  if (!quota?.exceeded?.any) {
+    return "";
+  }
+  const reasons = [];
+  if (quota.exceeded.evidence) {
+    reasons.push("evidence storage");
+  }
+  if (quota.exceeded.users) {
+    reasons.push("users");
+  }
+  if (quota.exceeded.exports) {
+    reasons.push("exports/month");
+  }
+  if (quota.exceeded.jobs) {
+    reasons.push("jobs/month");
+  }
+  return reasons.length > 0 ? `Quota reached (${reasons.join(", ")}). Contact admin.` : "Quota reached.";
+};
+
 export default function DashboardPage() {
   const tenant = useTenantSession();
   const [loading, setLoading] = useState(true);
@@ -25,6 +45,10 @@ export default function DashboardPage() {
     activities: 0,
     evidence: 0,
     assessments: 0,
+    scope1Tco2e: 0,
+    scope2Tco2e: 0,
+    scope3Tco2e: 0,
+    ghgCoveragePct: 0,
     lastActivity: null,
     completeness: null,
   });
@@ -38,23 +62,28 @@ export default function DashboardPage() {
     setError("");
 
     try {
-      const [sitesRes, peopleRes, activitiesRes, evidenceRes, projectsRes] = await Promise.all([
+      const [sitesRes, peopleRes, activitiesRes, evidenceRes, projectsRes, emissionsRes] = await Promise.all([
         fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/sites`, { cache: "no-store" }),
         fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/people`, { cache: "no-store" }),
         fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/activities`, { cache: "no-store" }),
         fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence`, { cache: "no-store" }),
         fetch("/api/v1/projects", { cache: "no-store" }),
+        fetch(
+          `/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/emissions?year=${encodeURIComponent(new Date().getFullYear())}`,
+          { cache: "no-store" },
+        ),
       ]);
 
-      const [sitesPayload, peoplePayload, activitiesPayload, evidencePayload, projectsPayload] = await Promise.all([
+      const [sitesPayload, peoplePayload, activitiesPayload, evidencePayload, projectsPayload, emissionsPayload] = await Promise.all([
         sitesRes.json().catch(() => ({})),
         peopleRes.json().catch(() => ({})),
         activitiesRes.json().catch(() => ({})),
         evidenceRes.json().catch(() => ({})),
         projectsRes.json().catch(() => ({})),
+        emissionsRes.json().catch(() => ({})),
       ]);
 
-      if (!sitesRes.ok || !peopleRes.ok || !activitiesRes.ok || !evidenceRes.ok || !projectsRes.ok) {
+      if (!sitesRes.ok || !peopleRes.ok || !activitiesRes.ok || !evidenceRes.ok || !projectsRes.ok || !emissionsRes.ok) {
         throw new Error("Failed to load dashboard KPI data");
       }
 
@@ -82,6 +111,12 @@ export default function DashboardPage() {
         activities: activities.length,
         evidence: Array.isArray(evidencePayload.evidence) ? evidencePayload.evidence.length : 0,
         assessments: projects.length,
+        scope1Tco2e: Number(emissionsPayload?.tenantTotals?.scope1Tco2e || 0),
+        scope2Tco2e: Number(
+          (emissionsPayload?.tenantTotals?.scope2LocationTco2e || 0) + (emissionsPayload?.tenantTotals?.scope2MarketTco2e || 0),
+        ),
+        scope3Tco2e: Number(emissionsPayload?.tenantTotals?.scope3Tco2e || 0),
+        ghgCoveragePct: Number(emissionsPayload?.tenantTotals?.ghgCoveragePct || 0),
         lastActivity: activities[0] || null,
         completeness,
       });
@@ -93,6 +128,10 @@ export default function DashboardPage() {
         activities: 0,
         evidence: 0,
         assessments: 0,
+        scope1Tco2e: 0,
+        scope2Tco2e: 0,
+        scope3Tco2e: 0,
+        ghgCoveragePct: 0,
         lastActivity: null,
         completeness: null,
       });
@@ -127,6 +166,7 @@ export default function DashboardPage() {
       </div>
 
       {tenant.error ? <p className="enterprise-status enterprise-status-error">{tenant.error}</p> : null}
+      {buildQuotaMessage(tenant.quota) ? <p className="enterprise-warning">{buildQuotaMessage(tenant.quota)}</p> : null}
       {error ? <p className="enterprise-status enterprise-status-error">{error}</p> : null}
       {loading ? <p className="enterprise-status">Loading KPI cards...</p> : null}
 
@@ -153,6 +193,22 @@ export default function DashboardPage() {
             <p>{snapshot.assessments}</p>
           </article>
           <article className="enterprise-kpi-card">
+            <strong>Scope 1 tCO2e</strong>
+            <p>{snapshot.scope1Tco2e}</p>
+          </article>
+          <article className="enterprise-kpi-card">
+            <strong>Scope 2 tCO2e</strong>
+            <p>{snapshot.scope2Tco2e}</p>
+          </article>
+          <article className="enterprise-kpi-card">
+            <strong>Scope 3 tCO2e</strong>
+            <p>{snapshot.scope3Tco2e}</p>
+          </article>
+          <article className="enterprise-kpi-card">
+            <strong>GHG coverage %</strong>
+            <p>{snapshot.ghgCoveragePct}</p>
+          </article>
+          <article className="enterprise-kpi-card">
             <strong>Completeness</strong>
             <p>{completionText}</p>
           </article>
@@ -173,6 +229,15 @@ export default function DashboardPage() {
           </Link>
           <Link className="enterprise-button-secondary" href="/app/evidence">
             Add evidence
+          </Link>
+          <Link className="enterprise-button-secondary" href="/app/ghg">
+            Enter GHG data
+          </Link>
+          <Link className="enterprise-button-secondary" href="/app/system-check">
+            System check
+          </Link>
+          <Link className="enterprise-button-secondary" href="/app/exports">
+            Export center
           </Link>
           <Link className="enterprise-button-secondary" href="/app/assessments">
             Open assessments

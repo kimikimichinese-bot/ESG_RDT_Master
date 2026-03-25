@@ -17,7 +17,7 @@
     "start": "bun run --filter @esg-rdt/web start",
     "lint": "bun run workspace:lint",
     "typecheck": "bun run --filter @esg-rdt/web typecheck",
-    "test": "bun run --filter @esg-rdt/web test --if-present",
+    "test": "bunx vitest run",
     "test:functional": "bash ./scripts/full-functional-check.sh",
     "workspace:build": "bun run --filter @esg-rdt/web build",
     "workspace:lint": "bun run --filter @esg-rdt/web lint",
@@ -29,13 +29,20 @@
     "verify:matrix:env": "bash ./scripts/pre-vercel-check.sh --with-env .env.vercel.local",
     "verify:matrix:offline": "FULL_FUNCTIONAL_OFFLINE=1 bash ./scripts/pre-vercel-check.sh",
     "verify:matrix:env-offline": "FULL_FUNCTIONAL_OFFLINE=1 bash ./scripts/pre-vercel-check.sh --with-env .env.vercel.local",
+    "onedrive:auth": "node ./scripts/dev/onedrive-auth.mjs",
+    "dropbox:auth": "node ./scripts/dev/dropbox-auth.mjs",
+    "gdrive:auth": "node ./scripts/dev/google-drive-auth.mjs",
     "db:migrate:deploy": "bun run --filter @esg-rdt/db migrate:deploy",
     "db:status": "bun run --filter @esg-rdt/db status",
-    "db:push": "bun run --filter @esg-rdt/db push"
+    "db:push": "bun run --filter @esg-rdt/db push",
+    "db:seed": "bun run --filter @esg-rdt/db seed"
   },
   "dependencies": {
     "next": "^14.2.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
   }
 }

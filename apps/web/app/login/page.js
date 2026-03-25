@@ -3,6 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeSwitcher from "../app/_components/theme-switcher";
+import TooltipViewportManager from "../app/_components/tooltip-viewport-manager";
+
+function TooltipText({ text, children }) {
+  return (
+    <span className="enterprise-tooltip" data-tooltip={text} aria-label={text}>
+      {children}
+    </span>
+  );
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,7 +48,7 @@ export default function LoginPage() {
         }
 
         if (response.status === 409 && payload?.needsSetup === true) {
-          throw new Error("No users found. Run first setup.");
+          throw new Error("Platform setup required. Complete /platform/setup first.");
         }
 
         const baseMessage = payload?.error || payload?.message || `HTTP ${response.status}`;
@@ -56,15 +66,19 @@ export default function LoginPage() {
 
   return (
     <main className="enterprise-auth-shell">
+      <TooltipViewportManager />
       <section className="enterprise-auth-card">
         <header>
           <h1 className="enterprise-auth-title">Enterprise login</h1>
           <p className="enterprise-auth-subtitle">Accedi alla piattaforma ESG con il tuo account tenant.</p>
         </header>
+        <div className="enterprise-auth-theme-switcher">
+          <ThemeSwitcher />
+        </div>
 
         <form className="enterprise-form-grid" onSubmit={onSubmit} noValidate>
           <label className="enterprise-label" htmlFor="login-email">
-            Email
+            <TooltipText text="Inserisci la tua email">Email</TooltipText>
           </label>
           <input
             id="login-email"
@@ -78,7 +92,7 @@ export default function LoginPage() {
           />
 
           <label className="enterprise-label" htmlFor="login-password">
-            Password
+            <TooltipText text="Inserisci la password">Password</TooltipText>
           </label>
           <input
             id="login-password"
@@ -97,7 +111,7 @@ export default function LoginPage() {
             <button className="enterprise-button-primary" type="submit" disabled={busy}>
               {busy ? "Signing in..." : "Sign in"}
             </button>
-            <Link className="enterprise-button-secondary" href="/setup">
+            <Link className="enterprise-button-secondary" href="/platform/setup">
               First setup
             </Link>
           </div>

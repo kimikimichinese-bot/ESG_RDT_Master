@@ -17,7 +17,7 @@ export default async function HomePage() {
   }
 
   if (bootstrap.needsSetup) {
-    redirect("/setup");
+    redirect("/platform/setup");
   }
 
   const sessionState = await getServerSessionState(cookies(), { ensureSchema: false, suppressErrors: true });

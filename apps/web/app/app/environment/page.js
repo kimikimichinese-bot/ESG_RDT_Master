@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCompanyScope } from "../_components/use-company-scope";
 import { useTenantSession } from "../_components/use-tenant-session";
@@ -8,10 +9,10 @@ const currentYear = new Date().getFullYear();
 
 const initialState = {
   loading: true,
-  error: "",
+  error: null,
   definitions: [],
-  metrics: [],
   warnings: [],
+  derived: {},
 };
 
 const toNumber = (value) => {
@@ -20,6 +21,30 @@ const toNumber = (value) => {
   }
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+const toErrorDetails = (error, fallbackCode, fallbackMessage) => {
+  if (error && typeof error === "object") {
+    const code = typeof error.code === "string" && error.code.trim() ? error.code.trim() : fallbackCode;
+    const message =
+      typeof error.message === "string" && error.message.trim() ? error.message.trim() : fallbackMessage;
+    return { code, message };
+  }
+  return { code: fallbackCode, message: fallbackMessage };
+};
+
+const toApiError = (payload, status) => {
+  const code =
+    typeof payload?.code === "string" && payload.code.trim()
+      ? payload.code.trim()
+      : `http_${String(status || 500)}`;
+  const message =
+    typeof payload?.message === "string" && payload.message.trim()
+      ? payload.message.trim()
+      : typeof payload?.error === "string" && payload.error.trim()
+        ? payload.error.trim()
+        : `HTTP ${String(status || 500)}`;
+  return { code, message };
 };
 
 export default function EnvironmentPage() {
@@ -80,7 +105,7 @@ export default function EnvironmentPage() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(payload?.error || `HTTP ${response.status}`);
+      throw toApiError(payload, response.status);
     }
 
     const nextSites = Array.isArray(payload.sites) ? payload.sites : [];
@@ -101,23 +126,24 @@ export default function EnvironmentPage() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(payload?.error || `HTTP ${response.status}`);
+      throw toApiError(payload, response.status);
     }
 
     setEvidence(Array.isArray(payload.evidence) ? payload.evidence : []);
   }, [tenant.tenantId]);
 
   const loadMetrics = useCallback(async () => {
-    if (!tenant.tenantId || !selectedSiteId || !reportingYear) {
+    if (!tenant.tenantId || !selectedCompanyId || !selectedSiteId || !reportingYear) {
       setState((current) => ({ ...current, loading: false }));
       return;
     }
 
-    setState((current) => ({ ...current, loading: true, error: "" }));
+    setState((current) => ({ ...current, loading: true, error: null }));
     setSaveMessage("");
 
     try {
       const query = new URLSearchParams({
+        companyId: selectedCompanyId,
         siteId: selectedSiteId,
         year: String(reportingYear),
       });
@@ -125,12 +151,18 @@ export default function EnvironmentPage() {
         cache: "no-store",
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(payload?.error || `HTTP ${response.status}`);
+      if (!response.ok || payload?.ok === false) {
+        throw toApiError(payload, response.status);
       }
 
       const definitions = Array.isArray(payload.definitions) ? payload.definitions : [];
-      const metrics = Array.isArray(payload.metrics) ? payload.metrics : [];
+      const payloadValues =
+        payload?.values && typeof payload.values === "object" && !Array.isArray(payload.values) ? payload.values : {};
+      const payloadDerived =
+        payload?.derived && typeof payload.derived === "object" && !Array.isArray(payload.derived)
+          ? payload.derived
+          : {};
+      const fallbackMetrics = Array.isArray(payload.metrics) ? payload.metrics : [];
 
       const nextValues = {};
       const nextEvidence = {};
@@ -142,8 +174,14 @@ export default function EnvironmentPage() {
         nextEvidence[definition.key] = [];
       }
 
-      for (const metric of metrics) {
-        nextValues[metric.metricKey] = Number.isFinite(metric.value) ? String(metric.value) : "";
+      for (const [metricKey, metricValue] of Object.entries(payloadValues)) {
+        nextValues[metricKey] = Number.isFinite(Number(metricValue)) ? String(Number(metricValue)) : "";
+      }
+
+      for (const metric of fallbackMetrics) {
+        if (nextValues[metric.metricKey] === "") {
+          nextValues[metric.metricKey] = Number.isFinite(metric.value) ? String(metric.value) : "";
+        }
         nextEvidence[metric.metricKey] = Array.isArray(metric.evidenceIds) ? metric.evidenceIds : [];
       }
 
@@ -151,19 +189,20 @@ export default function EnvironmentPage() {
       setEvidenceByMetricKey(nextEvidence);
       setState({
         loading: false,
-        error: "",
+        error: null,
         definitions,
-        metrics,
         warnings: Array.isArray(payload.warnings) ? payload.warnings : [],
+        derived: payloadDerived,
       });
     } catch (error) {
+      const details = toErrorDetails(error, "metrics_load_failed", "Unable to load metrics");
       setState((current) => ({
         ...current,
         loading: false,
-        error: error instanceof Error ? error.message : "Unable to load metrics",
+        error: details,
       }));
     }
-  }, [reportingYear, selectedSiteId, tenant.tenantId]);
+  }, [reportingYear, selectedCompanyId, selectedSiteId, tenant.tenantId]);
 
   const loadSummary = useCallback(async () => {
     if (!tenant.tenantId || !reportingYear) {
@@ -188,10 +227,11 @@ export default function EnvironmentPage() {
   useEffect(() => {
     if (!tenant.loading && tenant.tenantId) {
       void Promise.all([loadSites(), loadEvidence()]).catch((error) => {
+        const details = toErrorDetails(error, "scope_load_failed", "Unable to load scope data");
         setState((current) => ({
           ...current,
           loading: false,
-          error: error instanceof Error ? error.message : "Unable to load scope data",
+          error: details,
         }));
       });
     }
@@ -342,6 +382,11 @@ export default function EnvironmentPage() {
           <h2 className="enterprise-section-title">Environment Data</h2>
           <p className="enterprise-muted">Annual site metrics grouped by Energy, Fuels, Refrigerants, Waste and Water.</p>
         </div>
+        <div className="enterprise-inline-actions">
+          <Link className="enterprise-button-secondary" href="/app/definitions?type=environment">
+            Manage fields
+          </Link>
+        </div>
       </div>
 
       <div className="enterprise-card">
@@ -415,7 +460,11 @@ export default function EnvironmentPage() {
 
       {tenant.error ? <p className="enterprise-status enterprise-status-error">{tenant.error}</p> : null}
       {companyScope.error ? <p className="enterprise-status enterprise-status-error">{companyScope.error}</p> : null}
-      {state.error ? <p className="enterprise-status enterprise-status-error">{state.error}</p> : null}
+      {state.error ? (
+        <p className="enterprise-status enterprise-status-error">
+          {state.error.code}: {state.error.message}
+        </p>
+      ) : null}
       {saveMessage ? <p className="enterprise-status">{saveMessage}</p> : null}
 
       {clientValidationErrors.length > 0 ? (

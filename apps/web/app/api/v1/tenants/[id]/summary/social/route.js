@@ -4,6 +4,7 @@ import { json } from "../../../../_lib/http.js";
 import { parseYear } from "../../../../_lib/esg-domain.js";
 import { ensureSocialSchema } from "../../../../_lib/db.js";
 import { computeSocialSummary } from "../../../../_lib/esg-api.js";
+import { computeSocialCatalogMetrics } from "../../../../_lib/ghg-api.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +68,7 @@ export async function GET(request, { params }) {
       return badRequest(requestId, "missing_year");
     }
 
-    const [companies, sites, workforceRows, leaverRows, managementRows, flagRows] = await Promise.all([
+    const [companies, sites, workforceRows, leaverRows, managementRows, flagRows, socialMetricRows, socialRecordRows] = await Promise.all([
       context.sql`
         SELECT id, tenant_id, name, legal_name, country, is_holding, created_at, updated_at
         FROM companies
@@ -104,6 +105,32 @@ export async function GET(request, { params }) {
         WHERE tenant_id = ${tenantId}
           AND reporting_year = ${year}
       `,
+      context.sql`
+      SELECT key, method, group_key, unit, input_schema, formula, sdgs, evidence_required, is_active, sort_order
+      FROM social_metric_definitions
+      WHERE tenant_id = ${tenantId}
+        AND is_active = TRUE
+        AND deleted_at IS NULL
+      ORDER BY sort_order ASC, key ASC
+    `,
+      context.sql`
+        SELECT
+          r.id,
+          r.company_id,
+          r.site_id,
+          r.reporting_year,
+          r.month,
+          r.value,
+          d.key AS metric_key
+        FROM social_records r
+      JOIN social_metric_definitions d
+        ON d.id = r.metric_def_id
+       AND d.tenant_id = r.tenant_id
+       AND d.is_active = TRUE
+       AND d.deleted_at IS NULL
+      WHERE r.tenant_id = ${tenantId}
+          AND r.reporting_year = ${year}
+      `,
     ]);
 
     const summary = computeSocialSummary({
@@ -115,10 +142,26 @@ export async function GET(request, { params }) {
       flagRows,
     });
 
+    const catalogComputed = computeSocialCatalogMetrics({
+      metricDefinitions: socialMetricRows.map((row) => ({
+        key: row.key,
+        method: row.method,
+      })),
+      socialRecords: socialRecordRows,
+      workforceRows,
+      leaverRows,
+      managementRows,
+    });
+
     return json({
       ok: true,
       year,
       ...summary,
+      socialCatalog: {
+        metrics: socialMetricRows,
+        values: catalogComputed.values,
+        aggregates: catalogComputed.aggregates,
+      },
       requestId,
     });
   } catch (error) {

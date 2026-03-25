@@ -64,15 +64,21 @@ export const ensureSiteAndCompanyScope = async ({ sql, tenantId, siteId, company
   };
 };
 
-export const validateAndNormalizeMetricEntries = ({ entries, existingMap, strictWaterDischarge }) => {
+export const validateAndNormalizeMetricEntries = ({
+  entries,
+  existingMap,
+  strictWaterDischarge,
+  definitionByKey = METRIC_DEFINITION_BY_KEY,
+}) => {
   const errors = [];
   const warnings = [];
   const normalizedEntries = [];
   const metricMap = new Map(existingMap || []);
+  const definitions = definitionByKey instanceof Map && definitionByKey.size > 0 ? definitionByKey : METRIC_DEFINITION_BY_KEY;
 
   for (const entry of entries || []) {
     const metricKey = cleanString(entry.metricKey);
-    const definition = METRIC_DEFINITION_BY_KEY.get(metricKey);
+    const definition = definitions.get(metricKey);
     if (!definition) {
       errors.push(`Unknown metric key: ${metricKey || "<empty>"}`);
       continue;
@@ -731,14 +737,61 @@ export const computeSocialSummary = ({ companies, sites, workforceRows, leaverRo
   };
 };
 
-export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, companies }) => {
-  const requiredKeys = EMISSION_FACTOR_DEFINITIONS.filter((item) => item.required).map((item) => item.key);
-  const missingFactors = [];
-  for (const factorKey of requiredKeys) {
-    if (factorsByKey.get(factorKey) == null) {
-      missingFactors.push(factorKey);
+export const computeEmissionSummary = ({ factorRows = [], countryOverrideRows = [], metricRows, sites, companies }) => {
+  const requiredKeys = new Set(EMISSION_FACTOR_DEFINITIONS.filter((item) => item.required).map((item) => item.key));
+  const missingFactors = new Set();
+  const warnings = [];
+  const definitionByKey = new Map(EMISSION_FACTOR_DEFINITIONS.map((item) => [item.key, item]));
+
+  const tenantFactorMap = new Map();
+  for (const row of factorRows || []) {
+    const key = cleanString(row?.key);
+    if (!key) {
+      continue;
     }
+    const value = row.value == null ? null : Number(row.value);
+    tenantFactorMap.set(key, {
+      value: Number.isFinite(value) ? value : null,
+      unit: cleanString(row.unit) || definitionByKey.get(key)?.unit || null,
+      sourceLabel: cleanString(row.source_label) || cleanString(row.source) || null,
+      sourceUrl: cleanString(row.source_url) || null,
+      resolutionScope: "tenant_default",
+      country: null,
+    });
   }
+
+  const countryOverrideMap = new Map();
+  for (const row of countryOverrideRows || []) {
+    const key = cleanString(row?.key);
+    const country = cleanString(row?.country).toUpperCase();
+    if (!key || !country) {
+      continue;
+    }
+
+    const value = row.value == null ? null : Number(row.value);
+    countryOverrideMap.set(`${country}:${key}`, {
+      value: Number.isFinite(value) ? value : null,
+      unit: cleanString(row.unit) || definitionByKey.get(key)?.unit || null,
+      sourceLabel: cleanString(row.source_label) || null,
+      sourceUrl: cleanString(row.source_url) || null,
+      resolutionScope: "country_override",
+      country,
+    });
+  }
+
+  const resolveFactor = (factorKey, siteCountry) => {
+    if (siteCountry) {
+      const override = countryOverrideMap.get(`${siteCountry}:${factorKey}`);
+      if (override && override.value != null) {
+        return override;
+      }
+    }
+    const tenant = tenantFactorMap.get(factorKey);
+    if (tenant && tenant.value != null) {
+      return tenant;
+    }
+    return null;
+  };
 
   const siteMetricMap = new Map();
   for (const site of sites) {
@@ -761,16 +814,6 @@ export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, compan
     }
   }
 
-  const locationFactor = factorsByKey.get("ef_scope2_location_kgco2e_per_kwh");
-  const marketFactor = factorsByKey.get("ef_scope2_market_kgco2e_per_kwh");
-  const marketFallbackToLocation = marketFactor == null && locationFactor != null;
-
-  if (marketFactor == null) {
-    missingFactors.push("ef_scope2_market_kgco2e_per_kwh");
-  }
-
-  const factorForMarket = marketFactor == null ? locationFactor : marketFactor;
-
   const companyMap = new Map();
   for (const company of companies) {
     companyMap.set(company.id, {
@@ -792,6 +835,7 @@ export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, compan
 
   const sitesResult = [];
   for (const site of sites) {
+    const siteCountry = cleanString(site.country).toUpperCase();
     const metrics = siteMetricMap.get(site.id) || {
       electricity_kwh: 0,
       renewable_electricity_kwh: 0,
@@ -801,22 +845,84 @@ export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, compan
       refrigerant_leakage_kg: 0,
     };
 
-    const naturalGasKg = metrics.natural_gas_mwh * (factorsByKey.get("ef_natural_gas_kgco2e_per_mwh") || 0);
-    const dieselKg = metrics.diesel_liters * (factorsByKey.get("ef_diesel_kgco2e_per_liter") || 0);
-    const gasolineKg = metrics.gasoline_liters * (factorsByKey.get("ef_gasoline_kgco2e_per_liter") || 0);
-    const refrigerantKg =
-      metrics.refrigerant_leakage_kg * (factorsByKey.get("ef_refrigerant_kgco2e_per_kg") || 0);
+    const factorRowsByKey = new Map();
+    for (const definition of EMISSION_FACTOR_DEFINITIONS) {
+      const resolved = resolveFactor(definition.key, siteCountry);
+      if (resolved) {
+        factorRowsByKey.set(definition.key, resolved);
+      } else if (requiredKeys.has(definition.key)) {
+        missingFactors.add(definition.key);
+      }
+    }
+
+    const locationFactorRow = factorRowsByKey.get("ef_scope2_location_kgco2e_per_kwh");
+    const marketFactorRow = factorRowsByKey.get("ef_scope2_market_kgco2e_per_kwh");
+
+    if (!marketFactorRow) {
+      missingFactors.add("ef_scope2_market_kgco2e_per_kwh");
+      if (locationFactorRow) {
+        warnings.push(`${site.name}: ef_scope2_market_kgco2e_per_kwh missing, using location factor fallback`);
+      }
+    }
+
+    const naturalGasKg = metrics.natural_gas_mwh * (factorRowsByKey.get("ef_natural_gas_kgco2e_per_mwh")?.value || 0);
+    const dieselKg = metrics.diesel_liters * (factorRowsByKey.get("ef_diesel_kgco2e_per_liter")?.value || 0);
+    const gasolineKg = metrics.gasoline_liters * (factorRowsByKey.get("ef_gasoline_kgco2e_per_liter")?.value || 0);
+    const refrigerantKg = metrics.refrigerant_leakage_kg * (factorRowsByKey.get("ef_refrigerant_kgco2e_per_kg")?.value || 0);
 
     const scope1Tco2e = roundNumber((naturalGasKg + dieselKg + gasolineKg + refrigerantKg) / 1000, 6);
-    const scope2LocationTco2e = roundNumber((metrics.electricity_kwh * (locationFactor || 0)) / 1000, 6);
+    const scope2LocationTco2e = roundNumber((metrics.electricity_kwh * (locationFactorRow?.value || 0)) / 1000, 6);
 
-    const marketElectricityKwh = Math.max(metrics.electricity_kwh - metrics.renewable_electricity_kwh, 0);
-    const scope2MarketTco2e = roundNumber((marketElectricityKwh * (factorForMarket || 0)) / 1000, 6);
+    let renewableKwh = metrics.renewable_electricity_kwh;
+    if (renewableKwh > metrics.electricity_kwh) {
+      warnings.push(`${site.name}: renewable electricity exceeds electricity consumption, clamped for market-based scope 2`);
+      renewableKwh = metrics.electricity_kwh;
+    }
+    const marketElectricityKwh = Math.max(metrics.electricity_kwh - renewableKwh, 0);
+    const factorForMarket = marketFactorRow?.value ?? locationFactorRow?.value ?? 0;
+    const scope2MarketTco2e = roundNumber((marketElectricityKwh * factorForMarket) / 1000, 6);
+
+    const resolvedFactors = EMISSION_FACTOR_DEFINITIONS.map((definition) => {
+      const resolved = factorRowsByKey.get(definition.key);
+      if (definition.key === "ef_scope2_market_kgco2e_per_kwh" && !resolved && locationFactorRow) {
+        return {
+          key: definition.key,
+          value: locationFactorRow.value,
+          unit: definition.unit,
+          resolutionScope: locationFactorRow.resolutionScope,
+          country: locationFactorRow.country,
+          sourceLabel: locationFactorRow.sourceLabel,
+          sourceUrl: locationFactorRow.sourceUrl,
+          fallbackFrom: "ef_scope2_location_kgco2e_per_kwh",
+        };
+      }
+      if (!resolved) {
+        return {
+          key: definition.key,
+          value: null,
+          unit: definition.unit,
+          resolutionScope: "missing",
+          country: siteCountry || null,
+          sourceLabel: null,
+          sourceUrl: null,
+        };
+      }
+      return {
+        key: definition.key,
+        value: resolved.value,
+        unit: definition.unit,
+        resolutionScope: resolved.resolutionScope,
+        country: resolved.country || null,
+        sourceLabel: resolved.sourceLabel,
+        sourceUrl: resolved.sourceUrl,
+      };
+    });
 
     const siteResult = {
       siteId: site.id,
       companyId: site.company_id,
       name: site.name,
+      country: siteCountry || null,
       scope1Tco2e,
       scope2LocationTco2e,
       scope2MarketTco2e,
@@ -828,6 +934,7 @@ export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, compan
         electricityLocationTco2e: scope2LocationTco2e,
         electricityMarketTco2e: scope2MarketTco2e,
       },
+      resolvedFactors,
     };
 
     sitesResult.push(siteResult);
@@ -891,11 +998,9 @@ export const computeEmissionSummary = ({ factorsByKey, metricRows, sites, compan
   };
 
   return {
-    ok: missingFactors.filter((item, index, source) => source.indexOf(item) === index).length === 0,
-    missingFactors: missingFactors.filter((item, index, source) => source.indexOf(item) === index),
-    warnings: marketFallbackToLocation
-      ? ["ef_scope2_market_kgco2e_per_kwh missing: using location factor fallback"]
-      : [],
+    ok: missingFactors.size === 0,
+    missingFactors: [...missingFactors],
+    warnings: [...new Set(warnings)],
     tenantTotals,
     companies: companiesResult,
     sites: sitesResult,

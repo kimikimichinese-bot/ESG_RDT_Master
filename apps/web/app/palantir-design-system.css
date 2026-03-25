@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap");
+
+:root {
+  --pal-font-sans: "Inter", "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --pal-font-mono: "IBM Plex Mono", "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --pal-space-1: 4px;
+  --pal-space-2: 8px;
+  --pal-space-3: 12px;
+  --pal-space-4: 16px;
+  --pal-space-5: 24px;
+  --pal-space-6: 32px;
+
+  --pal-radius-sm: 6px;
+  --pal-radius-md: 8px;
+  --pal-radius-lg: 12px;
+
+  --pal-motion-color-fast: 100ms ease-out;
+  --pal-motion-color-slow: 200ms ease;
+  --pal-motion-opacity: 200ms ease-in-out;
+  --pal-motion-transform: 300ms cubic-bezier(0.2, 0, 0.2, 1);
+  --pal-motion-size: 200ms ease;
+}
+
+:root,
+:root[data-theme="original"] {
+  --pal-bg-main: #0f171d;
+  --pal-bg-header-footer: #080f14;
+  --pal-bg-card: #1b2a37;
+  --pal-bg-sidebar: #223344;
+  --pal-bg-hover: #32475b;
+  --pal-border: #3a4d61;
+
+  --pal-accent-primary: #1f78ad;
+  --pal-accent-hover: #4f9dd8;
+  --pal-accent-active: #7bbcf7;
+  --pal-success: #19a06f;
+  --pal-warning: #d28a3a;
+  --pal-danger: #e14f4f;
+
+  --pal-text: #f3f8fd;
+  --pal-text-muted: #aab7c3;
+
+  --app-bg-main: var(--pal-bg-main);
+  --app-bg-card: var(--pal-bg-card);
+  --app-bg-sidebar: var(--pal-bg-sidebar);
+}
+
+:root[data-theme="palantir"] {
+  --pal-bg-main: #10161a;
+  --pal-bg-header-footer: #000000;
+  --pal-bg-card: #182026;
+  --pal-bg-sidebar: #202b33;
+  --pal-bg-hover: #293742;
+  --pal-border: #30404d;
+
+  --pal-accent-primary: #137cbd;
+  --pal-accent-hover: #2b95d6;
+  --pal-accent-active: #48aff0;
+  --pal-success: #0f9960;
+  --pal-warning: #d9822b;
+  --pal-danger: #db3737;
+
+  --pal-text: #f5f8fa;
+  --pal-text-muted: #a5b4c0;
+
+  --app-bg-main: var(--pal-bg-main);
+  --app-bg-card: var(--pal-bg-card);
+  --app-bg-sidebar: var(--pal-bg-sidebar);
+}

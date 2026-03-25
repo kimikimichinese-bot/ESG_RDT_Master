@@ -5,6 +5,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Modal from "../_components/modal";
 import { useTenantSession } from "../_components/use-tenant-session";
 
+function TooltipText({ text, children }) {
+  return (
+    <span className="enterprise-tooltip" data-tooltip={text} aria-label={text}>
+      {children}
+    </span>
+  );
+}
+
 const emptyForm = {
   siteId: "",
 };
@@ -187,7 +195,7 @@ export default function EvidencePage() {
           </button>
           {canWrite ? (
             <button className="enterprise-button-primary" type="button" onClick={openCreate}>
-              Add evidence
+              <TooltipText text="Carica documento">Add evidence</TooltipText>
             </button>
           ) : null}
         </div>
@@ -209,7 +217,9 @@ export default function EvidencePage() {
                 <th>Type</th>
                 <th>Size</th>
                 <th>Site</th>
-                <th>Viewer</th>
+                <th>
+                  <TooltipText text="Apri anteprima">Viewer</TooltipText>
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -282,7 +292,7 @@ export default function EvidencePage() {
 
             <div className="enterprise-inline-actions">
               <button className="enterprise-button-primary" type="submit" disabled={saving || !selectedFile}>
-                {saving ? "Uploading..." : "Upload evidence"}
+                {saving ? "Uploading..." : <TooltipText text="Carica documento">Upload evidence</TooltipText>}
               </button>
             </div>
           </form>

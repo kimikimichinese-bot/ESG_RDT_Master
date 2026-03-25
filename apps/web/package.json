@@ -9,21 +9,25 @@
     "lint": "next lint",
     "e2e": "playwright test",
     "typecheck": "next build",
-    "test": "echo \"No web tests configured yet.\""
+    "test": "bunx vitest run --config ../../vitest.config.mjs --dir tests --passWithNoTests"
   },
   "dependencies": {
+    "@blueprintjs/core": "^6.10.0",
+    "@blueprintjs/icons": "^6.7.0",
+    "@esg-rdt/ui": "workspace:*",
     "@neondatabase/serverless": "^0.10.4",
+    "@vercel/blob": "^1.0.0",
     "docx": "^9.5.1",
     "mammoth": "^1.9.1",
-    "@vercel/blob": "^1.0.0",
-    "pg": "^8.11.6",
     "next": "^14.2.3",
+    "pg": "^8.11.6",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@esg-rdt/ui": "workspace:*"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/node": "^22.10.2",
     "@playwright/test": "^1.49.0",
+    "@types/react": "^18.3.12",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.3",
     "typescript": "^5.5.4"

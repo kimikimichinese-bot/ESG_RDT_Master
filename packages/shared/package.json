@@ -9,6 +9,6 @@
   },
   "scripts": {
     "build": "echo \"Shared schemas placeholder.\"",
-    "test": "echo \"No shared tests yet.\""
+    "test": "bunx vitest run --config ../../vitest.config.mjs --dir tests --passWithNoTests"
   }
 }
