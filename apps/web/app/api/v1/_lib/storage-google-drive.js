@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { buildDeletedStorageFolderSegments, buildReadableStorageFolderSegments, normalizeReadableStorageSegment } from "./storage-paths.js";
 import { resolveStorageSecret } from "./storage-secrets.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -32,10 +33,7 @@ const normalizeItemName = (value) => {
   return normalized || "evidence.bin";
 };
 
-const normalizeFolderSegment = (value) => {
-  const normalized = normalizeItemName(value).replace(/[.]+$/g, "").trim();
-  return normalized || "default";
-};
+const normalizeFolderSegment = (value) => normalizeReadableStorageSegment(normalizeItemName(value), "default");
 
 const splitFolderPath = (value) =>
   String(value || "")
@@ -274,26 +272,25 @@ const resolveRootFolder = async (config, accessToken) => {
   return current || { id: "root", name: "My Drive Root", driveId: toCleanString(config.driveId) || null };
 };
 
-const toUploadFolderSegments = ({ config, tenantId, metadata = {} }) => {
-  const issueYear = toCleanString(metadata.issueDate).slice(0, 4) || String(new Date().getUTCFullYear());
-  const docType = normalizeFolderSegment(metadata.docType || "other");
-  const siteId = normalizeFolderSegment(metadata.siteId || "shared");
-  const companyId = normalizeFolderSegment(metadata.companyId || siteId);
+const toUploadFolderSegments = ({ config, tenantId, metadata = {} }) =>
+  buildReadableStorageFolderSegments({
+    config,
+    tenantId,
+    metadata: {
+      ...metadata,
+      filename: metadata.filename || "",
+    },
+  }).map((segment) => normalizeFolderSegment(segment));
 
-  if (config.folderStrategy === "company_site_year") {
-    return [companyId, siteId, issueYear];
-  }
-  if (config.folderStrategy === "year_doc_type") {
-    return [issueYear, docType];
-  }
-  if (config.folderStrategy === "company_year_entity_type") {
-    return [companyId, issueYear, normalizeFolderSegment(metadata.entityType || "evidence")];
-  }
-  if (config.folderStrategy === "custom") {
-    return splitFolderPath(config.customFolderPattern);
-  }
-  return [normalizeFolderSegment(tenantId), companyId, issueYear];
-};
+const toDeletedFolderSegments = ({ config, tenantId, metadata = {} }) =>
+  buildDeletedStorageFolderSegments({
+    config,
+    tenantId,
+    metadata: {
+      ...metadata,
+      filename: metadata.filename || "",
+    },
+  }).map((segment) => normalizeFolderSegment(segment));
 
 const toStoredFilename = ({ config, filename, metadata = {} }) => {
   const safeFilename = normalizeItemName(filename);
@@ -346,6 +343,16 @@ const deleteGoogleDriveFile = async ({ accessToken, fileId }) => {
     await readGoogleDriveError(response, "gdrive_delete_failed", "Google Drive delete failed.");
   }
 };
+
+const moveGoogleDriveFile = async ({ accessToken, fileId, addParents, removeParents }) =>
+  fetchGoogleDriveJson({
+    accessToken,
+    url:
+      `${API_BASE_URL}/files/${encodeURIComponent(fileId)}` +
+      `?supportsAllDrives=true&addParents=${encodeURIComponent(addParents)}&removeParents=${encodeURIComponent(removeParents)}&fields=id,name,parents,driveId,webViewLink`,
+    method: "PATCH",
+    body: {},
+  });
 
 export const runGoogleDriveHealthCheck = async (config, { mode = "connection" } = {}) => {
   const checks = [];
@@ -515,6 +522,52 @@ export const uploadGoogleDriveEvidence = async ({ config, tenantId, fileBuffer, 
     externalWebUrl: uploaded?.webViewLink || null,
     sourceOfTruth: "google_drive",
     storageStatus: "available",
+    lastVerifiedAt: new Date().toISOString(),
+  };
+};
+
+export const archiveGoogleDriveEvidence = async ({ config, tenantId, evidence, metadata = {} }) => {
+  const token = await resolveGoogleDriveAccess(config);
+  const root = await resolveRootFolder(config, token.accessToken);
+  const fileId = toCleanString(evidence?.external_file_id || evidence?.externalFileId);
+  const currentParentId = toCleanString(evidence?.external_parent_id || evidence?.externalParentId);
+  if (!fileId || !currentParentId) {
+    throw createGoogleDriveError(
+      "gdrive_archive_missing_reference",
+      "Google Drive-backed evidence is missing external file or parent references.",
+    );
+  }
+
+  const folderSegments = toDeletedFolderSegments({
+    config,
+    tenantId,
+    metadata: {
+      ...metadata,
+      filename: metadata.filename || evidence?.filename || "evidence.bin",
+    },
+  });
+  const parentFolder = await ensureFolderPath({
+    accessToken: token.accessToken,
+    driveId: toCleanString(config.driveId) || root?.driveId || "",
+    parentId: root.id,
+    segments: folderSegments,
+  });
+  const moved = await moveGoogleDriveFile({
+    accessToken: token.accessToken,
+    fileId,
+    addParents: parentFolder.id,
+    removeParents: currentParentId,
+  });
+  return {
+    ok: true,
+    archivedExternally: true,
+    storageKey: [...folderSegments, normalizeItemName(evidence?.filename || "evidence.bin")].join("/"),
+    externalFileId: moved?.id || fileId,
+    externalDriveId: moved?.driveId || parentFolder?.driveId || config.driveId || null,
+    externalParentId: parentFolder.id,
+    externalWebUrl: moved?.webViewLink || null,
+    sourceOfTruth: "google_drive",
+    storageStatus: "archived",
     lastVerifiedAt: new Date().toISOString(),
   };
 };

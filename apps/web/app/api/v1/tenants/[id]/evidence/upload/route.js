@@ -11,18 +11,33 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const resolveSite = async (sql, tenantId, siteId) => {
+const resolveSiteContext = async (sql, tenantId, siteId) => {
   if (!siteId || typeof siteId !== "string") {
     return null;
   }
 
   const rows = await sql`
-    SELECT id
-    FROM sites
-    WHERE tenant_id = ${tenantId} AND id = ${siteId}
+    SELECT
+      s.id,
+      s.name,
+      s.company_id,
+      c.name AS company_name
+    FROM sites s
+    LEFT JOIN companies c
+      ON c.id = s.company_id
+     AND c.tenant_id = s.tenant_id
+    WHERE s.tenant_id = ${tenantId} AND s.id = ${siteId}
     LIMIT 1
   `;
-  return rows?.[0]?.id || null;
+  if (!rows?.[0]) {
+    return null;
+  }
+  return {
+    id: rows[0].id,
+    siteName: rows[0].name || null,
+    companyId: rows[0].company_id || null,
+    companyName: rows[0].company_name || null,
+  };
 };
 
 const normalizeDocType = (value) => {
@@ -43,6 +58,21 @@ const normalizeIssueDate = (value) => {
     return null;
   }
   return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
+};
+
+const buildEvidenceUploadStorageConfig = (config) => {
+  if (!config || typeof config !== "object") {
+    return config;
+  }
+  const next = { ...config };
+  if (next.folderStrategy === "tenant_company_year" && !cleanString(next.customFolderPattern)) {
+    next.folderStrategy = "custom";
+    next.customFolderPattern = "{tenant}/{year}/{module}/{category}";
+  }
+  if (next.filenameStrategy === "timestamp_original") {
+    next.filenameStrategy = "original_filename";
+  }
+  return next;
 };
 
 export async function POST(request, { params }) {
@@ -126,8 +156,9 @@ export async function POST(request, { params }) {
   }
 
   const rawSiteId = cleanString(formData.get("siteId"));
-  const siteId = await resolveSite(context.sql, tenantId, rawSiteId);
-  if (rawSiteId && !siteId) {
+  const siteContext = await resolveSiteContext(context.sql, tenantId, rawSiteId);
+  const siteId = siteContext?.id || null;
+  if (rawSiteId && !siteContext) {
     response = errorJson("siteId is invalid for this tenant", 400, { requestId });
     logRequest({
       request,
@@ -169,9 +200,14 @@ export async function POST(request, { params }) {
     const issueDate = normalizeIssueDate(formData.get("issueDate"));
     const docType = normalizeDocType(formData.get("docType"));
     const scopeCoverage = normalizeCoverage(formData.get("scopeCoverage"));
+    const reportingYear = cleanString(formData.get("reportingYear")) || null;
+    const moduleName = cleanString(formData.get("module")) || cleanString(formData.get("moduleName")) || null;
+    const categoryName = cleanString(formData.get("category")) || cleanString(formData.get("categoryName")) || null;
+    const activityName = cleanString(formData.get("activity")) || cleanString(formData.get("activityName")) || null;
+    const entityType = cleanString(formData.get("entityType")) || null;
     const isEncrypted = cleanString(formData.get("isEncrypted")).toLowerCase() === "true";
     const language = cleanString(formData.get("language")) || null;
-    const storageConfig = await resolveTenantStorageConfig(context.sql, tenantId);
+    const storageConfig = buildEvidenceUploadStorageConfig(await resolveTenantStorageConfig(context.sql, tenantId));
     const adapter = getStorageAdapter(storageConfig);
     const uploadResult = await adapter.uploadEvidence({
       config: storageConfig,
@@ -180,10 +216,20 @@ export async function POST(request, { params }) {
       filename,
       contentType,
       metadata: {
+        tenantName: context.membership?.tenantName || null,
+        companyId: siteContext?.companyId || null,
+        companyName: siteContext?.companyName || null,
         siteId,
+        siteName: siteContext?.siteName || null,
+        reportingYear,
+        moduleName,
+        categoryName,
+        activityName,
+        entityType,
         issueDate,
         docType,
         scopeCoverage,
+        filename,
       },
     });
     const evidenceId = randomUUID();

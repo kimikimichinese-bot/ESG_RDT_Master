@@ -11,18 +11,48 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const resolveSite = async (sql, tenantId, siteId) => {
+const resolveSiteContext = async (sql, tenantId, siteId) => {
   if (!siteId || typeof siteId !== "string") {
     return null;
   }
 
   const rows = await sql`
-    SELECT id
-    FROM sites
-    WHERE tenant_id = ${tenantId} AND id = ${siteId}
+    SELECT
+      s.id,
+      s.name,
+      s.company_id,
+      c.name AS company_name
+    FROM sites s
+    LEFT JOIN companies c
+      ON c.id = s.company_id
+     AND c.tenant_id = s.tenant_id
+    WHERE s.tenant_id = ${tenantId} AND s.id = ${siteId}
     LIMIT 1
   `;
-  return rows?.[0]?.id || null;
+  if (!rows?.[0]) {
+    return null;
+  }
+  return {
+    id: rows[0].id,
+    siteName: rows[0].name || null,
+    companyId: rows[0].company_id || null,
+    companyName: rows[0].company_name || null,
+  };
+};
+
+const buildEvidenceUploadStorageConfig = (config) => {
+  if (!config || typeof config !== "object") {
+    return config;
+  }
+  const next = { ...config };
+  if (next.folderStrategy === "tenant_company_year" && !cleanString(next.customFolderPattern)) {
+    next.folderStrategy = "custom";
+    next.customFolderPattern = "{tenant}/{year}/{module}/{category}";
+  }
+  if (next.filenameStrategy === "timestamp_original") {
+    next.filenameStrategy = "original_filename";
+  }
+  return next;
 };
 
 export async function POST(request, { params }) {
@@ -77,7 +107,8 @@ export async function POST(request, { params }) {
   }
 
   const contentType = cleanString(payload.contentType) || "application/octet-stream";
-  const siteId = await resolveSite(context.sql, tenantId, payload.siteId);
+  const siteContext = await resolveSiteContext(context.sql, tenantId, payload.siteId);
+  const siteId = siteContext?.id || null;
 
   const blobToken = normalizeBlobToken(process.env.BLOB_READ_WRITE_TOKEN) || "";
   const fileBase64 = cleanString(payload.fileBase64);
@@ -132,7 +163,7 @@ export async function POST(request, { params }) {
   }
 
   try {
-    const storageConfig = await resolveTenantStorageConfig(context.sql, tenantId);
+    const storageConfig = buildEvidenceUploadStorageConfig(await resolveTenantStorageConfig(context.sql, tenantId));
     const adapter = getStorageAdapter(storageConfig);
     const uploadResult =
       fileBuffer != null
@@ -143,7 +174,20 @@ export async function POST(request, { params }) {
             filename,
             contentType,
             metadata: {
+              tenantName: context.membership?.tenantName || null,
+              companyId: siteContext?.companyId || null,
+              companyName: siteContext?.companyName || null,
               siteId,
+              siteName: siteContext?.siteName || null,
+              reportingYear: cleanString(payload.reportingYear) || null,
+              moduleName: cleanString(payload.module) || cleanString(payload.moduleName) || null,
+              categoryName: cleanString(payload.category) || cleanString(payload.categoryName) || null,
+              activityName: cleanString(payload.activity) || cleanString(payload.activityName) || null,
+              entityType: cleanString(payload.entityType) || null,
+              issueDate: cleanString(payload.issueDate) || null,
+              docType: cleanString(payload.docType) || null,
+              scopeCoverage: cleanString(payload.scopeCoverage) || null,
+              filename,
             },
           })
         : {

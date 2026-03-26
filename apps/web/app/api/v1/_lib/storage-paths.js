@@ -178,4 +178,12 @@ export const buildReadableStorageFolderSegments = ({ config = {}, tenantId, meta
   return finalizeSegments([tokens.tenant, tokens.company, tokens.year, tokens.module, tokens.category]);
 };
 
+export const buildDeletedStorageFolderSegments = ({ config = {}, tenantId, metadata = {} }) => {
+  const tokens = buildReadableStorageTokens({ tenantId, metadata });
+  return stripRootFolderDuplication(
+    dedupeSegments(["_Deleted", tokens.tenant, tokens.year, tokens.module, tokens.category]),
+    config,
+  );
+};
+
 export { normalizeSegment as normalizeReadableStorageSegment };

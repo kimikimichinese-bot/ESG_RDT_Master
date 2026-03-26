@@ -16,6 +16,9 @@ function TooltipText({ text, children }) {
 const emptyForm = {
   filename: "",
   siteId: "",
+  reportingYear: String(new Date().getUTCFullYear()),
+  moduleName: "",
+  categoryName: "",
   issueDate: "",
   docType: "other",
   scopeCoverage: "tenant",
@@ -134,6 +137,9 @@ export default function EvidencePage() {
     setForm({
       filename: item.filename || "",
       siteId: item.siteId || "",
+      reportingYear: String(new Date().getUTCFullYear()),
+      moduleName: "",
+      categoryName: "",
       issueDate: item.issueDate || "",
       docType: item.docType || "other",
       scopeCoverage: item.scopeCoverage || "tenant",
@@ -198,6 +204,15 @@ export default function EvidencePage() {
         }
         if (form.issueDate) {
           formData.append("issueDate", form.issueDate);
+        }
+        if (form.reportingYear.trim()) {
+          formData.append("reportingYear", form.reportingYear.trim());
+        }
+        if (form.moduleName.trim()) {
+          formData.append("moduleName", form.moduleName.trim());
+        }
+        if (form.categoryName.trim()) {
+          formData.append("categoryName", form.categoryName.trim());
         }
         if (form.docType) {
           formData.append("docType", form.docType);
@@ -382,6 +397,39 @@ export default function EvidencePage() {
               type="date"
               value={form.issueDate}
               onChange={(event) => setForm((current) => ({ ...current, issueDate: event.target.value }))}
+            />
+
+            <label className="enterprise-label" htmlFor="evidence-reporting-year">
+              Reporting year
+            </label>
+            <input
+              id="evidence-reporting-year"
+              className="enterprise-input"
+              value={form.reportingYear}
+              onChange={(event) => setForm((current) => ({ ...current, reportingYear: event.target.value }))}
+              placeholder="2026"
+            />
+
+            <label className="enterprise-label" htmlFor="evidence-module">
+              Module
+            </label>
+            <input
+              id="evidence-module"
+              className="enterprise-input"
+              value={form.moduleName}
+              onChange={(event) => setForm((current) => ({ ...current, moduleName: event.target.value }))}
+              placeholder="GHG Scope 2, Governance, Social..."
+            />
+
+            <label className="enterprise-label" htmlFor="evidence-category">
+              Category
+            </label>
+            <input
+              id="evidence-category"
+              className="enterprise-input"
+              value={form.categoryName}
+              onChange={(event) => setForm((current) => ({ ...current, categoryName: event.target.value }))}
+              placeholder="Energy Bills, Policies, Workforce..."
             />
 
             <label className="enterprise-label" htmlFor="evidence-doc-type">

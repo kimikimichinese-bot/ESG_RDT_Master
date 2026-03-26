@@ -1,6 +1,6 @@
 import { writeAuditLog } from "../../../../_lib/audit.js";
 import { normalizeEvidence, requireTenantContext } from "../../../../_lib/enterprise-api.js";
-import { buildEvidenceAccess } from "../../../../_lib/storage-adapters.js";
+import { buildEvidenceAccess, getStorageAdapter, resolveTenantStorageConfig } from "../../../../_lib/storage-adapters.js";
 import { cleanString, errorJson, json, parseJsonBody } from "../../../../_lib/http.js";
 
 export const runtime = "nodejs";
@@ -183,6 +183,82 @@ export async function DELETE(request, { params }) {
   }
 
   const { context } = scoped;
+  const evidenceRows = await context.sql`
+    SELECT
+      e.id,
+      e.tenant_id,
+      e.site_id,
+      e.filename,
+      e.content_type,
+      e.size_bytes,
+      e.sha256,
+      e.blob_url,
+      e.storage_backend,
+      e.storage_key,
+      e.external_file_id,
+      e.external_drive_id,
+      e.external_parent_id,
+      e.external_web_url,
+      e.source_of_truth,
+      e.storage_status,
+      e.last_verified_at,
+      e.issue_date,
+      e.doc_type,
+      e.scope_coverage,
+      e.is_encrypted,
+      e.language,
+      e.created_at,
+      s.name AS site_name,
+      c.id AS company_id,
+      c.name AS company_name,
+      t.name AS tenant_name
+    FROM evidence e
+    LEFT JOIN sites s
+      ON s.id = e.site_id
+     AND s.tenant_id = e.tenant_id
+    LEFT JOIN companies c
+      ON c.id = s.company_id
+     AND c.tenant_id = e.tenant_id
+    LEFT JOIN tenants t
+      ON t.id = e.tenant_id
+    WHERE e.tenant_id = ${tenantId} AND e.id = ${evidenceId}
+    LIMIT 1
+  `;
+
+  const evidenceRow = evidenceRows?.[0];
+  if (!evidenceRow) {
+    return errorJson("Evidence not found", 404);
+  }
+
+  const storageBackend = cleanString(evidenceRow.storage_backend);
+  if (storageBackend && storageBackend !== "vercel_blob") {
+    const storageConfig = await resolveTenantStorageConfig(context.sql, tenantId, { preferBackend: storageBackend });
+    const adapter = getStorageAdapter(storageConfig);
+    const archiveResult = await adapter.archiveEvidence?.({
+      config: storageConfig,
+      tenantId,
+      evidence: evidenceRow,
+      metadata: {
+        tenantName: evidenceRow.tenant_name || null,
+        companyId: evidenceRow.company_id || null,
+        companyName: evidenceRow.company_name || null,
+        siteId: evidenceRow.site_id || null,
+        siteName: evidenceRow.site_name || null,
+        issueDate: evidenceRow.issue_date || null,
+        docType: evidenceRow.doc_type || null,
+        scopeCoverage: evidenceRow.scope_coverage || null,
+        filename: evidenceRow.filename || null,
+      },
+    });
+
+    if (!archiveResult?.archivedExternally) {
+      return errorJson("External evidence archive is not supported for this storage backend.", 409, {
+        code: archiveResult?.reason || "external_archive_not_supported",
+        storageBackend,
+      });
+    }
+  }
+
   const rows = await context.sql`
     DELETE FROM evidence
     WHERE tenant_id = ${tenantId} AND id = ${evidenceId}

@@ -9,6 +9,7 @@ import {
   uploadDropboxEvidence,
 } from "./storage-dropbox.js";
 import {
+  archiveGoogleDriveEvidence,
   getGoogleDriveAccessDescriptor,
   runGoogleDriveHealthCheck,
   statGoogleDriveEvidence,
@@ -232,6 +233,13 @@ const legacyAdapter = {
       webUrl: evidence?.blob_url || evidence?.blobUrl || null,
     };
   },
+  async archiveEvidence() {
+    return {
+      ok: false,
+      archivedExternally: false,
+      reason: "archive_not_supported_for_vercel_blob",
+    };
+  },
 };
 
 const oneDriveAdapter = {
@@ -243,6 +251,11 @@ const oneDriveAdapter = {
   getDownloadAccess: async () => getOneDriveAccessDescriptor({ disposition: "attachment" }),
   streamEvidence: streamOneDriveEvidence,
   stat: statOneDriveEvidence,
+  archiveEvidence: async () => ({
+    ok: false,
+    archivedExternally: false,
+    reason: "archive_not_implemented_for_onedrive",
+  }),
 };
 
 const dropboxAdapter = {
@@ -254,6 +267,11 @@ const dropboxAdapter = {
   getDownloadAccess: async () => getDropboxAccessDescriptor({ disposition: "attachment" }),
   streamEvidence: streamDropboxEvidence,
   stat: statDropboxEvidence,
+  archiveEvidence: async () => ({
+    ok: false,
+    archivedExternally: false,
+    reason: "archive_not_implemented_for_dropbox",
+  }),
 };
 
 const googleDriveAdapter = {
@@ -265,6 +283,7 @@ const googleDriveAdapter = {
   getDownloadAccess: async () => getGoogleDriveAccessDescriptor({ disposition: "attachment" }),
   streamEvidence: streamGoogleDriveEvidence,
   stat: statGoogleDriveEvidence,
+  archiveEvidence: archiveGoogleDriveEvidence,
 };
 
 const ADAPTERS = {
