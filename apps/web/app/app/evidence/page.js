@@ -14,8 +14,29 @@ function TooltipText({ text, children }) {
 }
 
 const emptyForm = {
+  filename: "",
   siteId: "",
+  issueDate: "",
+  docType: "other",
+  scopeCoverage: "tenant",
+  isEncrypted: false,
+  language: "",
 };
+
+const DOC_TYPE_OPTIONS = [
+  { value: "policy", label: "Policy" },
+  { value: "action", label: "Action" },
+  { value: "reporting", label: "Reporting" },
+  { value: "audit", label: "Audit" },
+  { value: "certification", label: "Certification" },
+  { value: "other", label: "Other" },
+];
+
+const COVERAGE_OPTIONS = [
+  { value: "tenant", label: "Tenant" },
+  { value: "company", label: "Company" },
+  { value: "site", label: "Site" },
+];
 
 const extractErrorMessage = (payload, fallback) => {
   if (payload && typeof payload === "object") {
@@ -37,13 +58,16 @@ export default function EvidencePage() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [selectedFile, setSelectedFile] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const canWrite = useMemo(
-    () => tenant.role === "TenantAdmin" || tenant.role === "Manager",
-    [tenant.role],
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.role === "TenantAdmin" || tenant.role === "Manager" || tenant.platformRole === "superadmin"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
   );
 
   const loadData = useCallback(async () => {
@@ -98,7 +122,24 @@ export default function EvidencePage() {
   }, [sites]);
 
   const openCreate = () => {
+    setEditing(null);
     setForm(emptyForm);
+    setSelectedFile(null);
+    setSuccessMessage("");
+    setModalOpen(true);
+  };
+
+  const openEdit = (item) => {
+    setEditing(item);
+    setForm({
+      filename: item.filename || "",
+      siteId: item.siteId || "",
+      issueDate: item.issueDate || "",
+      docType: item.docType || "other",
+      scopeCoverage: item.scopeCoverage || "tenant",
+      isEncrypted: item.isEncrypted === true,
+      language: item.language || "",
+    });
     setSelectedFile(null);
     setSuccessMessage("");
     setModalOpen(true);
@@ -106,6 +147,7 @@ export default function EvidencePage() {
 
   const closeModal = () => {
     setModalOpen(false);
+    setEditing(null);
     setForm(emptyForm);
     setSelectedFile(null);
   };
@@ -115,7 +157,7 @@ export default function EvidencePage() {
     if (!tenant.tenantId) {
       return;
     }
-    if (!selectedFile) {
+    if (!editing && !selectedFile) {
       setError("Select a file before uploading.");
       return;
     }
@@ -125,16 +167,54 @@ export default function EvidencePage() {
     setSuccessMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      if (form.siteId) {
-        formData.append("siteId", form.siteId);
-      }
+      let response;
+      if (editing) {
+        response = await fetch(
+          `/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence/${encodeURIComponent(editing.id)}`,
+          {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              filename: form.filename.trim(),
+              siteId: form.siteId || null,
+              contentType: editing.contentType,
+              sizeBytes: editing.sizeBytes,
+              sha256: editing.sha256,
+              blobUrl: editing.blobUrl,
+              storageBackend: editing.storageBackend,
+              issueDate: form.issueDate || null,
+              docType: form.docType || null,
+              scopeCoverage: form.scopeCoverage || null,
+              isEncrypted: form.isEncrypted === true,
+              language: form.language.trim() || null,
+            }),
+          },
+        );
+      } else {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        if (form.siteId) {
+          formData.append("siteId", form.siteId);
+        }
+        if (form.issueDate) {
+          formData.append("issueDate", form.issueDate);
+        }
+        if (form.docType) {
+          formData.append("docType", form.docType);
+        }
+        if (form.scopeCoverage) {
+          formData.append("scopeCoverage", form.scopeCoverage);
+        }
+        formData.append("isEncrypted", String(form.isEncrypted === true));
+        if (form.language.trim()) {
+          formData.append("language", form.language.trim());
+        }
 
-      const response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence/upload`, {
-        method: "POST",
-        body: formData,
-      });
+        response = await fetch(`/api/v1/tenants/${encodeURIComponent(tenant.tenantId)}/evidence/upload`, {
+          method: "POST",
+          body: formData,
+        });
+      }
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -142,10 +222,10 @@ export default function EvidencePage() {
       }
 
       closeModal();
-      setSuccessMessage("Evidence uploaded successfully.");
+      setSuccessMessage(editing ? "Evidence metadata updated." : "Evidence uploaded successfully.");
       await loadData();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Unable to upload evidence");
+      setError(submitError instanceof Error ? submitError.message : editing ? "Unable to update evidence" : "Unable to upload evidence");
     } finally {
       setSaving(false);
     }
@@ -238,9 +318,14 @@ export default function EvidencePage() {
                   <td>
                     <div className="enterprise-inline-actions">
                       {canWrite ? (
-                        <button className="enterprise-button-danger" type="button" onClick={() => void onDelete(item)}>
-                          Delete
-                        </button>
+                        <>
+                          <button className="enterprise-button-secondary" type="button" onClick={() => openEdit(item)}>
+                            Edit
+                          </button>
+                          <button className="enterprise-button-danger" type="button" onClick={() => void onDelete(item)}>
+                            Delete
+                          </button>
+                        </>
                       ) : (
                         <span className="enterprise-muted">Read-only</span>
                       )}
@@ -254,8 +339,23 @@ export default function EvidencePage() {
       ) : null}
 
       {modalOpen ? (
-        <Modal title="Add evidence" onClose={closeModal}>
+        <Modal title={editing ? "Edit evidence metadata" : "Add evidence"} onClose={closeModal}>
           <form className="enterprise-form-grid" onSubmit={onSubmit}>
+            {editing ? (
+              <>
+                <label className="enterprise-label" htmlFor="evidence-filename">
+                  Filename
+                </label>
+                <input
+                  id="evidence-filename"
+                  className="enterprise-input"
+                  value={form.filename}
+                  onChange={(event) => setForm((current) => ({ ...current, filename: event.target.value }))}
+                  required
+                />
+              </>
+            ) : null}
+
             <label className="enterprise-label" htmlFor="evidence-site">
               Site (optional)
             </label>
@@ -273,26 +373,98 @@ export default function EvidencePage() {
               ))}
             </select>
 
-            <label className="enterprise-label" htmlFor="evidence-file">
-              File
+            <label className="enterprise-label" htmlFor="evidence-issue-date">
+              Issue date
             </label>
             <input
-              id="evidence-file"
+              id="evidence-issue-date"
               className="enterprise-input"
-              type="file"
-              onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              required
+              type="date"
+              value={form.issueDate}
+              onChange={(event) => setForm((current) => ({ ...current, issueDate: event.target.value }))}
             />
 
-            {selectedFile ? (
+            <label className="enterprise-label" htmlFor="evidence-doc-type">
+              Document type
+            </label>
+            <select
+              id="evidence-doc-type"
+              className="enterprise-input"
+              value={form.docType}
+              onChange={(event) => setForm((current) => ({ ...current, docType: event.target.value }))}
+            >
+              {DOC_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="enterprise-label" htmlFor="evidence-coverage">
+              Coverage
+            </label>
+            <select
+              id="evidence-coverage"
+              className="enterprise-input"
+              value={form.scopeCoverage}
+              onChange={(event) => setForm((current) => ({ ...current, scopeCoverage: event.target.value }))}
+            >
+              {COVERAGE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <label className="enterprise-label" htmlFor="evidence-language">
+              Language
+            </label>
+            <input
+              id="evidence-language"
+              className="enterprise-input"
+              value={form.language}
+              onChange={(event) => setForm((current) => ({ ...current, language: event.target.value }))}
+              placeholder="en, it, fr..."
+            />
+
+            <label className="enterprise-label" htmlFor="evidence-encrypted">
+              Encrypted
+            </label>
+            <input
+              id="evidence-encrypted"
+              type="checkbox"
+              checked={form.isEncrypted}
+              onChange={(event) => setForm((current) => ({ ...current, isEncrypted: event.target.checked }))}
+            />
+
+            {!editing ? (
+              <>
+                <label className="enterprise-label" htmlFor="evidence-file">
+                  File
+                </label>
+                <input
+                  id="evidence-file"
+                  className="enterprise-input"
+                  type="file"
+                  onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
+                  required
+                />
+
+                {selectedFile ? (
+                  <p className="enterprise-muted" style={{ margin: 0 }}>
+                    Selected: {selectedFile.name}
+                  </p>
+                ) : null}
+              </>
+            ) : (
               <p className="enterprise-muted" style={{ margin: 0 }}>
-                Selected: {selectedFile.name}
+                File replacement is not supported on this record. Upload a new evidence item if the binary changes.
               </p>
-            ) : null}
+            )}
 
             <div className="enterprise-inline-actions">
-              <button className="enterprise-button-primary" type="submit" disabled={saving || !selectedFile}>
-                {saving ? "Uploading..." : <TooltipText text="Carica documento">Upload evidence</TooltipText>}
+              <button className="enterprise-button-primary" type="submit" disabled={saving || (!editing && !selectedFile)}>
+                {saving ? "Saving..." : editing ? "Save metadata" : <TooltipText text="Carica documento">Upload evidence</TooltipText>}
               </button>
             </div>
           </form>
