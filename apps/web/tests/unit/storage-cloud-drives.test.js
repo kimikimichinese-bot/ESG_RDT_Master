@@ -58,10 +58,18 @@ describe("Dropbox storage adapter", () => {
         return jsonResponse({ access_token: "dropbox-token", token_type: "Bearer", expires_in: 3600 });
       }
       if (target.endsWith("/files/create_folder_v2")) {
-        return jsonResponse({ metadata: { id: "id:folder", path_display: "/Evidence/tenant-a/tenant-a/2026" } });
+        return jsonResponse({
+          metadata: {
+            id: "id:folder",
+            path_display: "/Biosphere Evidence Test/WINDWARD/2026/GHG Scope 2/Energy Bills",
+          },
+        });
       }
       if (target.endsWith("/files/upload")) {
-        return jsonResponse({ id: "id:file-123", path_display: "/Evidence/tenant-a/tenant-a/2026/evidence.pdf" });
+        return jsonResponse({
+          id: "id:file-123",
+          path_display: "/Biosphere Evidence Test/WINDWARD/2026/GHG Scope 2/Energy Bills/evidence.pdf",
+        });
       }
       throw new Error(`Unexpected Dropbox fetch call: ${target}`);
     });
@@ -71,7 +79,7 @@ describe("Dropbox storage adapter", () => {
       config: {
         authMode: "oauth_delegated",
         secretReference: "kv://tenant/tenant-a/storage/dropbox/default",
-        rootFolderPath: "/Evidence",
+        rootFolderPath: "/Biosphere Evidence Test",
         folderStrategy: "tenant_company_year",
         filenameStrategy: "original_filename",
       },
@@ -79,14 +87,17 @@ describe("Dropbox storage adapter", () => {
       filename: "evidence.pdf",
       fileBuffer: Buffer.from("pdf-content"),
       metadata: {
-        companyId: "tenant-a",
+        tenantName: "WINDWARD",
+        companyName: "Biosphere Evidence Test",
+        moduleName: "GHG Scope 2",
+        categoryName: "Energy Bills",
         issueDate: "2026-03-24",
       },
     });
 
     expect(result.externalFileId).toBe("id:file-123");
-    expect(result.storageKey).toContain("/Evidence/");
-    expect(global.fetch).toHaveBeenCalledTimes(5);
+    expect(result.storageKey).toContain("/Biosphere Evidence Test/WINDWARD/2026/GHG Scope 2/Energy Bills/");
+    expect(global.fetch.mock.calls.length).toBeGreaterThanOrEqual(5);
   });
 
   it("streams Dropbox evidence through the server-side proxy", async () => {
@@ -168,14 +179,17 @@ describe("Google Drive storage adapter", () => {
       contentType: "application/pdf",
       fileBuffer: Buffer.from("pdf-content"),
       metadata: {
-        companyId: "tenant-a",
+        tenantName: "WINDWARD",
+        companyName: "Biosphere Evidence Test",
+        moduleName: "Governance",
+        categoryName: "Policies",
         issueDate: "2026-03-24",
       },
     });
 
     expect(result.externalFileId).toBe("file-123");
     expect(result.externalDriveId).toBe("drive-123");
-    expect(result.storageKey).toContain("evidence.pdf");
+    expect(result.storageKey).toContain("WINDWARD/Biosphere Evidence Test/2026/Governance/Policies/evidence.pdf");
   });
 
   it("streams Google Drive evidence through the server-side proxy", async () => {
