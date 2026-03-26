@@ -48,11 +48,77 @@ describe("storage secret resolver", () => {
 
   it("fails when env is missing", async () => {
     delete process.env.STORAGE_SECRET_FILE;
+    delete process.env.STORAGE_SECRET_JSON;
+    delete process.env.STORAGE_SECRET_JSON_B64;
     const { loadStorageSecretStore } = await importStorageSecrets();
 
     await expect(loadStorageSecretStore()).rejects.toMatchObject({
       code: "storage_secret_env_missing",
     });
+  });
+
+  it("resolves a valid secret reference from STORAGE_SECRET_JSON", async () => {
+    process.env.STORAGE_SECRET_JSON = JSON.stringify({
+      "kv://tenant/tenant-a/storage/google_drive/default": {
+        clientId: "google-client-id",
+        clientSecret: "google-client-secret",
+        refreshToken: "google-refresh-token",
+      },
+    });
+
+    const { resolveStorageSecret } = await importStorageSecrets();
+    const payload = await resolveStorageSecret("kv://tenant/tenant-a/storage/google_drive/default");
+
+    expect(payload.clientId).toBe("google-client-id");
+    expect(payload.refreshToken).toBe("google-refresh-token");
+  });
+
+  it("resolves a valid secret reference from STORAGE_SECRET_JSON_B64", async () => {
+    process.env.STORAGE_SECRET_JSON_B64 = Buffer.from(
+      JSON.stringify({
+        "kv://tenant/tenant-a/storage/google_drive/default": {
+          clientId: "google-client-id",
+          clientSecret: "google-client-secret",
+          refreshToken: "google-refresh-token",
+        },
+      }),
+      "utf8",
+    ).toString("base64");
+
+    const { resolveStorageSecret } = await importStorageSecrets();
+    const payload = await resolveStorageSecret("kv://tenant/tenant-a/storage/google_drive/default");
+
+    expect(payload.clientSecret).toBe("google-client-secret");
+    expect(payload.refreshToken).toBe("google-refresh-token");
+  });
+
+  it("prefers STORAGE_SECRET_JSON_B64 over STORAGE_SECRET_FILE", async () => {
+    const filePath = await writeSecretFile(
+      JSON.stringify({
+        "kv://tenant/tenant-a/storage/google_drive/default": {
+          clientId: "file-client-id",
+          clientSecret: "file-client-secret",
+          refreshToken: "file-refresh-token",
+        },
+      }),
+    );
+    process.env.STORAGE_SECRET_FILE = filePath;
+    process.env.STORAGE_SECRET_JSON_B64 = Buffer.from(
+      JSON.stringify({
+        "kv://tenant/tenant-a/storage/google_drive/default": {
+          clientId: "env-client-id",
+          clientSecret: "env-client-secret",
+          refreshToken: "env-refresh-token",
+        },
+      }),
+      "utf8",
+    ).toString("base64");
+
+    const { resolveStorageSecret } = await importStorageSecrets();
+    const payload = await resolveStorageSecret("kv://tenant/tenant-a/storage/google_drive/default");
+
+    expect(payload.clientId).toBe("env-client-id");
+    expect(payload.refreshToken).toBe("env-refresh-token");
   });
 
   it("fails when file is missing", async () => {
