@@ -70,7 +70,12 @@ export default function EnvironmentPage() {
     }
   }, [companyScope.activeCompanyId]);
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   const groupedDefinitions = useMemo(() => {
     const groups = new Map();

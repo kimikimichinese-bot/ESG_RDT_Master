@@ -61,7 +61,12 @@ export default function FactorsPage() {
   const [payload, setPayload] = useState(null);
   const [csvText, setCsvText] = useState("");
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   const siteOptions = useMemo(() => {
     if (!companyId) {

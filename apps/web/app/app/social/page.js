@@ -123,7 +123,12 @@ export default function SocialPage() {
     }
   }, [companyScope.activeCompanyId]);
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   const siteSummary = useMemo(() => {
     if (!summary || !selectedSiteId) {

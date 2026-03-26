@@ -83,7 +83,12 @@ export default function EcoVadisPage() {
     }
   }, [companyScope.activeCompanyId]);
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   const evidenceMap = useMemo(() => {
     const map = new Map();

@@ -296,7 +296,12 @@ export default function MaterialityPage() {
     }
   }, [companyScope.activeCompanyId]);
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
   const reportingYearInt = useMemo(() => Number.parseInt(reportingYear, 10) || 0, [reportingYear]);
 
   const loadKickoffState = useCallback(async () => {

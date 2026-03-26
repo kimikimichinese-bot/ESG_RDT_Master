@@ -55,7 +55,12 @@ export default function AssessmentsPage() {
     }
   }, [companyScope.activeCompanyId]);
 
-  const canWrite = useMemo(() => tenant.role !== "Auditor", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   const baseYearValidationError = useMemo(
     () => (baseYear > reportingYear ? "base_year must be less than or equal to reporting_year" : ""),

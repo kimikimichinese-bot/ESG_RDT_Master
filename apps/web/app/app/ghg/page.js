@@ -203,7 +203,9 @@ export default function GhgPage() {
 
   const activeDefinition = useMemo(() => definitionById.get(draft.activityDefId) || null, [definitionById, draft.activityDefId]);
 
-  const canWrite = tenant.role !== "Auditor";
+  const canWrite =
+    !tenant.impersonationReadOnly &&
+    (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager");
 
   const loadScopeData = useCallback(async () => {
     if (!tenant.tenantId) {
