@@ -300,6 +300,11 @@ export default function SuperadminTenantDetailPage({ params }) {
               <option value="archived">archived</option>
             </select>
 
+            <label className="enterprise-label" htmlFor="tenant-name">
+              Tenant name
+            </label>
+            <input id="tenant-name" name="name" className="enterprise-input" defaultValue={detail.tenant.name || ""} />
+
             <label className="enterprise-label" htmlFor="tenant-notes">
               Internal notes
             </label>

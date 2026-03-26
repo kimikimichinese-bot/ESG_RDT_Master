@@ -77,7 +77,12 @@ export default function CompaniesPage() {
   const [customField, setCustomField] = useState(emptyCustomField);
   const [customFieldEditingKey, setCustomFieldEditingKey] = useState("");
 
-  const canWrite = useMemo(() => tenant.role === "TenantAdmin" || tenant.role === "Manager", [tenant.role]);
+  const canWrite = useMemo(
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
+  );
 
   useEffect(() => {
     if (companyScope.activeCompanyId) {

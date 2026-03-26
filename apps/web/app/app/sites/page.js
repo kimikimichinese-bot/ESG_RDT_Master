@@ -34,8 +34,10 @@ export default function SitesPage() {
   const [companyFilter, setCompanyFilter] = useState("");
 
   const canWrite = useMemo(
-    () => tenant.role === "TenantAdmin" || tenant.role === "Manager",
-    [tenant.role],
+    () =>
+      !tenant.impersonationReadOnly &&
+      (tenant.platformRole === "superadmin" || tenant.role === "TenantAdmin" || tenant.role === "Manager"),
+    [tenant.impersonationReadOnly, tenant.platformRole, tenant.role],
   );
 
   useEffect(() => {
